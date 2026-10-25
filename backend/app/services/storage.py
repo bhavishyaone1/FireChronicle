@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Tuple
+import threading
 import duckdb
 import pandas as pd
 import pyarrow as pa
@@ -17,20 +18,20 @@ class StorageEngine:
     def __init__(self, db_path: Optional[Path] = None):
         self.db_path = db_path or settings.duckdb_path
         self._conn = None
+        self._lock = threading.RLock()
         self._init_db()
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
-        if self._conn is None:
-            try:
-                self._conn = duckdb.connect(str(self.db_path))
-            except duckdb.IOException:
-                # Primary database file is held by another process (e.g. active server process or concurrent tests).
-                # Fall back to an in-memory database to allow concurrent execution without locking conflicts.
-                self._conn = duckdb.connect(":memory:")
-            # Bound memory to 1GB to respect host RAM constraints
-            self._conn.execute("SET max_memory = '1GB';")
-            self._conn.execute("SET threads = 2;")
-        return self._conn
+        with self._lock:
+            if self._conn is None:
+                try:
+                    self._conn = duckdb.connect(str(self.db_path))
+                except duckdb.IOException:
+                    # Primary database file is held by another process. Fall back to in-memory.
+                    self._conn = duckdb.connect(":memory:")
+                self._conn.execute("SET max_memory = '1GB';")
+                self._conn.execute("SET threads = 2;")
+            return self._conn
 
     def _init_db(self):
         conn = self.get_connection()
@@ -91,15 +92,16 @@ class StorageEngine:
         df["confidence_category"] = df["confidence_category"].astype(str)
         df["classification"] = df["classification"].astype(str)
         
-        conn = self.get_connection()
-        conn.register("df_temp", df)
-        
-        # Insert or replace by observation_id
-        conn.execute("""
-            INSERT OR REPLACE INTO observations 
-            SELECT * FROM df_temp;
-        """)
-        conn.unregister("df_temp")
+        with self._lock:
+            conn = self.get_connection()
+            conn.register("df_temp", df)
+            
+            # Insert or replace by observation_id
+            conn.execute("""
+                INSERT OR REPLACE INTO observations 
+                SELECT * FROM df_temp;
+            """)
+            conn.unregister("df_temp")
 
         # Export to Parquet in processed directory
         if parquet_filename:
@@ -118,7 +120,6 @@ class StorageEngine:
         offset: int = 0
     ) -> Tuple[List[NormalizedObservation], int]:
         """Query observations with bounding box, date ranges, and filters."""
-        conn = self.get_connection()
         conditions = ["1=1"]
         params = []
 
@@ -146,8 +147,6 @@ class StorageEngine:
         where_clause = " AND ".join(conditions)
 
         count_sql = f"SELECT COUNT(*) FROM observations WHERE {where_clause}"
-        total_count = conn.execute(count_sql, params).fetchone()[0]
-
         data_sql = f"""
             SELECT * FROM observations 
             WHERE {where_clause}
@@ -155,7 +154,15 @@ class StorageEngine:
             LIMIT ? OFFSET ?
         """
         data_params = params + [limit, offset]
-        rows_df = conn.execute(data_sql, data_params).fetchdf()
+
+        with self._lock:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            try:
+                total_count = cursor.execute(count_sql, params).fetchone()[0]
+                rows_df = cursor.execute(data_sql, data_params).fetchdf()
+            finally:
+                cursor.close()
 
         records = []
         for raw_row in rows_df.to_dict(orient="records"):

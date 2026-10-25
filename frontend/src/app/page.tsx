@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { HeroBanner } from "@/components/HeroBanner";
+import { Controls } from "@/components/Controls";
 import { MetricsCards } from "@/components/MetricsCards";
 import { ObservationDetailsPanel } from "@/components/ObservationDetailsPanel";
 import { BurningActivityCalendar } from "@/components/BurningActivityCalendar";
@@ -97,57 +98,65 @@ export default function Home() {
   }, []);
 
   // Main synchronized data fetch
-  useEffect(() => {
-    async function loadData() {
-      setIsLoading(true);
-      const bbox = selectedAoi.bbox;
-      const targetStartDate = selectedDate || startDate;
-      const targetEndDate = selectedDate || endDate;
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    const bbox = selectedAoi.bbox;
+    const targetStartDate = selectedDate || startDate;
+    const targetEndDate = selectedDate || endDate;
 
-      try {
-        const [obs, cal, comp, anom] = await Promise.all([
-          fetchObservations({
-            bbox,
-            startDate: targetStartDate,
-            endDate: targetEndDate,
-            sensor: sensorFilter,
-            classification: classificationFilter,
-          }).catch(() => null),
-          fetchCalendar({
-            bbox,
-            startDate,
-            endDate,
-            gridSizeKm,
-          }).catch(() => null),
-          fetchComparison({
-            bbox,
-            startDate: targetStartDate,
-            endDate: targetEndDate,
-            spatialToleranceM,
-          }).catch(() => null),
-          fetchAnomalies({
-            bbox,
-            targetYear: 2024,
-          }).catch(() => null),
-        ]);
+    try {
+      const [obs, cal, comp, anom] = await Promise.all([
+        fetchObservations({
+          bbox,
+          startDate: targetStartDate,
+          endDate: targetEndDate,
+          sensor: sensorFilter,
+          classification: classificationFilter,
+        }).catch((err) => {
+          console.error("fetchObservations error:", err);
+          return null;
+        }),
+        fetchCalendar({
+          bbox,
+          startDate,
+          endDate,
+          gridSizeKm,
+        }).catch((err) => {
+          console.error("fetchCalendar error:", err);
+          return null;
+        }),
+        fetchComparison({
+          bbox,
+          startDate: targetStartDate,
+          endDate: targetEndDate,
+          spatialToleranceM,
+        }).catch((err) => {
+          console.error("fetchComparison error:", err);
+          return null;
+        }),
+        fetchAnomalies({
+          bbox,
+          targetYear: 2024,
+        }).catch((err) => {
+          console.error("fetchAnomalies error:", err);
+          return null;
+        }),
+      ]);
 
-        setGeoJsonData(obs);
-        setCalendarData(cal);
-        setComparisonData(comp);
-        setAnomalyData(anom);
+      setGeoJsonData(obs);
+      setCalendarData(cal);
+      setComparisonData(comp);
+      setAnomalyData(anom);
 
-        // Auto-select first observation if available and none selected yet
-        if (obs && obs.features && obs.features.length > 0 && !selectedObservation) {
-          setSelectedObservation(obs.features[0].properties);
-        }
-      } catch (error) {
-        console.error("Data synchronization error:", error);
-      } finally {
-        setIsLoading(false);
+      // Auto-select first observation if available and none selected yet
+      if (obs && obs.features && obs.features.length > 0 && !selectedObservation) {
+        setSelectedObservation(obs.features[0].properties);
       }
+    } catch (error) {
+      console.error("Data synchronization error:", error);
+    } finally {
+      setIsLoading(false);
     }
-
-    loadData();
   }, [
     selectedAoi,
     startDate,
@@ -157,7 +166,12 @@ export default function Home() {
     spatialToleranceM,
     sensorFilter,
     classificationFilter,
+    selectedObservation,
   ]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-black text-neutral-100 font-sans antialiased">
@@ -186,6 +200,32 @@ export default function Home() {
           onOpenProvenance={() => setActiveTab("methodology")}
         />
 
+        {/* Mobile Tab Navigation Strip (< 768px screens) */}
+        <nav
+          className="md:hidden flex items-center overflow-x-auto gap-1 px-4 py-2 bg-[#090A0C] border-b border-[#282D35] shrink-0"
+          aria-label="Mobile section navigation"
+        >
+          {[
+            { id: "overview", label: "Overview" },
+            { id: "calendar", label: "Calendar" },
+            { id: "compare", label: "Comparison" },
+            { id: "anomalies", label: "Patterns" },
+            { id: "methodology", label: "Methodology" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors duration-150 ${
+                activeTab === tab.id
+                  ? "bg-[#16191F] text-[#F59E0B] border border-[#282D35]"
+                  : "text-[#A4AAB5] hover:text-[#F3F4F6]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+
         {/* Dashboard Content Container */}
         <main className="flex-1 p-5 space-y-5 max-w-[1720px] w-full mx-auto">
           {/* OVERVIEW TAB (Primary Visual Target) */}
@@ -193,6 +233,31 @@ export default function Home() {
             <>
               {/* Welcome / Hero Banner */}
               <HeroBanner isFirmsConfigured={isFirmsConfigured} />
+
+              {/* Observation Filters & Harmonization Controls */}
+              <Controls
+                presetAois={presetAois}
+                selectedAoiId={selectedAoi.id}
+                onSelectAoi={(aoi) => {
+                  setSelectedAoi(aoi);
+                  setSelectedDate(null);
+                }}
+                startDate={startDate}
+                setStartDate={setStartDate}
+                endDate={endDate}
+                setEndDate={setEndDate}
+                gridSizeKm={gridSizeKm}
+                setGridSizeKm={setGridSizeKm}
+                spatialToleranceM={spatialToleranceM}
+                setSpatialToleranceM={setSpatialToleranceM}
+                sensorFilter={sensorFilter}
+                setSensorFilter={setSensorFilter}
+                classificationFilter={classificationFilter}
+                setClassificationFilter={setClassificationFilter}
+                selectedDate={selectedDate}
+                onClearSelectedDate={() => setSelectedDate(null)}
+                onApplyFilters={() => loadData()}
+              />
 
               {/* 4 KPI Summary Cards */}
               <MetricsCards
@@ -223,6 +288,7 @@ export default function Home() {
                 <div className="lg:col-span-4 h-full">
                   <ObservationDetailsPanel
                     selectedObservation={selectedObservation}
+                    onDeselectObservation={() => setSelectedObservation(null)}
                     onFlyToObservation={() => {
                       // Handled within map
                     }}
@@ -300,12 +366,12 @@ export default function Home() {
         </main>
 
         {/* Global Scientific Footer */}
-        <footer className="border-t border-neutral-900 py-4 px-6 bg-black text-xs text-neutral-400 mt-auto shrink-0">
+        <footer className="border-t border-[#282D35] py-4 px-6 bg-[#090A0C] text-xs text-[#A4AAB5] mt-auto shrink-0">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-[1720px] mx-auto">
             <span>
-              Data sources: <span className="text-orange-400 font-medium">NASA FIRMS</span> &bull; <span className="text-orange-400">MODIS (Terra/Aqua)</span> &bull; <span className="text-red-400">VIIRS (NOAA-20/21)</span>
+              Data sources: <span className="text-[#F59E0B] font-medium">NASA FIRMS</span> &bull; <span className="text-[#F59E0B]">MODIS (Terra/Aqua)</span> &bull; <span className="text-red-400">VIIRS (NOAA-20/21)</span>
             </span>
-            <span className="text-[11px] text-neutral-500 font-normal">
+            <span className="text-xs text-[#A4AAB5] font-normal">
               Not an official NASA product. For educational and research purposes only.
             </span>
           </div>

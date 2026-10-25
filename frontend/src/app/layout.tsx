@@ -26,7 +26,7 @@ export default function RootLayout({
       lang="en"
       className={`${GeistSans.variable} ${GeistMono.variable} ${inter.variable}`}
     >
-      <body className="bg-black text-neutral-100 min-h-screen flex flex-col font-sans antialiased">
+      <body className="bg-[#090A0C] text-[#F3F4F6] min-h-screen flex flex-col font-sans antialiased">
         {children}
       </body>
     </html>

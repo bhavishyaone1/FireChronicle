@@ -8,7 +8,6 @@ import {
   SlidersHorizontal,
   TrendingUp,
   BookOpen,
-  Sparkles,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -22,30 +21,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     { id: "calendar", label: "Activity calendar", icon: Calendar },
     { id: "compare", label: "Sensor comparison", icon: SlidersHorizontal },
     { id: "anomalies", label: "Historical patterns", icon: TrendingUp },
-    { id: "methodology", label: "Methodology", icon: BookOpen },
+    { id: "methodology", label: "How harmonization works", icon: BookOpen },
   ];
 
   return (
-    <aside className="w-64 bg-black border-r border-neutral-900 flex flex-col justify-between shrink-0 select-none z-30">
+    <aside className="hidden md:flex md:w-60 lg:w-64 bg-[#090A0C] border-r border-[#282D35] flex-col justify-between shrink-0 select-none z-30">
       {/* Top Logo and Navigation */}
-      <div className="p-5 flex flex-col gap-6">
-        {/* Brand Logo with Refined Restrained Hierarchy */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 via-red-600 to-rose-700 flex items-center justify-center shadow-md shadow-orange-600/25 ring-1 ring-orange-400/30 shrink-0">
-            <Flame className="w-5 h-5 text-white fill-white/20" />
+      <div className="p-4 flex flex-col gap-5">
+        {/* Brand Header */}
+        <div className="flex items-center gap-2.5 px-1 py-1">
+          <div className="w-8 h-8 rounded-lg bg-[#16191F] border border-[#282D35] flex items-center justify-center shrink-0">
+            <Flame className="w-4 h-4 text-[#F59E0B]" />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-[15px] font-semibold tracking-tight text-white leading-none">
+            <h1 className="text-sm font-semibold tracking-tight text-[#F3F4F6] leading-none">
               FireChronicle
             </h1>
-            <span className="text-[11px] font-normal text-neutral-400 tracking-normal mt-1">
+            <span className="text-[11px] font-normal text-[#A4AAB5] tracking-normal mt-1">
               Satellite fire activity intelligence
             </span>
           </div>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex flex-col gap-1" aria-label="Main Navigation">
+        <nav className="flex flex-col gap-1" aria-label="Main navigation">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -53,53 +52,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-colors duration-150 text-left ${
                   isActive
-                    ? "bg-neutral-900/90 text-white border-l-2 border-orange-500 font-semibold"
-                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/40"
+                    ? "bg-[#16191F] text-[#F3F4F6] border-l-2 border-[#F59E0B] font-medium"
+                    : "text-[#A4AAB5] hover:text-[#F3F4F6] hover:bg-[#16191F]/50 font-normal"
                 }`}
               >
                 <Icon
-                  className={`w-4 h-4 transition-colors ${
-                    isActive ? "text-orange-400" : "text-neutral-500"
+                  className={`w-4 h-4 shrink-0 ${
+                    isActive ? "text-[#F59E0B]" : "text-[#727A88]"
                   }`}
                 />
-                <span>{item.label}</span>
-                {isActive && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-400" />
-                )}
+                <span className="truncate">{item.label}</span>
               </button>
             );
           })}
         </nav>
       </div>
 
-      {/* Bottom Inspiration Card & Space Apps Badge */}
-      <div className="p-5 flex flex-col gap-3.5">
-        {/* Obsidian Space/Thermal Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-neutral-950 border border-neutral-800/80 p-3.5 shadow-lg">
-          <div className="relative z-10 flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 text-orange-400 text-[11px] font-medium">
-              <Sparkles className="w-3 h-3 text-orange-400" />
-              <span>Earth observation</span>
-            </div>
-            <p className="text-xs font-semibold text-white leading-snug">
-              Better data. <br />
-              <span className="text-orange-400 font-medium">Safer tomorrow.</span>
-            </p>
-            <p className="text-[11px] font-normal text-neutral-400 leading-relaxed">
-              Harmonizing satellite observations into actionable insights for fire research and resource planning.
-            </p>
-          </div>
+      {/* Bottom Summary Card & Metadata */}
+      <div className="p-4 flex flex-col gap-3">
+        <div className="rounded-xl bg-[#101216] border border-[#282D35] p-3 text-xs flex flex-col gap-1.5">
+          <span className="text-[11px] font-medium text-[#F59E0B]">
+            Scientific purpose
+          </span>
+          <p className="text-[11px] font-normal text-[#A4AAB5] leading-relaxed">
+            Harmonizing MODIS (1 km) and VIIRS (375 m) satellite hotspot detections into an interpretable burning activity calendar.
+          </p>
         </div>
 
-        {/* Space Apps Challenge Signature */}
-        <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-1 border-t border-neutral-900">
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-            <span className="font-normal text-neutral-300">NASA Space Apps 2026</span>
-          </div>
-          <span className="text-neutral-500 font-mono text-[10px]">v1.2.0</span>
+        <div className="flex items-center justify-between text-[11px] text-[#727A88] px-1 pt-1 border-t border-[#1C2026]">
+          <span>NASA Space Apps 2026</span>
+          <span className="font-mono text-[10px]">v1.2.0</span>
         </div>
       </div>
     </aside>

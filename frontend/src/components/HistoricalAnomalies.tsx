@@ -26,8 +26,8 @@ export const HistoricalAnomalies: React.FC<HistoricalAnomaliesProps> = ({
 }) => {
   if (isLoading || !anomalyData) {
     return (
-      <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-8 text-center text-neutral-400 flex flex-col items-center justify-center gap-2">
-        <span className="w-5 h-5 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-8 text-center text-[#A4AAB5] flex flex-col items-center justify-center gap-2">
+        <span className="w-5 h-5 rounded-full border-2 border-[#F59E0B] border-t-transparent animate-spin" />
         <span className="text-xs font-normal">Loading multi-year robust baseline analytics...</span>
       </div>
     );
@@ -49,43 +49,43 @@ export const HistoricalAnomalies: React.FC<HistoricalAnomaliesProps> = ({
     const data = payload[0]?.payload;
 
     return (
-      <div className="bg-black/95 backdrop-blur-md border border-neutral-800 p-3 rounded-lg shadow-xl text-xs flex flex-col gap-1.5 min-w-[200px]">
-        <div className="font-semibold text-white border-b border-neutral-800 pb-1 flex items-center justify-between">
+      <div className="bg-[#101216] border border-[#282D35] p-3 rounded-lg shadow-xl text-xs flex flex-col gap-1.5 min-w-[200px]">
+        <div className="font-semibold text-[#F3F4F6] border-b border-[#282D35] pb-1 flex items-center justify-between">
           <span>{label} 2024 activity</span>
           {data.isAnomaly ? (
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-950/80 border border-red-500/50 text-red-300 font-medium">
               Anomaly
             </span>
           ) : (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-700 text-neutral-300 font-medium">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] border border-[#282D35] text-[#A4AAB5] font-medium">
               Nominal
             </span>
           )}
         </div>
         <div className="flex flex-col gap-1 text-[11px]">
           <div className="flex justify-between items-center">
-            <span className="text-orange-400 font-medium">Observed active cells:</span>
-            <span className="font-mono tabular-nums font-semibold text-white">
+            <span className="text-[#F59E0B] font-medium">Observed active cells:</span>
+            <span className="font-mono tabular-nums font-semibold text-[#F3F4F6]">
               {data["Observed 2024"] !== null ? `${data["Observed 2024"]} cells` : "No data"}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-neutral-400">Historical median:</span>
-            <span className="font-mono tabular-nums text-neutral-300">
+            <span className="text-[#A4AAB5]">Historical median:</span>
+            <span className="font-mono tabular-nums text-[#F3F4F6]">
               {data["Historical Median"]} cells
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-amber-400/90">75th percentile (p75):</span>
-            <span className="font-mono tabular-nums text-neutral-300">
+            <span className="text-amber-400">75th percentile (p75):</span>
+            <span className="font-mono tabular-nums text-[#F3F4F6]">
               {data["75th Percentile"]} cells
             </span>
           </div>
-          <div className="flex justify-between items-center pt-1 border-t border-neutral-800">
-            <span className="text-neutral-400">Robust Z-score (MAD):</span>
+          <div className="flex justify-between items-center pt-1 border-t border-[#282D35]">
+            <span className="text-[#A4AAB5]">Robust Z-score (MAD):</span>
             <span
               className={`font-mono tabular-nums font-semibold ${
-                data.isAnomaly ? "text-red-400" : "text-white"
+                data.isAnomaly ? "text-red-400" : "text-[#F3F4F6]"
               }`}
             >
               {data.zScore !== null ? `${data.zScore > 0 ? "+" : ""}${data.zScore}` : "N/A"}
@@ -97,15 +97,15 @@ export const HistoricalAnomalies: React.FC<HistoricalAnomaliesProps> = ({
   };
 
   return (
-    <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-5 shadow-sm flex flex-col gap-6">
+    <div className="bg-[#101216] border border-[#282D35] rounded-xl p-5 shadow-sm flex flex-col gap-6">
       {/* Header & Status Pill */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-900 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#282D35] pb-3">
         <div>
-          <h2 className="text-base font-semibold text-white flex items-center gap-2 tracking-tight">
-            <TrendingUp className="w-4 h-4 text-orange-400" />
+          <h2 className="text-base font-semibold text-[#F3F4F6] flex items-center gap-2 tracking-tight">
+            <TrendingUp className="w-4 h-4 text-[#F59E0B]" />
             Historical seasonality and robust anomaly baseline
           </h2>
-          <p className="text-xs text-neutral-400 mt-0.5 font-normal">
+          <p className="text-xs text-[#A4AAB5] mt-0.5 font-normal">
             Non-parametric median and median absolute deviation (MAD) over {anomalyData.baseline_years.length} historical baseline years ({anomalyData.baseline_years.join(", ")})
           </p>
         </div>
@@ -118,7 +118,7 @@ export const HistoricalAnomalies: React.FC<HistoricalAnomaliesProps> = ({
               {anomalyMonths.length} anomalous month(s) detected (Z &ge; 2.0 &amp; &gt; p75)
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-medium">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#16191F] border border-[#282D35] text-[#A4AAB5] text-xs font-medium">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               All 2024 months within nominal historical baseline
             </span>
@@ -130,17 +130,17 @@ export const HistoricalAnomalies: React.FC<HistoricalAnomaliesProps> = ({
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 20 }}>
-            <CartesianGrid stroke="#1F1F28" strokeDasharray="3 3" />
-            <XAxis dataKey="month" stroke="#71717A" fontSize={11} tickLine={false} />
+            <CartesianGrid stroke="#282D35" strokeDasharray="3 3" />
+            <XAxis dataKey="month" stroke="#A4AAB5" fontSize={11} tickLine={false} />
             <YAxis
-              stroke="#71717A"
+              stroke="#A4AAB5"
               fontSize={11}
               tickLine={false}
               label={{
                 value: "Active Grid Cells (1 km)",
                 angle: -90,
                 position: "insideLeft",
-                fill: "#71717A",
+                fill: "#A4AAB5",
                 fontSize: 11,
                 dy: 60,
               }}
@@ -150,22 +150,23 @@ export const HistoricalAnomalies: React.FC<HistoricalAnomaliesProps> = ({
               wrapperStyle={{
                 paddingTop: 15,
                 fontSize: 11,
+                color: "#A4AAB5",
                 fontFamily: "var(--font-geist-sans), sans-serif",
               }}
             />
             <Bar
               dataKey="Observed 2024"
-              fill="#F97316"
+              fill="#F59E0B"
               radius={[3, 3, 0, 0]}
               barSize={24}
             />
             <Line
               type="monotone"
               dataKey="Historical Median"
-              stroke="#A1A1AA"
+              stroke="#A4AAB5"
               strokeWidth={2}
               strokeDasharray="4 4"
-              dot={{ r: 3, fill: "#A1A1AA" }}
+              dot={{ r: 3, fill: "#A4AAB5" }}
             />
             <Line
               type="monotone"
@@ -179,13 +180,13 @@ export const HistoricalAnomalies: React.FC<HistoricalAnomaliesProps> = ({
       </div>
 
       {/* Methodology Explanatory Callout */}
-      <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl flex items-start gap-3 text-xs leading-relaxed">
-        <Info className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
+      <div className="bg-[#090A0C] border border-[#282D35] p-4 rounded-xl flex items-start gap-3 text-xs leading-relaxed">
+        <Info className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="font-semibold text-white text-xs">
+          <p className="font-semibold text-[#F3F4F6] text-xs">
             Why non-parametric percentiles and MAD instead of mean &plusmn; standard deviation?
           </p>
-          <p className="text-neutral-400 text-[11px] font-normal leading-relaxed">
+          <p className="text-[#A4AAB5] text-[11px] font-normal leading-relaxed">
             Wildfire occurrences exhibit heavy-tailed (log-normal or Pareto) distributions rather than a Gaussian bell curve. Calculating simple mean and variance distorts baseline expectations due to extreme historical mega-fire seasons. FireChronicle computes robust Median and Median Absolute Deviation (MAD), requiring deviations to exceed both robust Z &ge; 2.0 and the 75th percentile threshold.
           </p>
         </div>

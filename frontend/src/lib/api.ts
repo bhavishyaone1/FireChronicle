@@ -35,12 +35,16 @@ export async function fetchObservations(params: {
   if (params.bbox) query.set("bbox", params.bbox.join(","));
   if (params.startDate) query.set("start_date", params.startDate);
   if (params.endDate) query.set("end_date", params.endDate);
-  if (params.sensor) query.set("sensor", params.sensor);
-  if (params.classification) query.set("classification", params.classification);
+  if (params.sensor && params.sensor !== "ALL") query.set("sensor", params.sensor);
+  if (params.classification && params.classification !== "ALL") query.set("classification", params.classification);
   if (params.limit) query.set("limit", params.limit.toString());
 
-  const res = await fetch(`${API_BASE}/observations?${query.toString()}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch observations");
+  const url = `${API_BASE}/observations?${query.toString()}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`Failed to fetch observations (${res.status}): ${err}`);
+  }
   return res.json();
 }
 
@@ -57,8 +61,12 @@ export async function fetchCalendar(params: {
     grid_size_km: (params.gridSizeKm || 1.0).toString(),
   });
 
-  const res = await fetch(`${API_BASE}/calendar?${query.toString()}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch calendar");
+  const url = `${API_BASE}/calendar?${query.toString()}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`Failed to fetch calendar (${res.status}): ${err}`);
+  }
   return res.json();
 }
 
@@ -78,7 +86,10 @@ export async function fetchComparison(params: {
   });
 
   const res = await fetch(`${API_BASE}/compare?${query.toString()}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch comparison");
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`Failed to fetch comparison (${res.status}): ${err}`);
+  }
   return res.json();
 }
 
@@ -92,6 +103,9 @@ export async function fetchAnomalies(params: {
   });
 
   const res = await fetch(`${API_BASE}/anomalies?${query.toString()}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch anomalies");
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`Failed to fetch anomalies (${res.status}): ${err}`);
+  }
   return res.json();
 }
