@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Database, Clock, Flame, ShieldAlert } from "lucide-react";
+import { Database, Clock } from "lucide-react";
 
 interface HeroBannerProps {
   isFirmsConfigured?: boolean;
@@ -9,66 +9,58 @@ interface HeroBannerProps {
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({ isFirmsConfigured = false }) => {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-black via-[#140603] to-black border border-red-900/40 p-6 shadow-2xl shadow-red-950/20">
-      {/* Visual atmospheric space/thermal horizon glow */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-red-600/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-16 right-10 w-80 h-40 rounded-full bg-orange-600/10 blur-2xl pointer-events-none" />
-      
-      {/* Subtle thermal ember texture */}
-      <div className="absolute inset-0 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
-
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-black via-neutral-950 to-black border border-neutral-800/80 p-5 shadow-lg">
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Left Welcome Copy */}
+        {/* Left Welcome Copy: Exact 28px weight 600 Title and 14px weight 400 Body */}
         <div className="flex flex-col gap-1 max-w-2xl">
-          <span className="text-xs font-bold uppercase tracking-wider text-orange-400">
-            Welcome back,
+          <span className="text-xs font-normal text-neutral-400">
+            Overview
           </span>
-          <h2 className="text-xl md:text-2xl font-extrabold tracking-tight text-white">
+          <h2 className="text-2xl sm:text-[28px] font-semibold tracking-tight text-white leading-tight">
             Explore fire activity across the globe
           </h2>
-          <p className="text-xs text-neutral-300 leading-relaxed mt-0.5">
-            Compare <span className="text-orange-400 font-semibold">MODIS</span> and{" "}
-            <span className="text-red-400 font-semibold">VIIRS</span> detections, analyze patterns, and discover insights from historical satellite data.
+          <p className="text-sm font-normal text-neutral-300 leading-relaxed mt-0.5">
+            Compare MODIS and VIIRS active-fire hotspot detections, analyze temporal patterns, and discover insights from satellite data.
           </p>
         </div>
 
         {/* Right Status Chips */}
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           {/* Data Source Chip */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0E0E12] border border-orange-500/30 shadow-sm backdrop-blur">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-950 border border-neutral-800 shadow-sm">
             <Database className="w-3.5 h-3.5 text-orange-400" />
             <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-wider text-neutral-400 leading-none">
-                Data Source
+              <span className="text-[11px] font-normal text-neutral-400 leading-none">
+                Data source
               </span>
-              <span className="text-xs font-extrabold text-white leading-tight">
+              <span className="text-[13px] font-semibold text-white leading-tight mt-0.5">
                 NASA FIRMS
               </span>
             </div>
           </div>
 
           {/* Latest Update Chip */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0E0E12] border border-red-500/30 shadow-sm backdrop-blur">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-950 border border-neutral-800 shadow-sm">
             <Clock className="w-3.5 h-3.5 text-red-400" />
             <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-wider text-neutral-400 leading-none">
-                Latest Update
+              <span className="text-[11px] font-normal text-neutral-400 leading-none">
+                Latest update
               </span>
-              <span className="text-xs font-extrabold text-white leading-tight">
-                Aug 20, 2024 23:45 UTC
+              <span className="text-[12px] font-mono tabular-nums font-medium text-white leading-tight mt-0.5">
+                20 Aug 2024 23:45 UTC
               </span>
             </div>
           </div>
 
           {/* Mode Badge */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-950/60 border border-red-500/50 text-red-300 shadow-md shadow-red-950/40 backdrop-blur">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-sm shadow-red-400" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-950 border border-red-900/50 text-red-300 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
             <div className="flex flex-col">
-              <span className="text-xs font-extrabold text-white leading-tight">
-                {isFirmsConfigured ? "Live Feed" : "Demo Mode"}
+              <span className="text-[13px] font-semibold text-white leading-tight">
+                {isFirmsConfigured ? "Live feed" : "Demo mode"}
               </span>
-              <span className="text-[9px] text-orange-300 leading-none font-medium">
-                {isFirmsConfigured ? "FIRMS MAP_KEY active" : "Sample benchmark data"}
+              <span className="text-[11px] text-neutral-400 leading-none mt-0.5">
+                {isFirmsConfigured ? "FIRMS key active" : "Sample benchmark data"}
               </span>
             </div>
           </div>

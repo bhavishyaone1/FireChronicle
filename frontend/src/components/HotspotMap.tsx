@@ -27,10 +27,8 @@ interface HotspotMapProps {
   endDate?: string;
 }
 
-// 1. OpenFreeMap Dark style - Keyless vector tiles, zero watermarks
 const VECTOR_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
 
-// 2. Genuine Satellite Imagery style (ESRI World Imagery) - Keyless raster tiles, zero watermarks
 const SATELLITE_RASTER_STYLE: any = {
   version: 8,
   sources: {
@@ -69,10 +67,8 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  // Basemap style toggle: "satellite" | "vector"
   const [basemapType, setBasemapType] = useState<"satellite" | "vector">("satellite");
 
-  // Floating Layer Controls
   const [isLayersPanelExpanded, setIsLayersPanelExpanded] = useState(true);
   const [showModis, setShowModis] = useState(true);
   const [showViirs, setShowViirs] = useState(true);
@@ -87,7 +83,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   const latestDataRef = useRef(geoJsonData);
   latestDataRef.current = geoJsonData;
 
-  // Add hotspot sources & layers with Black, Red & Orange theme colors
   const setupLayers = useCallback((instance: maplibregl.Map) => {
     const currentData = latestDataRef.current || {
       type: "FeatureCollection",
@@ -96,7 +91,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
 
     if (instance.getSource("hotspots")) return;
 
-    // Source with clustering for low zoom
     instance.addSource("hotspots", {
       type: "geojson",
       data: currentData,
@@ -105,7 +99,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       clusterRadius: 35,
     });
 
-    // 1. Cluster circles (zoom < 9) in fiery step gradient
     instance.addLayer({
       id: "clusters",
       type: "circle",
@@ -138,7 +131,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       },
     });
 
-    // 2. Cluster count text
     instance.addLayer({
       id: "cluster-count",
       type: "symbol",
@@ -147,13 +139,13 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       layout: {
         "text-field": "{point_count_abbreviated}",
         "text-size": 12,
+        "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
       },
       paint: {
         "text-color": "#ffffff",
       },
     });
 
-    // 3. MODIS Footprint Layer (1km) - Fiery Orange (#F97316)
     instance.addLayer({
       id: "modis-layer",
       type: "circle",
@@ -163,12 +155,11 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         "circle-radius": 11,
         "circle-color": "#F97316",
         "circle-opacity": (layerOpacity / 100) * 0.7,
-        "circle-stroke-width": 2,
+        "circle-stroke-width": 1.8,
         "circle-stroke-color": "#EA580C",
       },
     });
 
-    // 4. VIIRS Point Layer (375m) - Scarlet Red (#EF4444)
     instance.addLayer({
       id: "viirs-layer",
       type: "circle",
@@ -183,7 +174,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       },
     });
 
-    // 5. Matched Cross-Sensor Halo - Luminous Gold (#FBBF24)
     instance.addLayer({
       id: "matched-halo-layer",
       type: "circle",
@@ -192,13 +182,12 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       paint: {
         "circle-radius": 15,
         "circle-color": "transparent",
-        "circle-stroke-width": 2.5,
+        "circle-stroke-width": 2,
         "circle-stroke-color": "#FBBF24",
         "circle-stroke-opacity": layerOpacity / 100,
       },
     });
 
-    // Cluster click: Zoom in
     instance.on("click", "clusters", async (e) => {
       const feats = instance.queryRenderedFeatures(e.point, { layers: ["clusters"] });
       const clusterId = feats?.[0]?.properties?.cluster_id;
@@ -216,7 +205,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       }
     });
 
-    // Point click: Select observation
     const handlePointClick = (e: any) => {
       if (!e.features || !e.features.length) return;
       const props = e.features[0].properties;
@@ -228,7 +216,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     instance.on("click", "modis-layer", handlePointClick);
     instance.on("click", "viirs-layer", handlePointClick);
 
-    // Hover cursor styling
     const setPointer = () => {
       if (instance) instance.getCanvas().style.cursor = "pointer";
     };
@@ -244,7 +231,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     instance.on("mouseleave", "viirs-layer", resetPointer);
   }, [layerOpacity, onSelectObservation]);
 
-  // Initialize MapLibre
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -286,7 +272,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     };
   }, [basemapType, bbox, setupLayers]);
 
-  // Update GeoJSON data dynamically
   useEffect(() => {
     if (!map.current || !isMapLoaded) return;
     const src = map.current.getSource("hotspots") as maplibregl.GeoJSONSource;
@@ -295,7 +280,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     }
   }, [geoJsonData, isMapLoaded]);
 
-  // Auto fitBounds on bounding box change
   useEffect(() => {
     if (!map.current || !isMapLoaded) return;
     try {
@@ -311,7 +295,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     }
   }, [bbox, isMapLoaded]);
 
-  // Layer Visibility Toggles
   useEffect(() => {
     if (!map.current || !isMapLoaded) return;
     try {
@@ -341,7 +324,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     }
   }, [showModis, showViirs, showMatched, isMapLoaded]);
 
-  // Switch basemap between satellite and vector
   const toggleBasemap = () => {
     if (!map.current) return;
     const nextType = basemapType === "satellite" ? "vector" : "satellite";
@@ -357,7 +339,6 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     });
   };
 
-  // Recenter to AOI
   const handleRecenter = () => {
     if (!map.current) return;
     map.current.fitBounds(
@@ -370,17 +351,17 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[520px] rounded-2xl overflow-hidden border border-neutral-900 shadow-2xl bg-black">
-      {/* MapLibre WebGL Canvas Container */}
+    <div className="relative w-full h-[520px] rounded-2xl overflow-hidden border border-neutral-900 shadow-md bg-black">
+      {/* Map Canvas */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* Floating Left: Map Layers Panel in Obsidian Black */}
-      <div className="absolute top-4 left-4 z-10 w-64 bg-black/95 backdrop-blur-md border border-neutral-800 hover:border-orange-500/40 rounded-2xl p-3.5 shadow-2xl flex flex-col gap-3 text-xs transition-all">
+      {/* Floating Left: Map Layers Panel */}
+      <div className="absolute top-4 left-4 z-10 w-64 bg-black/90 backdrop-blur-md border border-neutral-800 rounded-2xl p-3.5 shadow-xl flex flex-col gap-2.5 text-xs">
         {/* Panel Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-neutral-900">
-          <div className="flex items-center gap-2 font-extrabold text-white tracking-tight">
+        <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
+          <div className="flex items-center gap-2 font-semibold text-white tracking-tight">
             <Layers className="w-4 h-4 text-orange-400" />
-            <span>Map Layers</span>
+            <span>Map layers</span>
           </div>
           <button
             onClick={() => setIsLayersPanelExpanded(!isLayersPanelExpanded)}
@@ -395,12 +376,12 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         </div>
 
         {isLayersPanelExpanded && (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2">
             {/* Checkboxes List */}
             <div className="flex flex-col gap-1.5">
               <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 font-medium">
-                  <span className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm shadow-orange-500/50" />
+                <span className="flex items-center gap-2 font-normal text-xs">
+                  <span className="w-2 h-2 rounded-full bg-orange-500" />
                   <span>MODIS (Terra/Aqua)</span>
                 </span>
                 <input
@@ -412,8 +393,8 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
               </label>
 
               <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 font-medium">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50" />
+                <span className="flex items-center gap-2 font-normal text-xs">
+                  <span className="w-2 h-2 rounded-full bg-red-500" />
                   <span>VIIRS (NOAA-20/21)</span>
                 </span>
                 <input
@@ -425,9 +406,9 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
               </label>
 
               <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 font-medium">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50" />
-                  <span>Matched Pairs</span>
+                <span className="flex items-center gap-2 font-normal text-xs">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>Matched pairs</span>
                 </span>
                 <input
                   type="checkbox"
@@ -438,9 +419,9 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
               </label>
 
               <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 font-medium">
-                  <span className="w-2.5 h-2.5 rounded-full bg-orange-600 shadow-sm shadow-orange-600/50" />
-                  <span>MODIS Only</span>
+                <span className="flex items-center gap-2 font-normal text-xs">
+                  <span className="w-2 h-2 rounded-full bg-orange-600" />
+                  <span>MODIS only</span>
                 </span>
                 <input
                   type="checkbox"
@@ -451,9 +432,9 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
               </label>
 
               <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 font-medium">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-700 shadow-sm shadow-red-700/50" />
-                  <span>VIIRS Only</span>
+                <span className="flex items-center gap-2 font-normal text-xs">
+                  <span className="w-2 h-2 rounded-full bg-red-700" />
+                  <span>VIIRS only</span>
                 </span>
                 <input
                   type="checkbox"
@@ -464,9 +445,9 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
               </label>
 
               <label className="flex items-center justify-between text-neutral-400 hover:text-neutral-300 cursor-pointer py-0.5">
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm border border-neutral-500" />
-                  <span>Grid Overlay (1 km)</span>
+                <span className="flex items-center gap-2 text-xs">
+                  <span className="w-2 h-2 rounded-sm border border-neutral-600" />
+                  <span>Grid overlay (1 km)</span>
                 </span>
                 <input
                   type="checkbox"
@@ -478,10 +459,10 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
             </div>
 
             {/* Opacity Slider */}
-            <div className="flex flex-col gap-1 pt-2 border-t border-neutral-900">
+            <div className="flex flex-col gap-1 pt-1.5 border-t border-neutral-800">
               <div className="flex items-center justify-between text-[11px] text-neutral-400">
-                <span className="font-semibold">Opacity</span>
-                <span className="font-mono text-orange-400 font-bold">{layerOpacity}%</span>
+                <span>Opacity</span>
+                <span className="font-mono tabular-nums text-neutral-300">{layerOpacity}%</span>
               </div>
               <input
                 type="range"
@@ -489,14 +470,14 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                 max="100"
                 value={layerOpacity}
                 onChange={(e) => setLayerOpacity(Number(e.target.value))}
-                className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
               />
             </div>
 
             {/* Region Selector */}
             {presetAois.length > 0 && onSelectAoi && (
-              <div className="flex flex-col gap-1 pt-1.5 border-t border-neutral-900">
-                <label className="text-[10px] uppercase font-bold text-orange-400">
+              <div className="flex flex-col gap-1 pt-1.5 border-t border-neutral-800">
+                <label className="text-[11px] font-medium text-neutral-400">
                   Region
                 </label>
                 <select
@@ -505,7 +486,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                     const found = presetAois.find((a) => a.id === e.target.value);
                     if (found) onSelectAoi(found);
                   }}
-                  className="w-full bg-[#0C0C0F] border border-neutral-800 rounded-lg px-2 py-1 text-[11px] text-neutral-200 focus:outline-none focus:border-orange-500"
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-2 py-1 text-xs text-neutral-200 focus:outline-none focus:border-neutral-700"
                 >
                   {presetAois.map((aoi) => (
                     <option key={aoi.id} value={aoi.id}>
@@ -517,22 +498,22 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
             )}
 
             {/* Time Range */}
-            <div className="flex flex-col gap-1 pt-1 border-t border-neutral-900 text-[10px]">
-              <span className="uppercase font-bold text-orange-400">Time Range</span>
-              <span className="font-mono text-neutral-300">
+            <div className="flex flex-col gap-0.5 pt-1 border-t border-neutral-800 text-[11px]">
+              <span className="font-medium text-neutral-400">Observation window</span>
+              <span className="font-mono tabular-nums text-neutral-300 text-[11px]">
                 {startDate} &mdash; {endDate}
               </span>
             </div>
 
-            {/* Display Interval buttons: All | Day | Week | Month */}
-            <div className="flex items-center justify-between bg-[#0C0C0F] p-0.5 rounded-lg border border-neutral-900 text-[10px]">
+            {/* Display Interval buttons */}
+            <div className="flex items-center justify-between bg-neutral-950 p-0.5 rounded-lg border border-neutral-800 text-[11px]">
               {(["all", "day", "week", "month"] as const).map((inter) => (
                 <button
                   key={inter}
                   onClick={() => setDisplayInterval(inter)}
-                  className={`px-2 py-1 rounded font-bold capitalize transition-all ${
+                  className={`px-2 py-1 rounded font-medium capitalize transition-all ${
                     displayInterval === inter
-                      ? "bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-md shadow-orange-600/30"
+                      ? "bg-neutral-800 text-white font-semibold"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -544,46 +525,42 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         )}
       </div>
 
-      {/* Floating Right: Controls Toolstrip in Obsidian Black */}
+      {/* Floating Right: Controls Toolstrip */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-        {/* Compass indicator */}
-        <div className="w-9 h-9 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 flex items-center justify-center text-orange-400 shadow-xl">
+        <div className="w-8 h-8 rounded-xl bg-black/90 backdrop-blur border border-neutral-800 flex items-center justify-center text-orange-400 shadow-md">
           <Compass className="w-4 h-4" />
         </div>
 
-        {/* Zoom In / Out */}
-        <div className="flex flex-col bg-black/95 backdrop-blur border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
+        <div className="flex flex-col bg-black/90 backdrop-blur border border-neutral-800 rounded-xl overflow-hidden shadow-md">
           <button
             onClick={() => map.current?.zoomIn()}
-            className="w-9 h-9 flex items-center justify-center text-white hover:bg-neutral-800 hover:text-orange-400 font-bold text-base transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-white hover:bg-neutral-800 text-sm transition-colors"
             title="Zoom in"
           >
             +
           </button>
-          <div className="h-px bg-neutral-900" />
+          <div className="h-px bg-neutral-800" />
           <button
             onClick={() => map.current?.zoomOut()}
-            className="w-9 h-9 flex items-center justify-center text-white hover:bg-neutral-800 hover:text-orange-400 font-bold text-base transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-white hover:bg-neutral-800 text-sm transition-colors"
             title="Zoom out"
           >
             -
           </button>
         </div>
 
-        {/* Recenter */}
         <button
           onClick={handleRecenter}
-          className="w-9 h-9 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-orange-400 hover:bg-neutral-800 shadow-xl transition-colors"
+          className="w-8 h-8 rounded-xl bg-black/90 backdrop-blur border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-white hover:bg-neutral-800 shadow-md transition-colors"
           title="Recenter Map"
         >
           <Crosshair className="w-4 h-4" />
         </button>
 
-        {/* Basemap Toggle: Satellite vs Dark Vector */}
         <button
           onClick={toggleBasemap}
-          className="w-9 h-9 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-orange-400 hover:bg-neutral-800 shadow-xl transition-colors"
-          title={`Switch to ${basemapType === "satellite" ? "Dark Vector" : "Satellite Imagery"}`}
+          className="w-8 h-8 rounded-xl bg-black/90 backdrop-blur border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-white hover:bg-neutral-800 shadow-md transition-colors"
+          title={`Switch to ${basemapType === "satellite" ? "dark vector" : "satellite imagery"}`}
         >
           {basemapType === "satellite" ? (
             <MapIcon className="w-4 h-4 text-orange-400" />
@@ -592,47 +569,43 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
           )}
         </button>
 
-        {/* Accessible Data Table Toggle */}
         <button
           onClick={() => setShowAccessibleTable(!showAccessibleTable)}
-          className={`w-9 h-9 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 flex items-center justify-center shadow-xl transition-colors ${
-            showAccessibleTable ? "text-orange-400 bg-orange-950/40 border-orange-500/50" : "text-neutral-300 hover:text-orange-400 hover:bg-neutral-800"
+          className={`w-8 h-8 rounded-xl bg-black/90 backdrop-blur border border-neutral-800 flex items-center justify-center shadow-md transition-colors ${
+            showAccessibleTable ? "text-orange-400 bg-neutral-900 border-neutral-700" : "text-neutral-300 hover:text-white hover:bg-neutral-800"
           }`}
-          title="Toggle Accessible Data Table"
+          title="Toggle observation table"
         >
           <Table className="w-4 h-4" />
         </button>
       </div>
 
       {/* Floating Bottom-Right: Fire Intensity (FRP) Legend & Attribution */}
-      <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-1.5">
-        {/* FRP Legend Card in Black, Red, Orange */}
-        <div className="px-3 py-2 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 shadow-2xl flex flex-col gap-1 text-[10px]">
-          <span className="font-extrabold text-white flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-            Fire Intensity (FRP)
+      <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-1">
+        <div className="px-3 py-1.5 rounded-xl bg-black/90 backdrop-blur border border-neutral-800 shadow-md flex flex-col gap-1 text-[11px]">
+          <span className="font-medium text-neutral-200">
+            Fire intensity (FRP)
           </span>
           <div className="flex items-center gap-1.5">
-            <span className="text-neutral-400 font-semibold">Low</span>
-            <div className="h-2 w-28 rounded-full bg-gradient-to-r from-[#450A0A] via-[#EA580C] via-[#EF4444] to-[#FDE047] border border-neutral-800" />
-            <span className="text-orange-400 font-bold">High</span>
+            <span className="text-neutral-400 text-[10px]">Low</span>
+            <div className="h-1.5 w-24 rounded-full bg-gradient-to-r from-[#450A0A] via-[#EA580C] via-[#EF4444] to-[#FDE047]" />
+            <span className="text-neutral-400 text-[10px]">High</span>
           </div>
         </div>
 
-        {/* Attribution Bar */}
-        <div className="px-2.5 py-1 rounded-lg bg-black/90 backdrop-blur text-[9px] text-neutral-400 font-mono flex items-center gap-2 border border-neutral-900">
-          <span>&copy; OpenStreetMap contributors</span>
+        <div className="px-2 py-0.5 rounded-lg bg-black/80 backdrop-blur text-[10px] text-neutral-500 font-mono flex items-center gap-1.5 border border-neutral-900">
+          <span>&copy; OpenStreetMap</span>
           <span>&bull;</span>
-          <span>Imagery: NASA / USGS / ESRI</span>
+          <span>NASA FIRMS / ESRI</span>
         </div>
       </div>
 
       {/* Loading Overlay */}
       {isLoading && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-20 pointer-events-none">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-black/90 border border-orange-500/40 text-white text-xs font-bold shadow-2xl shadow-orange-950/50">
-            <span className="w-3.5 h-3.5 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
-            <span className="text-orange-400">Harmonizing observations...</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/90 border border-neutral-800 text-neutral-200 text-xs font-medium shadow-md">
+            <span className="w-3 h-3 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+            <span>Harmonizing observations...</span>
           </div>
         </div>
       )}
@@ -641,9 +614,9 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       {showAccessibleTable && (
         <div className="absolute inset-4 z-30 bg-black/95 backdrop-blur-md border border-neutral-800 rounded-2xl p-4 flex flex-col shadow-2xl overflow-hidden">
           <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-            <h4 className="text-sm font-bold text-white flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-white flex items-center gap-2">
               <Table className="w-4 h-4 text-orange-400" />
-              Harmonized Observations ({geoJsonData?.features?.length || 0} records)
+              Harmonized observations ({geoJsonData?.features?.length || 0} records)
             </h4>
             <button
               onClick={() => setShowAccessibleTable(false)}
@@ -653,13 +626,13 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
             </button>
           </div>
           <div className="flex-1 overflow-auto mt-2">
-            <table className="w-full text-left text-xs font-mono text-neutral-300">
-              <thead className="bg-[#0C0C0F] text-orange-400 sticky top-0 border-b border-neutral-800">
+            <table className="w-full text-left text-xs font-mono tabular-nums text-neutral-300">
+              <thead className="bg-[#0C0C0F] text-neutral-400 font-sans font-medium sticky top-0 border-b border-neutral-800">
                 <tr>
                   <th className="p-2">ID</th>
                   <th className="p-2">Sensor</th>
                   <th className="p-2">Platform</th>
-                  <th className="p-2">UTC Timestamp</th>
+                  <th className="p-2">Timestamp (UTC)</th>
                   <th className="p-2">FRP (MW)</th>
                   <th className="p-2">Classification</th>
                 </tr>
@@ -672,14 +645,14 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                       if (onSelectObservation) onSelectObservation(f.properties);
                       setShowAccessibleTable(false);
                     }}
-                    className="hover:bg-neutral-900/80 cursor-pointer"
+                    className="hover:bg-neutral-900/60 cursor-pointer"
                   >
-                    <td className="p-2 truncate max-w-[120px]">{f.properties.observation_id}</td>
-                    <td className="p-2 text-white font-bold">{f.properties.sensor}</td>
-                    <td className="p-2">{f.properties.platform}</td>
-                    <td className="p-2">{f.properties.acq_datetime_utc}</td>
-                    <td className="p-2 text-orange-400 font-bold">{f.properties.frp_mw?.toFixed(1) || "-"}</td>
-                    <td className="p-2 text-red-400">{f.properties.classification}</td>
+                    <td className="p-2 truncate max-w-[120px] font-mono">{f.properties.observation_id}</td>
+                    <td className="p-2 text-white font-sans font-medium">{f.properties.sensor}</td>
+                    <td className="p-2 font-sans">{f.properties.platform}</td>
+                    <td className="p-2 font-mono">{f.properties.acq_datetime_utc}</td>
+                    <td className="p-2 text-orange-400 font-mono font-medium">{f.properties.frp_mw?.toFixed(1) || "-"}</td>
+                    <td className="p-2 font-sans text-neutral-400">{f.properties.classification}</td>
                   </tr>
                 ))}
               </tbody>

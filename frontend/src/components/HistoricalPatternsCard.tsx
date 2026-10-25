@@ -53,37 +53,37 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
   const augCells = augRecord ? augRecord.cells : 178;
 
   return (
-    <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-xl h-full hover:border-orange-500/30 transition-colors">
+    <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-sm h-full">
       {/* Header with Title and Dropdowns */}
       <div className="flex items-center justify-between pb-3 border-b border-neutral-900">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-lg bg-orange-500/10 border border-orange-500/25 flex items-center justify-center">
             <TrendingUp className="w-3.5 h-3.5 text-orange-400" />
           </div>
-          <h3 className="text-sm font-extrabold text-white tracking-tight">
-            Historical Patterns
+          <h3 className="text-base font-semibold text-white tracking-tight">
+            Historical patterns
           </h3>
         </div>
 
         <div className="flex items-center gap-1.5">
           {/* Year selector */}
-          <div className="flex items-center gap-1 bg-[#0C0C0F] px-2 py-1 rounded-lg border border-neutral-800 text-[11px] text-neutral-300 font-bold">
+          <div className="flex items-center gap-1 bg-neutral-950 px-2 py-1 rounded-lg border border-neutral-800 text-xs text-neutral-300 font-medium">
             <span>{selectedYear}</span>
-            <ChevronDown className="w-3 h-3 text-orange-400" />
+            <ChevronDown className="w-3 h-3 text-neutral-500" />
           </div>
 
           {/* Metric selector */}
-          <div className="flex items-center gap-1 bg-[#0C0C0F] px-2 py-1 rounded-lg border border-neutral-800 text-[11px] text-neutral-300 font-bold">
-            <span>Active Grid Cells</span>
-            <ChevronDown className="w-3 h-3 text-orange-400" />
+          <div className="flex items-center gap-1 bg-neutral-950 px-2 py-1 rounded-lg border border-neutral-800 text-xs text-neutral-300 font-medium">
+            <span>Active grid cells</span>
+            <ChevronDown className="w-3 h-3 text-neutral-500" />
           </div>
         </div>
       </div>
 
       {/* Chart Section */}
-      <div className="flex-1 w-full min-h-[160px] py-2 relative">
+      <div className="flex-1 w-full min-h-[160px] py-1.5 relative">
         {/* Floating peak callout badge for August */}
-        <div className="absolute top-1 right-28 z-10 px-2 py-0.5 rounded-lg bg-orange-950/80 border border-orange-500/60 text-orange-300 text-[10px] font-extrabold flex items-center gap-1 shadow-md shadow-orange-950/40 backdrop-blur">
+        <div className="absolute top-1 right-28 z-10 px-2 py-0.5 rounded-md bg-neutral-900 border border-neutral-700 text-neutral-200 text-[11px] font-medium flex items-center gap-1 shadow-sm font-mono tabular-nums">
           <Flame className="w-3 h-3 text-orange-400" />
           <span>Aug 2024: {augCells} cells</span>
         </div>
@@ -91,21 +91,22 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
         <ResponsiveContainer width="100%" height={145}>
           <BarChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 0 }}>
             <CartesianGrid stroke="#181820" strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="month" stroke="#71717A" fontSize={10} tickLine={false} />
-            <YAxis stroke="#71717A" fontSize={10} tickLine={false} />
+            <XAxis dataKey="month" stroke="#71717A" fontSize={11} tickLine={false} />
+            <YAxis stroke="#71717A" fontSize={11} tickLine={false} />
             <Tooltip
               contentStyle={{
                 backgroundColor: "#000000",
-                borderColor: "#333333",
+                borderColor: "#26262B",
                 borderRadius: "8px",
                 fontSize: "11px",
+                fontFamily: "var(--font-geist-sans), sans-serif",
               }}
             />
-            <Bar dataKey="cells" radius={[3, 3, 0, 0]}>
+            <Bar dataKey="cells" radius={[2, 2, 0, 0]}>
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={entry.month === "Aug" ? "#F97316" : "#26262E"}
+                  fill={entry.month === "Aug" ? "#F97316" : "#222228"}
                 />
               ))}
             </Bar>
@@ -114,15 +115,15 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
       </div>
 
       {/* Bottom Alert Banner */}
-      <div className="p-2.5 rounded-xl bg-red-950/60 border border-red-500/50 flex items-start justify-between gap-2 text-xs shadow-md shadow-red-950/30">
+      <div className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 flex items-start justify-between gap-2 text-xs">
         <div className="flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+          <AlertTriangle className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
           <div className="flex flex-col">
-            <span className="font-extrabold text-red-200 leading-tight">
-              Unusual Activity Detected
+            <span className="font-medium text-white leading-tight">
+              Seasonal deviation detected
             </span>
-            <span className="text-[10px] text-orange-200/90 leading-snug mt-0.5 font-medium">
-              August 2024 shows 42% higher activity than the historical average for this period (2018–2023).
+            <span className="text-[11px] text-neutral-400 leading-snug mt-0.5 font-normal">
+              August 2024 shows elevated activity compared to the multi-year baseline (2018–2023).
             </span>
           </div>
         </div>
@@ -130,9 +131,9 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
         {onViewDeepDive && (
           <button
             onClick={onViewDeepDive}
-            className="text-[11px] font-extrabold text-orange-400 hover:text-orange-300 shrink-0 self-center pl-1 transition-colors"
+            className="text-xs font-medium text-orange-400 hover:text-orange-300 shrink-0 self-center pl-1 transition-colors"
           >
-            View Details &rarr;
+            Details &rarr;
           </button>
         )}
       </div>

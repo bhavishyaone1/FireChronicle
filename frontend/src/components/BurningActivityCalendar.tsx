@@ -45,7 +45,7 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
       if (parts.length === 3) {
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const m = parseInt(parts[1], 10) - 1;
-        return `${months[m]} ${parts[2]}, ${parts[0]}`;
+        return `${parts[2]} ${months[m]} ${parts[0]}`;
       }
     } catch {
       // fallback
@@ -77,40 +77,39 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
     });
   }
 
-  // Black, Red & Orange Heatmap Color Mapping
   const getCellHeatStyle = (cellDate: string) => {
     const dayRecord = days.find((d) => d.date === cellDate);
     if (!dayRecord || dayRecord.unique_active_cells === 0) {
-      return "bg-[#0E0E12] text-neutral-500 hover:bg-[#181820]";
+      return "bg-neutral-900/60 text-neutral-500 hover:bg-neutral-800";
     }
     const val = dayRecord.unique_active_cells;
-    if (val <= 2) return "bg-[#451A03] text-amber-200 border border-amber-600/50";
-    if (val <= 5) return "bg-[#9A3412] text-orange-100 border border-orange-500/60 font-bold";
-    if (val <= 10) return "bg-[#DC2626] text-white font-extrabold shadow-sm shadow-red-500/30";
-    return "bg-[#EF4444] text-white font-black shadow-md shadow-red-600/50";
+    if (val <= 2) return "bg-[#451A03] text-amber-200 border border-amber-600/40";
+    if (val <= 5) return "bg-[#9A3412] text-orange-100 border border-orange-500/50";
+    if (val <= 10) return "bg-[#DC2626] text-white";
+    return "bg-[#EF4444] text-white";
   };
 
   return (
-    <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-xl h-full hover:border-orange-500/30 transition-colors">
+    <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-sm h-full">
       {/* Header with Title and Segmented Interval */}
       <div className="flex items-center justify-between pb-3 border-b border-neutral-900">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-lg bg-orange-500/10 border border-orange-500/25 flex items-center justify-center">
             <Flame className="w-3.5 h-3.5 text-orange-400" />
           </div>
-          <h3 className="text-sm font-extrabold text-white tracking-tight">
-            Burning Activity Calendar
+          <h3 className="text-base font-semibold text-white tracking-tight">
+            Burning activity calendar
           </h3>
         </div>
 
-        <div className="flex items-center bg-[#0C0C0F] p-0.5 rounded-lg border border-neutral-800 text-[11px]">
+        <div className="flex items-center bg-neutral-950 p-0.5 rounded-lg border border-neutral-800 text-xs">
           {(["daily", "weekly", "monthly"] as const).map((interval) => (
             <button
               key={interval}
               onClick={() => setViewInterval(interval)}
-              className={`px-2.5 py-1 rounded-md font-bold capitalize transition-all ${
+              className={`px-2.5 py-0.5 rounded-md font-medium capitalize transition-all ${
                 viewInterval === interval
-                  ? "bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-md shadow-orange-600/30"
+                  ? "bg-neutral-800 text-white font-semibold"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
@@ -124,18 +123,17 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 py-2.5">
         {/* Left: Month Navigator & 7x5 Calendar Grid */}
         <div className="md:col-span-7 flex flex-col gap-2">
-          {/* Month Navigation */}
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-bold text-white">August 2024</span>
+            <span className="text-[13px] font-semibold text-white">August 2024</span>
             <div className="flex items-center gap-1">
               <button
-                className="p-1 rounded-md bg-[#0C0C0F] hover:bg-neutral-800 text-neutral-300 hover:text-orange-400 transition-colors"
+                className="p-1 rounded-md bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
                 aria-label="Previous month"
               >
                 <ChevronLeft className="w-3 h-3" />
               </button>
               <button
-                className="p-1 rounded-md bg-[#0C0C0F] hover:bg-neutral-800 text-neutral-300 hover:text-orange-400 transition-colors"
+                className="p-1 rounded-md bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
                 aria-label="Next month"
               >
                 <ChevronRight className="w-3 h-3" />
@@ -143,8 +141,7 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
             </div>
           </div>
 
-          {/* Weekday headers */}
-          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-neutral-400">
+          <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-neutral-400">
             <span>Mon</span>
             <span>Tue</span>
             <span>Wed</span>
@@ -154,7 +151,6 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
             <span>Sun</span>
           </div>
 
-          {/* Calendar Day Cells */}
           <div className="grid grid-cols-7 gap-1">
             {calendarCells.map((c, idx) => {
               const isSelected = selectedDate === c.dateStr;
@@ -170,8 +166,8 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
                       onSelectDate(isSelected ? null : c.dateStr);
                     }
                   }}
-                  className={`h-7 rounded-md text-[11px] font-mono font-semibold flex items-center justify-center transition-all ${heatClass} ${
-                    isSelected ? "ring-2 ring-orange-400 scale-105 z-10 shadow-lg shadow-orange-500/50" : ""
+                  className={`h-7 rounded-md text-xs font-mono tabular-nums font-medium flex items-center justify-center transition-all ${heatClass} ${
+                    isSelected ? "ring-2 ring-orange-500 scale-105 z-10" : ""
                   }`}
                 >
                   {c.dayNum}
@@ -182,73 +178,73 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
         </div>
 
         {/* Right: Selected Day Activity Summary */}
-        <div className="md:col-span-5 bg-[#0C0C0F] rounded-xl p-3 border border-neutral-900 flex flex-col justify-between">
+        <div className="md:col-span-5 bg-neutral-950 rounded-xl p-3 border border-neutral-900 flex flex-col justify-between">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-1.5">
-              <span className="text-[11px] font-bold text-white flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 text-orange-500" />
+            <div className="flex items-center justify-between border-b border-neutral-900 pb-1.5">
+              <span className="text-xs font-semibold text-white flex items-center gap-1.5 font-mono tabular-nums">
+                <Flame className="w-3.5 h-3.5 text-orange-400" />
                 {formatDateDisplay(activeDayDateStr)}
               </span>
               {selectedDate && (
                 <button
                   onClick={() => onSelectDate(null)}
-                  className="text-[9px] text-orange-400 hover:text-orange-300 font-bold"
+                  className="text-[11px] text-orange-400 hover:text-orange-300 font-medium"
                 >
                   Clear
                 </button>
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5 text-[11px]">
+            <div className="flex flex-col gap-1.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400 flex items-center gap-1">
+                <span className="text-neutral-400 flex items-center gap-1.5 font-normal">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                  Active Grid Cells
+                  Active grid cells
                 </span>
-                <span className="font-mono font-bold text-white">{activeCells}</span>
+                <span className="font-mono tabular-nums font-semibold text-white">{activeCells}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400 flex items-center gap-1">
+                <span className="text-neutral-400 flex items-center gap-1.5 font-normal">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                  MODIS Detections
+                  MODIS detections
                 </span>
-                <span className="font-mono font-bold text-orange-400">{modisRaw}</span>
+                <span className="font-mono tabular-nums font-semibold text-orange-400">{modisRaw}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400 flex items-center gap-1">
+                <span className="text-neutral-400 flex items-center gap-1.5 font-normal">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                  VIIRS Detections
+                  VIIRS detections
                 </span>
-                <span className="font-mono font-bold text-red-400">{viirsRaw}</span>
+                <span className="font-mono tabular-nums font-semibold text-red-400">{viirsRaw}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400 flex items-center gap-1">
+                <span className="text-neutral-400 flex items-center gap-1.5 font-normal">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  Matched Pairs
+                  Matched pairs
                 </span>
-                <span className="font-mono font-bold text-amber-400">{matchedPairs}</span>
+                <span className="font-mono tabular-nums font-semibold text-amber-400">{matchedPairs}</span>
               </div>
             </div>
           </div>
 
           <button
             onClick={() => onSelectDate(activeDayDateStr)}
-            className="w-full mt-2 py-1.5 rounded-lg bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-all shadow-md shadow-orange-600/30"
+            className="w-full mt-2 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-orange-400 hover:text-orange-300 text-xs font-medium flex items-center justify-center gap-1 transition-colors border border-neutral-800"
           >
-            <span>View Day Details</span>
+            <span>Inspect selected day</span>
             <ExternalLink className="w-3 h-3" />
           </button>
         </div>
       </div>
 
       {/* Footer Gradient Legend */}
-      <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[10px] text-neutral-400">
-        <span className="font-semibold">Low Activity</span>
-        <div className="h-2 w-32 rounded-full bg-gradient-to-r from-[#0E0E12] via-[#EA580C] to-[#EF4444] border border-neutral-800" />
-        <span className="text-orange-400 font-bold">High Activity</span>
+      <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px] text-neutral-400">
+        <span>Low activity</span>
+        <div className="h-1.5 w-28 rounded-full bg-gradient-to-r from-neutral-800 via-[#EA580C] to-[#EF4444]" />
+        <span>High activity</span>
       </div>
     </div>
   );

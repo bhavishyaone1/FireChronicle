@@ -7,8 +7,6 @@ import {
   Sliders,
   Filter,
   RotateCcw,
-  Sparkles,
-  Info,
 } from "lucide-react";
 import { PresetAoi } from "@/types";
 
@@ -51,7 +49,6 @@ export const Controls: React.FC<ControlsProps> = ({
   selectedDate,
   onClearSelectedDate,
 }) => {
-  // Format date for unambiguous display (e.g., "10 Aug 2024")
   const formatDateLabel = (isoDate: string) => {
     try {
       const parts = isoDate.split("-");
@@ -67,18 +64,18 @@ export const Controls: React.FC<ControlsProps> = ({
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 shadow-xl flex flex-col gap-4">
-      {/* Tier 1: AOI Selector, Observation Window, and Single-Date Banner */}
+    <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 shadow-sm flex flex-col gap-4">
+      {/* Tier 1: AOI Selector & Observation Window */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
         {/* AOI Preset Selector (5 cols) */}
         <div className="md:col-span-5 flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-text-secondary flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-accent-cyan">
-              <MapPin className="w-4 h-4" />
-              Area of Interest (AOI)
+          <label className="text-[13px] font-medium text-neutral-300 flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-neutral-200">
+              <MapPin className="w-3.5 h-3.5 text-orange-400" />
+              Area of interest (AOI)
             </span>
-            <span className="text-[10px] text-text-muted font-normal lowercase">
-              bounding coordinates
+            <span className="text-[11px] text-neutral-400 font-normal">
+              Bounding coordinates
             </span>
           </label>
           <select
@@ -87,7 +84,7 @@ export const Controls: React.FC<ControlsProps> = ({
               const found = presetAois.find((a) => a.id === e.target.value);
               if (found) onSelectAoi(found);
             }}
-            className="w-full bg-surface-elevated border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-accent-cyan transition-colors"
+            className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-200 focus:outline-none focus:border-neutral-700 transition-colors"
           >
             {presetAois.map((aoi) => (
               <option key={aoi.id} value={aoi.id}>
@@ -100,13 +97,12 @@ export const Controls: React.FC<ControlsProps> = ({
         {/* Date Window & Quick Presets (7 cols) */}
         <div className="md:col-span-7 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5 text-fire-mid">
-              <CalendarIcon className="w-4 h-4" />
-              Observation Window (UTC)
+            <label className="text-[13px] font-medium text-neutral-300 flex items-center gap-1.5">
+              <CalendarIcon className="w-3.5 h-3.5 text-orange-400" />
+              Observation window (UTC)
             </label>
-            {/* Quick preset buttons */}
-            <div className="flex items-center gap-1.5 text-[10px]">
-              <span className="text-text-muted">Presets:</span>
+            <div className="flex items-center gap-1.5 text-[11px]">
+              <span className="text-neutral-500">Presets:</span>
               <button
                 type="button"
                 onClick={() => {
@@ -114,9 +110,9 @@ export const Controls: React.FC<ControlsProps> = ({
                   setEndDate("2024-08-15");
                   if (onClearSelectedDate) onClearSelectedDate();
                 }}
-                className="px-2 py-0.5 rounded bg-surface-muted hover:bg-surface-elevated border border-border text-text-primary transition-colors font-medium"
+                className="px-2 py-0.5 rounded bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 transition-colors font-medium"
               >
-                Aug 10–15 (Sample Fixture)
+                10–15 Aug (Fixture)
               </button>
               <button
                 type="button"
@@ -125,9 +121,9 @@ export const Controls: React.FC<ControlsProps> = ({
                   setEndDate("2024-08-20");
                   if (onClearSelectedDate) onClearSelectedDate();
                 }}
-                className="px-2 py-0.5 rounded bg-surface-muted hover:bg-surface-elevated border border-border text-text-secondary hover:text-white transition-colors"
+                className="px-2 py-0.5 rounded bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
               >
-                Aug 01–20 (Full Month)
+                01–20 Aug (Full window)
               </button>
             </div>
           </div>
@@ -141,13 +137,13 @@ export const Controls: React.FC<ControlsProps> = ({
                   setStartDate(e.target.value);
                   if (onClearSelectedDate) onClearSelectedDate();
                 }}
-                className="w-full bg-surface-elevated border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-accent-cyan transition-colors"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs font-mono tabular-nums text-neutral-200 focus:outline-none focus:border-neutral-700 transition-colors"
               />
-              <span className="absolute right-2.5 top-2.5 text-[10px] text-text-muted pointer-events-none hidden sm:inline">
+              <span className="absolute right-2.5 top-2.5 text-[11px] text-neutral-400 pointer-events-none hidden sm:inline">
                 {formatDateLabel(startDate)}
               </span>
             </div>
-            <span className="text-text-muted text-xs">&rarr;</span>
+            <span className="text-neutral-500 text-xs">&rarr;</span>
             <div className="relative w-1/2">
               <input
                 type="date"
@@ -156,9 +152,9 @@ export const Controls: React.FC<ControlsProps> = ({
                   setEndDate(e.target.value);
                   if (onClearSelectedDate) onClearSelectedDate();
                 }}
-                className="w-full bg-surface-elevated border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-accent-cyan transition-colors"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs font-mono tabular-nums text-neutral-200 focus:outline-none focus:border-neutral-700 transition-colors"
               />
-              <span className="absolute right-2.5 top-2.5 text-[10px] text-text-muted pointer-events-none hidden sm:inline">
+              <span className="absolute right-2.5 top-2.5 text-[11px] text-neutral-400 pointer-events-none hidden sm:inline">
                 {formatDateLabel(endDate)}
               </span>
             </div>
@@ -166,41 +162,41 @@ export const Controls: React.FC<ControlsProps> = ({
         </div>
       </div>
 
-      {/* Active Single-Date Filter Banner (when a specific day is clicked in the calendar) */}
+      {/* Active Single-Date Filter Banner */}
       {selectedDate && (
-        <div className="bg-action/15 border border-action/40 rounded-lg px-3 py-2 flex items-center justify-between text-xs text-blue-200">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 flex items-center justify-between text-xs text-neutral-200">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-accent-cyan animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
             <span>
-              Inspecting single date: <strong>{formatDateLabel(selectedDate)}</strong>
+              Inspecting single date: <strong className="font-semibold text-white">{formatDateLabel(selectedDate)}</strong>
             </span>
-            <span className="text-text-muted text-[11px] hidden sm:inline">
+            <span className="text-neutral-400 text-[11px] hidden sm:inline">
               (Map and details scoped to this day)
             </span>
           </div>
           {onClearSelectedDate && (
             <button
               onClick={onClearSelectedDate}
-              className="flex items-center gap-1 px-2.5 py-1 rounded bg-action/30 hover:bg-action text-white text-[11px] font-medium transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-white text-[11px] font-medium transition-colors"
             >
               <RotateCcw className="w-3 h-3" />
-              Reset to Full Window
+              Reset to full window
             </button>
           )}
         </div>
       )}
 
       {/* Tier 2: Harmonization Parameters & Display Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-3 border-t border-border/60">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-3 border-t border-neutral-900">
         {/* Equal-Area Grid Resolution (4 cols) */}
         <div className="md:col-span-4 flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs font-semibold text-text-secondary">
-            <span className="flex items-center gap-1.5 text-text-primary">
-              <Sliders className="w-3.5 h-3.5 text-accent-cyan" />
-              Harmonization Grid: {gridSizeKm.toFixed(1)} km
+          <div className="flex items-center justify-between text-xs text-neutral-300">
+            <span className="flex items-center gap-1.5 font-medium text-white">
+              <Sliders className="w-3.5 h-3.5 text-orange-400" />
+              Harmonization grid: {gridSizeKm.toFixed(1)} km
             </span>
-            <span className="text-[10px] text-text-muted font-normal">
-              Equal-Area Cylindrical
+            <span className="text-[11px] text-neutral-400">
+              Equal-area cylindrical
             </span>
           </div>
           <input
@@ -210,23 +206,23 @@ export const Controls: React.FC<ControlsProps> = ({
             step="0.5"
             value={gridSizeKm}
             onChange={(e) => setGridSizeKm(parseFloat(e.target.value))}
-            className="w-full accent-action cursor-pointer h-1.5 bg-surface-muted rounded-lg"
+            className="w-full accent-orange-500 cursor-pointer h-1.5 bg-neutral-800 rounded-lg"
           />
-          <div className="flex justify-between text-[10px] text-text-muted">
+          <div className="flex justify-between text-[11px] text-neutral-400">
             <span>0.5 km (Fine)</span>
-            <span className="text-accent-cyan font-mono">1.0 km (Nominal MODIS)</span>
+            <span className="text-orange-400 font-mono tabular-nums">1.0 km (Nominal MODIS)</span>
             <span>3.0 km (Regional)</span>
           </div>
         </div>
 
         {/* Spatial Match Tolerance (4 cols) */}
         <div className="md:col-span-4 flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs font-semibold text-text-secondary">
-            <span className="flex items-center gap-1.5 text-text-primary">
-              <Sliders className="w-3.5 h-3.5 text-fire-mid" />
-              Match Tolerance: {spatialToleranceM}m
+          <div className="flex items-center justify-between text-xs text-neutral-300">
+            <span className="flex items-center gap-1.5 font-medium text-white">
+              <Sliders className="w-3.5 h-3.5 text-red-400" />
+              Match tolerance: {spatialToleranceM}m
             </span>
-            <span className="text-[10px] text-text-muted font-normal">
+            <span className="text-[11px] text-neutral-400">
               &le; 60 min orbital delta
             </span>
           </div>
@@ -237,41 +233,41 @@ export const Controls: React.FC<ControlsProps> = ({
             step="250"
             value={spatialToleranceM}
             onChange={(e) => setSpatialToleranceM(parseInt(e.target.value, 10))}
-            className="w-full accent-fire-mid cursor-pointer h-1.5 bg-surface-muted rounded-lg"
+            className="w-full accent-red-500 cursor-pointer h-1.5 bg-neutral-800 rounded-lg"
           />
-          <div className="flex justify-between text-[10px] text-text-muted">
+          <div className="flex justify-between text-[11px] text-neutral-400">
             <span>500m (Strict)</span>
-            <span className="text-fire-mid font-mono">1000m (MODIS Nadir)</span>
+            <span className="text-red-400 font-mono tabular-nums">1000m (MODIS Nadir)</span>
             <span>2000m (Permissive)</span>
           </div>
         </div>
 
         {/* Sensor & Classification Selectors (4 cols) */}
         <div className="md:col-span-4 flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-emerald-400" />
-            Display Filters
+          <label className="text-[13px] font-medium text-neutral-300 flex items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5 text-neutral-400" />
+            Display filters
           </label>
           <div className="grid grid-cols-2 gap-2">
             <select
               value={sensorFilter}
               onChange={(e) => setSensorFilter(e.target.value)}
-              className="w-full bg-surface-elevated border border-border rounded-lg px-2.5 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent-cyan transition-colors"
+              className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-2.5 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-neutral-700 transition-colors"
             >
-              <option value="ALL">All Sensors</option>
-              <option value="MODIS">MODIS Only (1 km)</option>
-              <option value="VIIRS">VIIRS Only (375 m)</option>
+              <option value="ALL">All sensors</option>
+              <option value="MODIS">MODIS only (1 km)</option>
+              <option value="VIIRS">VIIRS only (375 m)</option>
             </select>
 
             <select
               value={classificationFilter}
               onChange={(e) => setClassificationFilter(e.target.value)}
-              className="w-full bg-surface-elevated border border-border rounded-lg px-2.5 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent-cyan transition-colors"
+              className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-2.5 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-neutral-700 transition-colors"
             >
-              <option value="ALL">All Records</option>
-              <option value="matched">Matched Pairs Only</option>
-              <option value="MODIS_only">MODIS Unique Only</option>
-              <option value="VIIRS_only">VIIRS Unique Only</option>
+              <option value="ALL">All records</option>
+              <option value="matched">Matched pairs only</option>
+              <option value="MODIS_only">MODIS unique only</option>
+              <option value="VIIRS_only">VIIRS unique only</option>
             </select>
           </div>
         </div>
