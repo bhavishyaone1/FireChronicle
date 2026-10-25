@@ -25,6 +25,19 @@ def test_metadata_endpoint():
     assert len(data["preset_aois"]) >= 3
 
 
+def test_observations_endpoint():
+    resp = client.get("/api/observations?start_date=2024-08-10&end_date=2024-08-15")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["type"] == "FeatureCollection"
+    assert len(data["features"]) > 0
+    first_feat = data["features"][0]
+    assert "geometry" in first_feat
+    assert "properties" in first_feat
+    assert "sensor" in first_feat["properties"]
+    assert "classification" in first_feat["properties"]
+
+
 def test_calendar_endpoint():
     resp = client.get("/api/calendar?start_date=2024-08-10&end_date=2024-08-15")
     assert resp.status_code == 200
