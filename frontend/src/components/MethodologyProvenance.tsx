@@ -68,6 +68,25 @@ export const MethodologyProvenance: React.FC = () => {
         </div>
       </div>
 
+      {/* Scientific Literature Citation */}
+      <div className="bg-nasa-dark/60 border border-nasa-border/40 rounded-xl p-4 text-xs space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="font-semibold text-white flex items-center gap-1.5">
+            <BookOpen className="w-4 h-4 text-nasa-cyan" />
+            Key Scientific Literature: Cross-Sensor FRP Comparison
+          </span>
+          <span className="text-[10px] px-2 py-0.5 rounded bg-purple-900/40 text-purple-200 border border-purple-500/40 font-mono">
+            Peer-Reviewed Reference
+          </span>
+        </div>
+        <p className="text-gray-300 text-[11px] leading-relaxed">
+          <strong>Li, F., Zhang, X., Kondragunta, S., & Roy, D. P. (2018).</strong> <em>Comparison of Fire Radiative Power Estimates From VIIRS and MODIS Observations.</em> Journal of Geophysical Research: Atmospheres, 123(9), 4545–4563. DOI: <a href="https://doi.org/10.1029/2017JD027823" target="_blank" rel="noopener noreferrer" className="text-nasa-cyan underline">10.1029/2017JD027823</a>.
+        </p>
+        <p className="text-[11px] text-nasa-slate">
+          <strong>Key Methodological Guidance:</strong> Li et al. demonstrate that cross-sensor Fire Radiative Power varies substantially across view angles, canopy cover, and sub-pixel fire geometry. FireChronicle adheres to their recommendation by <em>prohibiting universal multiplicative FRP corrections</em> and strictly enforcing <em>non-duplication</em> of overlapping observations.
+        </p>
+      </div>
+
       {/* NASA Attribution & Citations */}
       <div className="border-t border-nasa-border/40 pt-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 text-xs text-nasa-slate">
         <div>
