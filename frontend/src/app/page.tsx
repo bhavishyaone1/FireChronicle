@@ -45,6 +45,26 @@ const DEFAULT_AOI: PresetAoi = {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Synchronize active tab with URL hash for deep-linking
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (["overview", "calendar", "compare", "anomalies", "methodology"].includes(hash)) {
+        setActiveTab(hash);
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      window.location.hash = tab;
+    }
+  };
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [isFirmsConfigured, setIsFirmsConfigured] = useState(false);
   const [activeMode, setActiveMode] = useState("HACKATHON_BUILD");
@@ -176,7 +196,7 @@ export default function Home() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-black text-neutral-100 font-sans antialiased">
       {/* 1. Left Persistent Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
       {/* 2. Main Scrollable Workspace */}
       <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden">
@@ -197,7 +217,7 @@ export default function Home() {
               setEndDate("2024-08-15");
             }
           }}
-          onOpenProvenance={() => setActiveTab("methodology")}
+          onOpenProvenance={() => handleTabChange("methodology")}
         />
 
         {/* Mobile Tab Navigation Strip (< 768px screens) */}
@@ -214,7 +234,7 @@ export default function Home() {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors duration-150 ${
                 activeTab === tab.id
                   ? "bg-[#16191F] text-[#F59E0B] border border-[#282D35]"
@@ -306,20 +326,20 @@ export default function Home() {
                   onSelectDate={(d) => setSelectedDate(d)}
                   selectedDate={selectedDate}
                   isLoading={isLoading}
-                  onViewDeepDive={() => setActiveTab("calendar")}
+                  onViewDeepDive={() => handleTabChange("calendar")}
                 />
 
                 <SensorComparisonCard
                   calendarData={calendarData}
                   comparisonData={comparisonData}
                   isLoading={isLoading}
-                  onViewDeepDive={() => setActiveTab("compare")}
+                  onViewDeepDive={() => handleTabChange("compare")}
                 />
 
                 <HistoricalPatternsCard
                   anomalyData={anomalyData}
                   isLoading={isLoading}
-                  onViewDeepDive={() => setActiveTab("anomalies")}
+                  onViewDeepDive={() => handleTabChange("anomalies")}
                 />
               </div>
             </>
