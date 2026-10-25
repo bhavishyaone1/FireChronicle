@@ -2,10 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
-import { Controls } from "@/components/Controls";
+import { HeroBanner } from "@/components/HeroBanner";
 import { MetricsCards } from "@/components/MetricsCards";
+import { ObservationDetailsPanel } from "@/components/ObservationDetailsPanel";
 import { BurningActivityCalendar } from "@/components/BurningActivityCalendar";
+import { SensorComparisonCard } from "@/components/SensorComparisonCard";
+import { HistoricalPatternsCard } from "@/components/HistoricalPatternsCard";
 import { SensorDiscontinuityInspector } from "@/components/SensorDiscontinuityInspector";
 import { HistoricalAnomalies } from "@/components/HistoricalAnomalies";
 import { MethodologyProvenance } from "@/components/MethodologyProvenance";
@@ -20,12 +24,13 @@ import {
 import {
   PresetAoi,
   GeoJSONFeatureCollection,
+  GeoJSONPointFeature,
   CalendarResponse,
   SensorComparisonResponse,
   AnomalyResponse,
 } from "@/types";
 
-// Dynamic client import for MapLibre GL to avoid SSR window undefined errors
+// Dynamic import for MapLibre GL to ensure client-only execution
 const HotspotMap = dynamic(
   () => import("@/components/HotspotMap").then((mod) => mod.HotspotMap),
   { ssr: false }
@@ -45,23 +50,28 @@ export default function Home() {
   const [presetAois, setPresetAois] = useState<PresetAoi[]>([DEFAULT_AOI]);
   const [selectedAoi, setSelectedAoi] = useState<PresetAoi>(DEFAULT_AOI);
 
-  // Filter parameters: Default to Aug 10-15, 2024 (where authentic sample fixture records exist)
-  const [startDate, setStartDate] = useState("2024-08-10");
-  const [endDate, setEndDate] = useState("2024-08-15");
+  // Filter parameters: Default to Aug 01 - Aug 20, 2024 (as in reference visual)
+  const [startDate, setStartDate] = useState("2024-08-01");
+  const [endDate, setEndDate] = useState("2024-08-20");
   const [gridSizeKm, setGridSizeKm] = useState(1.0);
   const [spatialToleranceM, setSpatialToleranceM] = useState(1000);
   const [sensorFilter, setSensorFilter] = useState("ALL");
   const [classificationFilter, setClassificationFilter] = useState("ALL");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Fetched data state
+  // Selected Observation for inspection panel
+  const [selectedObservation, setSelectedObservation] = useState<
+    GeoJSONPointFeature["properties"] | null
+  >(null);
+
+  // Fetched data states
   const [geoJsonData, setGeoJsonData] = useState<GeoJSONFeatureCollection | null>(null);
   const [calendarData, setCalendarData] = useState<CalendarResponse | null>(null);
   const [comparisonData, setComparisonData] = useState<SensorComparisonResponse | null>(null);
   const [anomalyData, setAnomalyData] = useState<AnomalyResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initial load: health & metadata
+  // Health and metadata initial load
   useEffect(() => {
     async function loadMeta() {
       try {
@@ -80,13 +90,13 @@ export default function Home() {
           setSelectedAoi(meta.preset_aois[0]);
         }
       } catch (err) {
-        // Fallback default
+        // Fallback default remains active
       }
     }
     loadMeta();
   }, []);
 
-  // Main synchronized data fetch on parameter change
+  // Main synchronized data fetch
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -95,7 +105,6 @@ export default function Home() {
       const targetEndDate = selectedDate || endDate;
 
       try {
-        // Fetch all 4 endpoints with strictly synchronized parameters
         const [obs, cal, comp, anom] = await Promise.all([
           fetchObservations({
             bbox,
@@ -122,11 +131,15 @@ export default function Home() {
           }).catch(() => null),
         ]);
 
-        // Atomic state assignment: never keep stale comparison data from previous selections
         setGeoJsonData(obs);
         setCalendarData(cal);
         setComparisonData(comp);
         setAnomalyData(anom);
+
+        // Auto-select first observation if available and none selected yet
+        if (obs && obs.features && obs.features.length > 0 && !selectedObservation) {
+          setSelectedObservation(obs.features[0].properties);
+        }
       } catch (error) {
         console.error("Data synchronization error:", error);
       } finally {
@@ -147,107 +160,157 @@ export default function Home() {
   ]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-text-primary">
-      <Header
-        activeMode={activeMode}
-        isBackendConnected={isBackendConnected}
-        isFirmsConfigured={isFirmsConfigured}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
+    <div className="flex h-screen w-screen overflow-hidden bg-[#070A11] text-slate-100 font-sans antialiased">
+      {/* 1. Left Persistent Sidebar */}
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 space-y-4">
-        {/* Controls Toolbar */}
-        <Controls
-          presetAois={presetAois}
-          selectedAoiId={selectedAoi.id}
-          onSelectAoi={(aoi) => {
-            setSelectedAoi(aoi);
-            setSelectedDate(null);
-          }}
+      {/* 2. Main Scrollable Workspace */}
+      <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden">
+        {/* Top Header Navigation */}
+        <Header
+          activeMode={activeMode}
+          isBackendConnected={isBackendConnected}
+          isFirmsConfigured={isFirmsConfigured}
           startDate={startDate}
-          setStartDate={setStartDate}
           endDate={endDate}
-          setEndDate={setEndDate}
-          gridSizeKm={gridSizeKm}
-          setGridSizeKm={setGridSizeKm}
-          spatialToleranceM={spatialToleranceM}
-          setSpatialToleranceM={setSpatialToleranceM}
-          sensorFilter={sensorFilter}
-          setSensorFilter={setSensorFilter}
-          classificationFilter={classificationFilter}
-          setClassificationFilter={setClassificationFilter}
-          selectedDate={selectedDate}
-          onClearSelectedDate={() => setSelectedDate(null)}
+          onOpenDateSelector={() => {
+            // Quick toggle for dates
+            if (startDate === "2024-08-10") {
+              setStartDate("2024-08-01");
+              setEndDate("2024-08-20");
+            } else {
+              setStartDate("2024-08-10");
+              setEndDate("2024-08-15");
+            }
+          }}
+          onOpenProvenance={() => setActiveTab("methodology")}
         />
 
-        {/* Unified KPI Strip with Invariant Enforcement */}
-        <MetricsCards
-          calendarData={calendarData}
-          comparisonData={comparisonData}
-          isLoading={isLoading}
-        />
+        {/* Dashboard Content Container */}
+        <main className="flex-1 p-5 space-y-5 max-w-[1720px] w-full mx-auto">
+          {/* OVERVIEW TAB (Primary Visual Target) */}
+          {activeTab === "overview" && (
+            <>
+              {/* Welcome / Hero Banner */}
+              <HeroBanner isFirmsConfigured={isFirmsConfigured} />
 
-        {/* Dynamic Tab Views */}
-        {activeTab === "overview" && (
-          <div className="space-y-4">
-            <HotspotMap
-              geoJsonData={geoJsonData}
-              bbox={selectedAoi.bbox}
+              {/* 4 KPI Summary Cards */}
+              <MetricsCards
+                calendarData={calendarData}
+                comparisonData={comparisonData}
+                isLoading={isLoading}
+              />
+
+              {/* Main Center Workspace: Map (70%) + Selected Observation (30%) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <div className="lg:col-span-8">
+                  <HotspotMap
+                    geoJsonData={geoJsonData}
+                    bbox={selectedAoi.bbox}
+                    onSelectObservation={(props) => setSelectedObservation(props)}
+                    isLoading={isLoading}
+                    presetAois={presetAois}
+                    selectedAoiId={selectedAoi.id}
+                    onSelectAoi={(aoi) => {
+                      setSelectedAoi(aoi);
+                      setSelectedDate(null);
+                    }}
+                    startDate={startDate}
+                    endDate={endDate}
+                  />
+                </div>
+
+                <div className="lg:col-span-4 h-full">
+                  <ObservationDetailsPanel
+                    selectedObservation={selectedObservation}
+                    onFlyToObservation={() => {
+                      // Handled within map
+                    }}
+                    onOpenTableView={() => {
+                      // Can open accessible table or jump to records
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Bottom 3-Card Analytics Row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <BurningActivityCalendar
+                  calendarData={calendarData}
+                  onSelectDate={(d) => setSelectedDate(d)}
+                  selectedDate={selectedDate}
+                  isLoading={isLoading}
+                  onViewDeepDive={() => setActiveTab("calendar")}
+                />
+
+                <SensorComparisonCard
+                  calendarData={calendarData}
+                  comparisonData={comparisonData}
+                  isLoading={isLoading}
+                  onViewDeepDive={() => setActiveTab("compare")}
+                />
+
+                <HistoricalPatternsCard
+                  anomalyData={anomalyData}
+                  isLoading={isLoading}
+                  onViewDeepDive={() => setActiveTab("anomalies")}
+                />
+              </div>
+            </>
+          )}
+
+          {/* DEDICATED DEEP DIVE TABS */}
+          {activeTab === "calendar" && (
+            <div className="space-y-5">
+              <BurningActivityCalendar
+                calendarData={calendarData}
+                onSelectDate={(d) => setSelectedDate(d)}
+                selectedDate={selectedDate}
+                isLoading={isLoading}
+              />
+              <HotspotMap
+                geoJsonData={geoJsonData}
+                bbox={selectedAoi.bbox}
+                onSelectObservation={(props) => setSelectedObservation(props)}
+                isLoading={isLoading}
+                presetAois={presetAois}
+                selectedAoiId={selectedAoi.id}
+                onSelectAoi={setSelectedAoi}
+                startDate={startDate}
+                endDate={endDate}
+              />
+            </div>
+          )}
+
+          {activeTab === "compare" && (
+            <SensorDiscontinuityInspector
+              comparisonData={comparisonData}
               isLoading={isLoading}
             />
-            <BurningActivityCalendar
-              calendarData={calendarData}
-              onSelectDate={(d) => setSelectedDate(d || null)}
-              selectedDate={selectedDate}
+          )}
+
+          {activeTab === "anomalies" && (
+            <HistoricalAnomalies
+              anomalyData={anomalyData}
               isLoading={isLoading}
             />
+          )}
+
+          {activeTab === "methodology" && <MethodologyProvenance />}
+        </main>
+
+        {/* Global Scientific Footer */}
+        <footer className="border-t border-[#1E293B]/80 py-4 px-6 bg-[#0B0F17] text-xs text-slate-400 mt-auto shrink-0">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-[1720px] mx-auto">
+            <span>
+              Data Sources: NASA FIRMS &bull; MODIS (Terra/Aqua) &bull; VIIRS (NOAA-20/21)
+            </span>
+            <span className="text-[11px] text-slate-400">
+              Not an official NASA product. For educational and research purposes only.
+            </span>
           </div>
-        )}
-
-        {activeTab === "calendar" && (
-          <div className="space-y-4">
-            <BurningActivityCalendar
-              calendarData={calendarData}
-              onSelectDate={(d) => setSelectedDate(d || null)}
-              selectedDate={selectedDate}
-              isLoading={isLoading}
-            />
-            <HotspotMap
-              geoJsonData={geoJsonData}
-              bbox={selectedAoi.bbox}
-              isLoading={isLoading}
-            />
-          </div>
-        )}
-
-        {activeTab === "compare" && (
-          <SensorDiscontinuityInspector
-            comparisonData={comparisonData}
-            isLoading={isLoading}
-          />
-        )}
-
-        {activeTab === "anomalies" && (
-          <HistoricalAnomalies
-            anomalyData={anomalyData}
-            isLoading={isLoading}
-          />
-        )}
-
-        {activeTab === "methodology" && <MethodologyProvenance />}
-      </main>
-
-      <footer className="border-t border-border/60 py-4 bg-surface text-center text-xs text-text-secondary">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>
-            FireChronicle &bull; NASA International Space Apps Challenge 2026
-          </span>
-          <span className="font-mono text-[11px] text-text-muted">
-            FastAPI + DuckDB Analytical Engine &bull; Next.js 14 &bull; OpenFreeMap Vector Basemap
-          </span>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

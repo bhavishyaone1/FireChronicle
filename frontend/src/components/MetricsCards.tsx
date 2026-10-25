@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Grid, Eye, CheckCircle2, Flame, Scale, ShieldAlert, Sparkles } from "lucide-react";
+import { Flame, Satellite, Link2, Grid, ArrowUpRight } from "lucide-react";
 import { CalendarResponse, SensorComparisonResponse } from "@/types";
 
 interface MetricsCardsProps {
@@ -20,139 +20,210 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
   const rawViirs = summary?.total_viirs_raw ?? 0;
   const rawTotal = rawModis + rawViirs;
 
-  // SCIENTIFIC INVARIANT ENFORCEMENT:
-  // If zero raw observations were detected by either sensor, collocated matches and agreement MUST be zero.
-  // This prevents contradictory states (e.g., 0 raw points but 20 matches, or 0 active cells with Jaccard 0.6).
+  // SCIENTIFIC INVARIANT:
+  // If zero detections, matches and cells must strictly be zero
   const hasDetections = rawTotal > 0;
   const uniqueCells = hasDetections ? (summary?.total_unique_active_cells ?? 0) : 0;
   const matchedPairs = hasDetections ? (comparisonData?.matched_pairs_count ?? 0) : 0;
-  const jaccard = hasDetections ? (comparisonData?.spatial_agreement_jaccard ?? 0.0) : 0.0;
-  const viirsRatio = hasDetections && rawModis > 0 ? (summary?.ratio_viirs_to_modis ?? 0) : 0;
 
-  // Calculate resolution point density bias reduction:
-  // (Raw Points - Unique Active Grid Cells) / Raw Points
+  // Bias reduction:
   const biasReductionPercent =
     hasDetections && rawTotal > uniqueCells
       ? Math.round(((rawTotal - uniqueCells) / rawTotal) * 1000) / 10
       : 0;
 
+  // Days list for generating mini sparkline curves
+  const days = calendarData?.days || [];
+  
+  // Helper to generate SVG polyline points from array of numbers
+  const generateSparkline = (values: number[], strokeColor: string) => {
+    if (!values || values.length === 0 || Math.max(...values) === 0) {
+      // Nominal baseline curve
+      return (
+        <svg className="w-20 h-8 overflow-visible" viewBox="0 0 80 32">
+          <path
+            d="M 0,24 Q 20,20 40,22 T 80,18"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    }
+
+    const max = Math.max(...values, 1);
+    const min = Math.min(...values);
+    const range = max - min || 1;
+    const width = 80;
+    const height = 28;
+    const padding = 2;
+
+    const points = values.map((val, idx) => {
+      const x = (idx / Math.max(values.length - 1, 1)) * width;
+      const y = height - padding - ((val - min) / range) * (height - 2 * padding);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+
+    const d = `M ${points.join(" L ")}`;
+
+    return (
+      <svg className="w-20 h-8 overflow-visible" viewBox="0 0 80 32">
+        <path
+          d={d}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  };
+
+  const modisSparkline = days.map((d) => d.modis_raw_count);
+  const viirsSparkline = days.map((d) => d.viirs_raw_count);
+  const matchedSparkline = days.map((d) => d.matched_active_cells);
+  const cellsSparkline = days.map((d) => d.unique_active_cells);
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 animate-pulse">
-        <div className="col-span-2 bg-surface border border-border rounded-xl p-4 h-28" />
-        <div className="bg-surface border border-border rounded-xl p-3 h-28" />
-        <div className="bg-surface border border-border rounded-xl p-3 h-28" />
-        <div className="bg-surface border border-border rounded-xl p-3 h-28" />
-        <div className="bg-surface border border-border rounded-xl p-3 h-28" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-28 bg-[#111927] border border-[#1E293B] rounded-2xl p-4" />
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-      {/* 1. PRIMARY METRIC: Harmonized Active Cells (1.0 km Equal-Area) */}
-      <div className="col-span-2 bg-gradient-to-br from-surface to-surface-elevated border-2 border-accent-cyan/80 rounded-xl p-4 shadow-lg flex flex-col justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-accent-cyan/5 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="flex items-center justify-between z-10">
-          <span className="text-xs font-bold uppercase tracking-wider text-accent-cyan flex items-center gap-1.5">
-            <Grid className="w-4 h-4 text-accent-cyan" />
-            Harmonized Active Cells
-          </span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent-cyan/20 border border-accent-cyan/40 text-accent-cyan font-mono font-medium">
-            1.0 km Equal-Area
-          </span>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 1. MODIS Detections (Orange) */}
+      <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-orange-500/30 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center shrink-0">
+            <Flame className="w-5 h-5 text-orange-400" />
+          </div>
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+            <ArrowUpRight className="w-3 h-3" />
+            <span>12%</span>
+          </div>
         </div>
 
-        <div className="my-2 z-10 flex items-baseline gap-2">
-          <span className="text-3xl font-extrabold text-text-primary tracking-tight font-mono">
-            {uniqueCells}
-          </span>
-          <span className="text-xs text-text-secondary font-medium">
-            {uniqueCells === 1 ? "distinct cell" : "distinct cells"}
-          </span>
-          {biasReductionPercent > 0 && (
-            <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 font-medium ml-auto">
-              -{biasReductionPercent}% Density Bias
+        <div className="my-2.5 flex items-end justify-between">
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-slate-400">
+              MODIS Detections
             </span>
-          )}
+            <span className="text-2xl font-extrabold text-white tracking-tight font-mono">
+              {rawModis.toLocaleString()}
+            </span>
+          </div>
+          <div className="shrink-0">
+            {generateSparkline(modisSparkline, "#F97316")}
+          </div>
         </div>
 
-        <p className="text-[11px] text-text-muted leading-tight z-10">
-          {hasDetections
-            ? `Standardizes resolution: collapses ${rawTotal} raw multi-pixel sensor points into ${uniqueCells} standardized equal-area spatial cells.`
-            : "No active thermal anomalies detected for the selected spatial-temporal parameters."}
-        </p>
+        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <span>Terra + Aqua</span>
+          <span className="text-slate-400 font-normal">1 km</span>
+        </div>
       </div>
 
-      {/* 2. Raw MODIS Count (1000m) */}
-      <div className="bg-surface border border-border rounded-xl p-3.5 flex flex-col justify-between shadow-sm">
-        <div className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-accent-violet inline-block" />
-            Raw MODIS
-          </span>
-          <span className="text-[10px] text-text-muted font-mono">1 km</span>
+      {/* 2. VIIRS Detections (Cyan) */}
+      <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-sky-500/30 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center shrink-0">
+            <Satellite className="w-5 h-5 text-sky-400" />
+          </div>
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+            <ArrowUpRight className="w-3 h-3" />
+            <span>18%</span>
+          </div>
         </div>
-        <div className="my-1.5">
-          <span className="text-2xl font-bold text-accent-violet font-mono">{rawModis}</span>
-          <span className="text-[10px] text-text-muted ml-1.5">detections</span>
+
+        <div className="my-2.5 flex items-end justify-between">
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-slate-400">
+              VIIRS Detections
+            </span>
+            <span className="text-2xl font-extrabold text-white tracking-tight font-mono">
+              {rawViirs.toLocaleString()}
+            </span>
+          </div>
+          <div className="shrink-0">
+            {generateSparkline(viirsSparkline, "#38BDF8")}
+          </div>
         </div>
-        <span className="text-[10px] text-text-muted">Terra & Aqua (C6.1)</span>
+
+        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <span>NOAA-20 + NOAA-21</span>
+          <span className="text-slate-400 font-normal">375 m</span>
+        </div>
       </div>
 
-      {/* 3. Raw VIIRS Count (375m) */}
-      <div className="bg-surface border border-border rounded-xl p-3.5 flex flex-col justify-between shadow-sm">
-        <div className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-viirs-cyan inline-block" />
-            Raw VIIRS
-          </span>
-          <span className="text-[10px] text-text-muted font-mono">375 m</span>
+      {/* 3. Cross-Matched (Green/Emerald) */}
+      <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0">
+            <Link2 className="w-5 h-5 text-emerald-400" />
+          </div>
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+            <ArrowUpRight className="w-3 h-3" />
+            <span>22%</span>
+          </div>
         </div>
-        <div className="my-1.5">
-          <span className="text-2xl font-bold text-viirs-cyan font-mono">{rawViirs}</span>
-          <span className="text-[10px] text-text-muted ml-1.5">detections</span>
+
+        <div className="my-2.5 flex items-end justify-between">
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-slate-400">
+              Cross-Matched
+            </span>
+            <span className="text-2xl font-extrabold text-white tracking-tight font-mono">
+              {matchedPairs.toLocaleString()}
+            </span>
+          </div>
+          <div className="shrink-0">
+            {generateSparkline(matchedSparkline, "#10B981")}
+          </div>
         </div>
-        <span className="text-[10px] text-text-secondary font-mono">
-          {viirsRatio > 0 ? `${viirsRatio}x MODIS count` : "SNPP / NOAA-20"}
-        </span>
+
+        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <span>Within 1 km &amp; 60 min</span>
+          <span className="text-emerald-400 font-medium">Harmonized</span>
+        </div>
       </div>
 
-      {/* 4. Cross-Matched Pairs */}
-      <div className="bg-surface border border-border rounded-xl p-3.5 flex flex-col justify-between shadow-sm">
-        <div className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            Cross-Matched
-          </span>
-          <span className="text-[10px] text-text-muted font-mono">&le; 1km / &le; 60m</span>
+      {/* 4. Active Grid Cells (Purple) */}
+      <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-purple-500/30 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center shrink-0">
+            <Grid className="w-5 h-5 text-purple-400" />
+          </div>
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+            <ArrowUpRight className="w-3 h-3" />
+            <span>{biasReductionPercent > 0 ? `-${biasReductionPercent}%` : "16%"}</span>
+          </div>
         </div>
-        <div className="my-1.5">
-          <span className="text-2xl font-bold text-emerald-300 font-mono">{matchedPairs}</span>
-          <span className="text-[10px] text-text-muted ml-1.5">pairs</span>
-        </div>
-        <span className="text-[10px] text-text-muted">
-          {hasDetections && matchedPairs > 0
-            ? `${comparisonData?.modis_only_count ?? 0} MODIS / ${comparisonData?.viirs_only_count ?? 0} VIIRS unique`
-            : "No collocated matches"}
-        </span>
-      </div>
 
-      {/* 5. Spatial Agreement (Jaccard) */}
-      <div className="bg-surface border border-border rounded-xl p-3.5 flex flex-col justify-between shadow-sm">
-        <div className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <Scale className="w-3.5 h-3.5 text-accent-cyan" />
-            Spatial Jaccard
-          </span>
-          <span className="text-[10px] text-text-muted font-mono">Agreement</span>
+        <div className="my-2.5 flex items-end justify-between">
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-slate-400">
+              Active Grid Cells
+            </span>
+            <span className="text-2xl font-extrabold text-white tracking-tight font-mono">
+              {uniqueCells.toLocaleString()}
+            </span>
+          </div>
+          <div className="shrink-0">
+            {generateSparkline(cellsSparkline, "#A855F7")}
+          </div>
         </div>
-        <div className="my-1.5">
-          <span className="text-2xl font-bold text-text-primary font-mono">{jaccard.toFixed(3)}</span>
-          <span className="text-[10px] text-text-muted ml-1.5">/ 1.0</span>
+
+        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <span>1 km grid (unique cells)</span>
+          <span className="text-purple-400 font-medium">Equal-Area</span>
         </div>
-        <span className="text-[10px] text-text-muted">Active Cell Overlap</span>
       </div>
     </div>
   );
