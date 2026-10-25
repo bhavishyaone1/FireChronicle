@@ -45,9 +45,9 @@ export default function Home() {
   const [presetAois, setPresetAois] = useState<PresetAoi[]>([DEFAULT_AOI]);
   const [selectedAoi, setSelectedAoi] = useState<PresetAoi>(DEFAULT_AOI);
 
-  // Filter parameters
-  const [startDate, setStartDate] = useState("2024-08-01");
-  const [endDate, setEndDate] = useState("2024-08-20");
+  // Filter parameters: Default to Aug 10-15, 2024 (where authentic sample fixture records exist)
+  const [startDate, setStartDate] = useState("2024-08-10");
+  const [endDate, setEndDate] = useState("2024-08-15");
   const [gridSizeKm, setGridSizeKm] = useState(1.0);
   const [spatialToleranceM, setSpatialToleranceM] = useState(1000);
   const [sensorFilter, setSensorFilter] = useState("ALL");
@@ -80,13 +80,13 @@ export default function Home() {
           setSelectedAoi(meta.preset_aois[0]);
         }
       } catch (err) {
-        // Use default fallback presets
+        // Fallback default
       }
     }
     loadMeta();
   }, []);
 
-  // Main data fetch on filter change
+  // Main synchronized data fetch on parameter change
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -95,6 +95,7 @@ export default function Home() {
       const targetEndDate = selectedDate || endDate;
 
       try {
+        // Fetch all 4 endpoints with strictly synchronized parameters
         const [obs, cal, comp, anom] = await Promise.all([
           fetchObservations({
             bbox,
@@ -111,8 +112,8 @@ export default function Home() {
           }).catch(() => null),
           fetchComparison({
             bbox,
-            startDate,
-            endDate,
+            startDate: targetStartDate,
+            endDate: targetEndDate,
             spatialToleranceM,
           }).catch(() => null),
           fetchAnomalies({
@@ -121,12 +122,13 @@ export default function Home() {
           }).catch(() => null),
         ]);
 
-        if (obs) setGeoJsonData(obs);
-        if (cal) setCalendarData(cal);
-        if (comp) setComparisonData(comp);
-        if (anom) setAnomalyData(anom);
+        // Atomic state assignment: never keep stale comparison data from previous selections
+        setGeoJsonData(obs);
+        setCalendarData(cal);
+        setComparisonData(comp);
+        setAnomalyData(anom);
       } catch (error) {
-        console.error("Data load error:", error);
+        console.error("Data synchronization error:", error);
       } finally {
         setIsLoading(false);
       }
@@ -145,7 +147,7 @@ export default function Home() {
   ]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background text-text-primary">
       <Header
         activeMode={activeMode}
         isBackendConnected={isBackendConnected}
@@ -175,25 +177,16 @@ export default function Home() {
           setSensorFilter={setSensorFilter}
           classificationFilter={classificationFilter}
           setClassificationFilter={setClassificationFilter}
+          selectedDate={selectedDate}
+          onClearSelectedDate={() => setSelectedDate(null)}
         />
 
-        {/* Selected Date Filter Banner */}
-        {selectedDate && (
-          <div className="flex items-center justify-between px-4 py-2 bg-nasa-cyan/15 border border-nasa-cyan rounded-lg text-xs text-nasa-cyan">
-            <span>
-              Filtering detections to selected calendar date: <strong>{selectedDate}</strong>
-            </span>
-            <button
-              onClick={() => setSelectedDate(null)}
-              className="text-white hover:underline font-semibold ml-3"
-            >
-              Clear Date Filter ✕
-            </button>
-          </div>
-        )}
-
-        {/* KPI Summary Cards */}
-        <MetricsCards calendarData={calendarData} comparisonData={comparisonData} />
+        {/* Unified KPI Strip with Invariant Enforcement */}
+        <MetricsCards
+          calendarData={calendarData}
+          comparisonData={comparisonData}
+          isLoading={isLoading}
+        />
 
         {/* Dynamic Tab Views */}
         {activeTab === "overview" && (
@@ -201,12 +194,13 @@ export default function Home() {
             <HotspotMap
               geoJsonData={geoJsonData}
               bbox={selectedAoi.bbox}
-              selectedDate={selectedDate}
+              isLoading={isLoading}
             />
             <BurningActivityCalendar
               calendarData={calendarData}
               onSelectDate={(d) => setSelectedDate(d || null)}
               selectedDate={selectedDate}
+              isLoading={isLoading}
             />
           </div>
         )}
@@ -217,30 +211,42 @@ export default function Home() {
               calendarData={calendarData}
               onSelectDate={(d) => setSelectedDate(d || null)}
               selectedDate={selectedDate}
+              isLoading={isLoading}
             />
             <HotspotMap
               geoJsonData={geoJsonData}
               bbox={selectedAoi.bbox}
-              selectedDate={selectedDate}
+              isLoading={isLoading}
             />
           </div>
         )}
 
         {activeTab === "compare" && (
-          <SensorDiscontinuityInspector comparisonData={comparisonData} />
+          <SensorDiscontinuityInspector
+            comparisonData={comparisonData}
+            isLoading={isLoading}
+          />
         )}
 
         {activeTab === "anomalies" && (
-          <HistoricalAnomalies anomalyData={anomalyData} />
+          <HistoricalAnomalies
+            anomalyData={anomalyData}
+            isLoading={isLoading}
+          />
         )}
 
         {activeTab === "methodology" && <MethodologyProvenance />}
       </main>
 
-      <footer className="border-t border-nasa-border/40 py-4 bg-nasa-dark text-center text-xs text-nasa-slate">
-        <p>
-          FireChronicle — NASA International Space Apps Challenge 2026. Built with FastAPI, DuckDB, Next.js, and MapLibre GL.
-        </p>
+      <footer className="border-t border-border/60 py-4 bg-surface text-center text-xs text-text-secondary">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>
+            FireChronicle &bull; NASA International Space Apps Challenge 2026
+          </span>
+          <span className="font-mono text-[11px] text-text-muted">
+            FastAPI + DuckDB Analytical Engine &bull; Next.js 14 &bull; OpenFreeMap Vector Basemap
+          </span>
+        </div>
       </footer>
     </div>
   );

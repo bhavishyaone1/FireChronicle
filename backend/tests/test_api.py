@@ -62,3 +62,8 @@ def test_anomalies_endpoint():
     data = resp.json()
     assert len(data["months"]) == 12
     assert "method" in data
+    # Ensure zero false positives when observed value is within historical 75th percentile
+    for m in data["months"]:
+        if m["observed_active_cells"] is not None and m["observed_active_cells"] <= m["p75_active_cells"]:
+            assert not m["is_anomaly"], f"False anomaly detected for {m['month_name']} where observed <= p75"
+

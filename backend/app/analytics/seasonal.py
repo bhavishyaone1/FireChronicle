@@ -60,18 +60,28 @@ def compute_robust_baseline(
         is_anomaly = False
 
         if observed_val is not None:
+            diff = observed_val - median_val
             # Scale MAD by 1.4826 for consistency with normal distribution
             mad_scaled = mad_val * 1.4826
             if mad_scaled > 0.001:
-                z_score = round(float((observed_val - median_val) / mad_scaled), 2)
+                z_score = round(float(diff / mad_scaled), 2)
             else:
-                diff = observed_val - median_val
-                z_score = 0.0 if abs(diff) < 0.001 else round(float(np.sign(diff) * 3.0), 2)
+                # When historical baseline has near-zero dispersion:
+                # If observed is within the historical 75th percentile, it is within normal baseline variability
+                if observed_val <= p75_val:
+                    z_score = 0.0
+                else:
+                    z_score = round(float(diff), 2)
 
-            # Anomaly threshold: robust z-score > 2.0 (unusually elevated burning)
-            if z_score is not None and z_score >= 2.0:
+            # Scientific Anomaly Criteria:
+            # 1. Robust Z-score >= 2.0 (unusually elevated burning)
+            # 2. Observed burning strictly exceeds the 75th percentile of historical baseline
+            # 3. Meaningful absolute deviation: diff >= 3.0 cells (guards against single-pixel sensor noise)
+            if z_score is not None and z_score >= 2.0 and observed_val > p75_val and diff >= 3.0:
                 is_anomaly = True
                 anomalous_months_count += 1
+            else:
+                is_anomaly = False
 
         monthly_results.append(MonthlyBaseline(
             month=month_num,
