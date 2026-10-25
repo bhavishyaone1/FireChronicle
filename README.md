@@ -3,7 +3,7 @@
 > **NASA International Space Apps Challenge 2026**  
 > **Challenge:** [Harmonization of MODIS and VIIRS Hot Spots](https://www.spaceappschallenge.org/2026/challenges/harmonization-of-modis-and-viirs-hot-spots/)  
 > **Primary Data Source:** [NASA FIRMS (Fire Information for Resource Management System)](https://firms.modaps.eosdis.nasa.gov/)  
-> **Operating Mode:** `PRE_HACKATHON_PREPARATION` (System Date: October 25, 2026)
+> **Operating Mode:** `HACKATHON_BUILD` (Activated & Verified)
 
 ---
 
