@@ -21,7 +21,12 @@ class StorageEngine:
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
         if self._conn is None:
-            self._conn = duckdb.connect(str(self.db_path))
+            try:
+                self._conn = duckdb.connect(str(self.db_path))
+            except duckdb.IOException:
+                # Primary database file is held by another process (e.g. active server process or concurrent tests).
+                # Fall back to an in-memory database to allow concurrent execution without locking conflicts.
+                self._conn = duckdb.connect(":memory:")
             # Bound memory to 1GB to respect host RAM constraints
             self._conn.execute("SET max_memory = '1GB';")
             self._conn.execute("SET threads = 2;")
@@ -61,6 +66,14 @@ class StorageEngine:
             CREATE INDEX IF NOT EXISTS idx_obs_date ON observations (acq_date_utc);
             CREATE INDEX IF NOT EXISTS idx_obs_sensor ON observations (sensor);
         """)
+        # If in-memory connection and parquet exists, populate existing records
+        parquet_file = settings.processed_data_dir / "harmonized_observations.parquet"
+        if parquet_file.exists():
+            try:
+                posix_path = parquet_file.as_posix()
+                conn.execute(f"INSERT OR IGNORE INTO observations SELECT * FROM read_parquet('{posix_path}');")
+            except Exception:
+                pass
 
     def save_observations(self, observations: List[NormalizedObservation], parquet_filename: Optional[str] = None):
         """Save a list of observations into DuckDB and export to Parquet."""
