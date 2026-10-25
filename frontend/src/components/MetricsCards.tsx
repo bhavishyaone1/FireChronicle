@@ -21,7 +21,6 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
   const rawTotal = rawModis + rawViirs;
 
   // SCIENTIFIC INVARIANT:
-  // If zero detections, matches and cells must strictly be zero
   const hasDetections = rawTotal > 0;
   const uniqueCells = hasDetections ? (summary?.total_unique_active_cells ?? 0) : 0;
   const matchedPairs = hasDetections ? (comparisonData?.matched_pairs_count ?? 0) : 0;
@@ -32,20 +31,18 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       ? Math.round(((rawTotal - uniqueCells) / rawTotal) * 1000) / 10
       : 0;
 
-  // Days list for generating mini sparkline curves
   const days = calendarData?.days || [];
   
-  // Helper to generate SVG polyline points from array of numbers
+  // Helper to generate SVG polyline sparklines
   const generateSparkline = (values: number[], strokeColor: string) => {
     if (!values || values.length === 0 || Math.max(...values) === 0) {
-      // Nominal baseline curve
       return (
         <svg className="w-20 h-8 overflow-visible" viewBox="0 0 80 32">
           <path
             d="M 0,24 Q 20,20 40,22 T 80,18"
             fill="none"
             stroke={strokeColor}
-            strokeWidth="2"
+            strokeWidth="2.2"
             strokeLinecap="round"
           />
         </svg>
@@ -65,15 +62,13 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
 
-    const d = `M ${points.join(" L ")}`;
-
     return (
       <svg className="w-20 h-8 overflow-visible" viewBox="0 0 80 32">
         <path
-          d={d}
+          d={`M ${points.join(" L ")}`}
           fill="none"
           stroke={strokeColor}
-          strokeWidth="2.2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -90,7 +85,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-28 bg-[#111927] border border-[#1E293B] rounded-2xl p-4" />
+          <div key={i} className="h-28 bg-[#09090C] border border-neutral-900 rounded-2xl p-4" />
         ))}
       </div>
     );
@@ -98,13 +93,13 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* 1. MODIS Detections (Orange) */}
-      <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-orange-500/30 transition-all duration-200">
+      {/* 1. MODIS Detections (Vibrant Fiery Orange) */}
+      <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden group hover:border-orange-500/50 hover:shadow-orange-950/20 transition-all duration-200">
         <div className="flex items-center justify-between">
-          <div className="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center shrink-0 shadow-sm shadow-orange-500/20">
             <Flame className="w-5 h-5 text-orange-400" />
           </div>
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/60 border border-orange-500/40 text-orange-400 text-[11px] font-bold">
             <ArrowUpRight className="w-3 h-3" />
             <span>12%</span>
           </div>
@@ -112,7 +107,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
 
         <div className="my-2.5 flex items-end justify-between">
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-semibold text-neutral-400">
               MODIS Detections
             </span>
             <span className="text-2xl font-extrabold text-white tracking-tight font-mono">
@@ -124,19 +119,19 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
           </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-          <span>Terra + Aqua</span>
-          <span className="text-slate-400 font-normal">1 km</span>
+        <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
+          <span className="text-orange-300 font-semibold">Terra + Aqua</span>
+          <span className="text-neutral-400 font-normal">1 km</span>
         </div>
       </div>
 
-      {/* 2. VIIRS Detections (Cyan) */}
-      <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-sky-500/30 transition-all duration-200">
+      {/* 2. VIIRS Detections (Intense Scarlet Red) */}
+      <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden group hover:border-red-500/50 hover:shadow-red-950/20 transition-all duration-200">
         <div className="flex items-center justify-between">
-          <div className="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center shrink-0">
-            <Satellite className="w-5 h-5 text-sky-400" />
+          <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center shrink-0 shadow-sm shadow-red-500/20">
+            <Satellite className="w-5 h-5 text-red-400" />
           </div>
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-950/60 border border-red-500/40 text-red-400 text-[11px] font-bold">
             <ArrowUpRight className="w-3 h-3" />
             <span>18%</span>
           </div>
@@ -144,7 +139,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
 
         <div className="my-2.5 flex items-end justify-between">
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-semibold text-neutral-400">
               VIIRS Detections
             </span>
             <span className="text-2xl font-extrabold text-white tracking-tight font-mono">
@@ -152,23 +147,23 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             </span>
           </div>
           <div className="shrink-0">
-            {generateSparkline(viirsSparkline, "#38BDF8")}
+            {generateSparkline(viirsSparkline, "#EF4444")}
           </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-          <span>NOAA-20 + NOAA-21</span>
-          <span className="text-slate-400 font-normal">375 m</span>
+        <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
+          <span className="text-red-300 font-semibold">NOAA-20 + NOAA-21</span>
+          <span className="text-neutral-400 font-normal">375 m</span>
         </div>
       </div>
 
-      {/* 3. Cross-Matched (Green/Emerald) */}
-      <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-200">
+      {/* 3. Cross-Matched (Warm Glowing Amber/Gold) */}
+      <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden group hover:border-amber-500/50 hover:shadow-amber-950/20 transition-all duration-200">
         <div className="flex items-center justify-between">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0">
-            <Link2 className="w-5 h-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 shadow-sm shadow-amber-500/20">
+            <Link2 className="w-5 h-5 text-amber-400" />
           </div>
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/40 text-amber-400 text-[11px] font-bold">
             <ArrowUpRight className="w-3 h-3" />
             <span>22%</span>
           </div>
@@ -176,7 +171,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
 
         <div className="my-2.5 flex items-end justify-between">
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-semibold text-neutral-400">
               Cross-Matched
             </span>
             <span className="text-2xl font-extrabold text-white tracking-tight font-mono">
@@ -184,23 +179,23 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             </span>
           </div>
           <div className="shrink-0">
-            {generateSparkline(matchedSparkline, "#10B981")}
+            {generateSparkline(matchedSparkline, "#F59E0B")}
           </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-          <span>Within 1 km &amp; 60 min</span>
-          <span className="text-emerald-400 font-medium">Harmonized</span>
+        <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
+          <span className="text-neutral-300">Within 1 km &amp; 60 min</span>
+          <span className="text-amber-400 font-bold">Harmonized</span>
         </div>
       </div>
 
-      {/* 4. Active Grid Cells (Purple) */}
-      <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-purple-500/30 transition-all duration-200">
+      {/* 4. Active Grid Cells (Fiery Crimson) */}
+      <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden group hover:border-red-600/50 hover:shadow-red-950/20 transition-all duration-200">
         <div className="flex items-center justify-between">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center shrink-0">
-            <Grid className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-red-600/20 border border-red-600/40 flex items-center justify-center shrink-0 shadow-sm shadow-red-600/20">
+            <Grid className="w-5 h-5 text-red-500" />
           </div>
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-950/60 border border-red-600/40 text-red-300 text-[11px] font-bold">
             <ArrowUpRight className="w-3 h-3" />
             <span>{biasReductionPercent > 0 ? `-${biasReductionPercent}%` : "16%"}</span>
           </div>
@@ -208,7 +203,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
 
         <div className="my-2.5 flex items-end justify-between">
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-semibold text-neutral-400">
               Active Grid Cells
             </span>
             <span className="text-2xl font-extrabold text-white tracking-tight font-mono">
@@ -216,13 +211,13 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             </span>
           </div>
           <div className="shrink-0">
-            {generateSparkline(cellsSparkline, "#A855F7")}
+            {generateSparkline(cellsSparkline, "#DC2626")}
           </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-          <span>1 km grid (unique cells)</span>
-          <span className="text-purple-400 font-medium">Equal-Area</span>
+        <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
+          <span className="text-neutral-300">1 km grid (unique cells)</span>
+          <span className="text-red-400 font-bold">Equal-Area</span>
         </div>
       </div>
     </div>

@@ -160,7 +160,7 @@ export default function Home() {
   ]);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#070A11] text-slate-100 font-sans antialiased">
+    <div className="flex h-screen w-screen overflow-hidden bg-black text-neutral-100 font-sans antialiased">
       {/* 1. Left Persistent Sidebar */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -300,12 +300,12 @@ export default function Home() {
         </main>
 
         {/* Global Scientific Footer */}
-        <footer className="border-t border-[#1E293B]/80 py-4 px-6 bg-[#0B0F17] text-xs text-slate-400 mt-auto shrink-0">
+        <footer className="border-t border-neutral-900 py-4 px-6 bg-black text-xs text-neutral-400 mt-auto shrink-0">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-[1720px] mx-auto">
             <span>
-              Data Sources: NASA FIRMS &bull; MODIS (Terra/Aqua) &bull; VIIRS (NOAA-20/21)
+              Data Sources: <span className="text-orange-400 font-bold">NASA FIRMS</span> &bull; <span className="text-orange-400">MODIS (Terra/Aqua)</span> &bull; <span className="text-red-400">VIIRS (NOAA-20/21)</span>
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-neutral-500 font-medium">
               Not an official NASA product. For educational and research purposes only.
             </span>
           </div>

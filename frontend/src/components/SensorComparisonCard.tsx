@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { SlidersHorizontal, BarChart3, TrendingUp, Layers } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -11,7 +11,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   CartesianGrid,
 } from "recharts";
 import { CalendarResponse, SensorComparisonResponse } from "@/types";
@@ -38,7 +37,6 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
   const matchedPairs = comparisonData?.matched_pairs_count ?? 0;
   const matchedFraction = rawTotal > 0 ? Math.round((matchedPairs / rawTotal) * 1000) / 10 : 0;
 
-  // Format short date: "2024-08-10" -> "Aug 10"
   const formatShortDate = (iso: string) => {
     try {
       const parts = iso.split("-");
@@ -61,7 +59,6 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
     Matched: d.matched_active_cells,
   }));
 
-  // FRP Histogram data
   const frpHistogramData = [
     { range: "0-5", MODIS: 14, VIIRS: 42 },
     { range: "5-20", MODIS: 18, VIIRS: 35 },
@@ -71,35 +68,35 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
   ];
 
   return (
-    <div className="bg-[#101827] border border-[#1E293B] rounded-2xl p-4 flex flex-col justify-between shadow-xl h-full">
+    <div className="bg-[#09090C] border border-neutral-900 rounded-2xl p-4 flex flex-col justify-between shadow-xl h-full hover:border-orange-500/30 transition-colors">
       {/* Header with Title and Mode Switcher */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-3 border-b border-neutral-900">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-sky-400" />
+          <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-orange-400" />
           </div>
-          <h3 className="text-sm font-bold text-white tracking-tight">
+          <h3 className="text-sm font-extrabold text-white tracking-tight">
             Sensor Comparison
           </h3>
         </div>
 
-        <div className="flex items-center bg-[#1E293B] p-0.5 rounded-lg border border-slate-700/60 text-[11px]">
+        <div className="flex items-center bg-[#0C0C0F] p-0.5 rounded-lg border border-neutral-800 text-[11px]">
           <button
             onClick={() => setViewMode("counts")}
-            className={`px-2.5 py-0.5 rounded-md font-medium transition-all ${
+            className={`px-2.5 py-1 rounded-md font-bold transition-all ${
               viewMode === "counts"
-                ? "bg-sky-500 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-md shadow-orange-600/30"
+                : "text-neutral-400 hover:text-white"
             }`}
           >
             Counts
           </button>
           <button
             onClick={() => setViewMode("frp")}
-            className={`px-2.5 py-0.5 rounded-md font-medium transition-all ${
+            className={`px-2.5 py-1 rounded-md font-bold transition-all ${
               viewMode === "frp"
-                ? "bg-sky-500 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-md shadow-orange-600/30"
+                : "text-neutral-400 hover:text-white"
             }`}
           >
             FRP
@@ -107,39 +104,39 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
         </div>
       </div>
 
-      {/* Quick Stats Strip */}
-      <div className="grid grid-cols-3 gap-2 py-2.5 my-1 bg-[#131B2B] rounded-xl px-3 border border-slate-800/80 text-xs">
+      {/* Quick Stats Strip in Black, Red, Orange */}
+      <div className="grid grid-cols-3 gap-2 py-2.5 my-1 bg-[#0C0C0F] rounded-xl px-3 border border-neutral-900 text-xs">
         <div className="flex flex-col">
-          <span className="text-[10px] text-purple-400 font-semibold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+          <span className="text-[10px] text-orange-400 font-bold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
             MODIS
           </span>
-          <span className="text-sm font-bold text-white font-mono mt-0.5">
+          <span className="text-sm font-extrabold text-white font-mono mt-0.5">
             {rawModis.toLocaleString()}
           </span>
-          <span className="text-[9px] text-slate-400">Terra + Aqua</span>
+          <span className="text-[9px] text-neutral-400">Terra + Aqua</span>
         </div>
 
-        <div className="flex flex-col border-l border-slate-800/80 pl-2.5">
-          <span className="text-[10px] text-sky-400 font-semibold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+        <div className="flex flex-col border-l border-neutral-900 pl-2.5">
+          <span className="text-[10px] text-red-400 font-bold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
             VIIRS
           </span>
-          <span className="text-sm font-bold text-white font-mono mt-0.5">
+          <span className="text-sm font-extrabold text-white font-mono mt-0.5">
             {rawViirs.toLocaleString()}
           </span>
-          <span className="text-[9px] text-slate-400">NOAA-20/21</span>
+          <span className="text-[9px] text-neutral-400">NOAA-20/21</span>
         </div>
 
-        <div className="flex flex-col border-l border-slate-800/80 pl-2.5">
-          <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        <div className="flex flex-col border-l border-neutral-900 pl-2.5">
+          <span className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             Matched Pairs
           </span>
-          <span className="text-sm font-bold text-white font-mono mt-0.5">
+          <span className="text-sm font-extrabold text-white font-mono mt-0.5">
             {matchedPairs.toLocaleString()}
           </span>
-          <span className="text-[9px] text-emerald-400/80 font-mono">
+          <span className="text-[9px] text-amber-400/90 font-mono font-bold">
             {matchedFraction}% of total
           </span>
         </div>
@@ -147,22 +144,22 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
 
       {/* Chart Section */}
       <div className="flex-1 w-full min-h-[160px] py-2">
-        <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-          <span className="font-semibold text-slate-300">
+        <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
+          <span className="font-bold text-white">
             {viewMode === "counts" ? "Detections Over Time" : "FRP Distribution (MW)"}
           </span>
           <div className="flex items-center gap-2 text-[10px]">
-            <span className="flex items-center gap-1 text-purple-400">
-              <span className="w-2 h-2 rounded-full bg-purple-400" />
+            <span className="flex items-center gap-1 text-orange-400 font-bold">
+              <span className="w-2 h-2 rounded-full bg-orange-500" />
               MODIS
             </span>
-            <span className="flex items-center gap-1 text-sky-400">
-              <span className="w-2 h-2 rounded-full bg-sky-400" />
+            <span className="flex items-center gap-1 text-red-400 font-bold">
+              <span className="w-2 h-2 rounded-full bg-red-500" />
               VIIRS
             </span>
             {viewMode === "counts" && (
-              <span className="flex items-center gap-1 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="flex items-center gap-1 text-amber-400 font-bold">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
                 Matched
               </span>
             )}
@@ -173,65 +170,65 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
           <ResponsiveContainer width="100%" height={140}>
             <AreaChart data={timeseriesData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
               <defs>
-                <linearGradient id="colorModis" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#A78BFA" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#A78BFA" stopOpacity={0.0} />
+                <linearGradient id="colorModisFire" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#F97316" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="#F97316" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id="colorViirs" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
+                <linearGradient id="colorViirsFire" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#EF4444" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="#EF4444" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id="colorMatched" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#34D399" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#34D399" stopOpacity={0.0} />
+                <linearGradient id="colorMatchedFire" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#1E293B" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="date" stroke="#64748B" fontSize={10} tickLine={false} />
-              <YAxis stroke="#64748B" fontSize={10} tickLine={false} />
+              <CartesianGrid stroke="#181820" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="date" stroke="#71717A" fontSize={10} tickLine={false} />
+              <YAxis stroke="#71717A" fontSize={10} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#0F172A",
-                  borderColor: "#334155",
+                  backgroundColor: "#000000",
+                  borderColor: "#333333",
                   borderRadius: "8px",
                   fontSize: "11px",
                 }}
               />
-              <Area type="monotone" dataKey="MODIS" stroke="#A78BFA" strokeWidth={2} fill="url(#colorModis)" />
-              <Area type="monotone" dataKey="VIIRS" stroke="#38BDF8" strokeWidth={2} fill="url(#colorViirs)" />
-              <Area type="monotone" dataKey="Matched" stroke="#34D399" strokeWidth={2} fill="url(#colorMatched)" />
+              <Area type="monotone" dataKey="MODIS" stroke="#F97316" strokeWidth={2.5} fill="url(#colorModisFire)" />
+              <Area type="monotone" dataKey="VIIRS" stroke="#EF4444" strokeWidth={2.5} fill="url(#colorViirsFire)" />
+              <Area type="monotone" dataKey="Matched" stroke="#F59E0B" strokeWidth={2.5} fill="url(#colorMatchedFire)" />
             </AreaChart>
           </ResponsiveContainer>
         ) : (
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={frpHistogramData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
-              <CartesianGrid stroke="#1E293B" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="range" stroke="#64748B" fontSize={10} tickLine={false} />
-              <YAxis stroke="#64748B" fontSize={10} tickLine={false} />
+              <CartesianGrid stroke="#181820" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="range" stroke="#71717A" fontSize={10} tickLine={false} />
+              <YAxis stroke="#71717A" fontSize={10} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#0F172A",
-                  borderColor: "#334155",
+                  backgroundColor: "#000000",
+                  borderColor: "#333333",
                   borderRadius: "8px",
                   fontSize: "11px",
                 }}
               />
-              <Bar dataKey="MODIS" fill="#A78BFA" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="VIIRS" fill="#38BDF8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="MODIS" fill="#F97316" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="VIIRS" fill="#EF4444" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
       </div>
 
       {/* Footer link to full sensitivity deep dive */}
-      <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px]">
-        <span className="text-slate-400">
+      <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px]">
+        <span className="text-neutral-400">
           Spatial tolerance: 1000m &bull; Time: 60m
         </span>
         {onViewDeepDive && (
           <button
             onClick={onViewDeepDive}
-            className="text-sky-400 hover:text-sky-300 font-semibold transition-colors"
+            className="text-orange-400 hover:text-orange-300 font-bold transition-colors"
           >
             Inspect Discontinuity &rarr;
           </button>

@@ -4,27 +4,27 @@
 
 :root {
   color-scheme: dark;
-  --background: #0A0F1A;
-  --surface: #101827;
-  --surface-elevated: #162236;
-  --surface-muted: #1B2A40;
-  --border: #26364B;
-  --text-primary: #F3F6FB;
-  --text-secondary: #A8B6C8;
-  --text-muted: #8493A8;
-  --action: #2563EB;
-  --accent-cyan: #40C4D8;
-  --accent-violet: #A78BFA;
-  --viirs-cyan: #38BDF8;
-  --matched: #F8FAFC;
-  --fire-low: #FDE68A;
-  --fire-mid: #FB923C;
-  --fire-high: #EF4444;
-  --success: #34D399;
-  --warning: #FBBF24;
-  --danger: #F87171;
-  --radius-card: 12px;
-  --radius-control: 8px;
+  --background: #000000;
+  --surface: #0A0A0C;
+  --surface-elevated: #111115;
+  --surface-muted: #181820;
+  --border: #26262B;
+  --text-primary: #FFFFFF;
+  --text-secondary: #D4D4D8;
+  --text-muted: #71717A;
+  --action: #EA580C;
+  --accent-cyan: #FB923C;
+  --accent-violet: #EF4444;
+  --viirs-cyan: #F97316;
+  --matched: #FBBF24;
+  --fire-low: #F59E0B;
+  --fire-mid: #EA580C;
+  --fire-high: #DC2626;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --radius-card: 14px;
+  --radius-control: 10px;
   --duration-fast: 140ms;
   --duration-medium: 200ms;
 }
@@ -37,20 +37,25 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Custom scrollbars */
+::selection {
+  background: #EA580C;
+  color: #FFFFFF;
+}
+
+/* Custom fiery scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--surface);
+  background: #000000;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: #26262B;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-cyan);
+  background: #EA580C;
 }
 
 /* Reduced motion preference support for accessibility */

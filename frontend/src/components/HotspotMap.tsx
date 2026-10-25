@@ -5,19 +5,13 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   Layers,
-  CheckCircle2,
-  Flame,
-  Maximize2,
   Table,
   Crosshair,
-  Sliders,
   ChevronDown,
   ChevronUp,
   Map as MapIcon,
   Satellite as SatelliteIcon,
   Compass,
-  Download,
-  AlertCircle,
 } from "lucide-react";
 import { GeoJSONFeatureCollection, GeoJSONPointFeature, PresetAoi } from "@/types";
 
@@ -86,14 +80,14 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   const [showModisOnly, setShowModisOnly] = useState(true);
   const [showViirsOnly, setShowViirsOnly] = useState(true);
   const [showGridOverlay, setShowGridOverlay] = useState(false);
-  const [layerOpacity, setLayerOpacity] = useState(70);
+  const [layerOpacity, setLayerOpacity] = useState(85);
   const [displayInterval, setDisplayInterval] = useState<"all" | "day" | "week" | "month">("all");
   const [showAccessibleTable, setShowAccessibleTable] = useState(false);
 
   const latestDataRef = useRef(geoJsonData);
   latestDataRef.current = geoJsonData;
 
-  // Add hotspot sources & layers
+  // Add hotspot sources & layers with Black, Red & Orange theme colors
   const setupLayers = useCallback((instance: maplibregl.Map) => {
     const currentData = latestDataRef.current || {
       type: "FeatureCollection",
@@ -111,7 +105,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       clusterRadius: 35,
     });
 
-    // 1. Cluster circles (zoom < 9)
+    // 1. Cluster circles (zoom < 9) in fiery step gradient
     instance.addLayer({
       id: "clusters",
       type: "circle",
@@ -121,11 +115,13 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         "circle-color": [
           "step",
           ["get", "point_count"],
-          "#FB923C",
+          "#F59E0B",
           5,
           "#F97316",
           15,
           "#EF4444",
+          30,
+          "#DC2626",
         ],
         "circle-radius": [
           "step",
@@ -157,7 +153,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       },
     });
 
-    // 3. MODIS Footprint Layer (1km) - Violet (#A78BFA)
+    // 3. MODIS Footprint Layer (1km) - Fiery Orange (#F97316)
     instance.addLayer({
       id: "modis-layer",
       type: "circle",
@@ -165,14 +161,14 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       filter: ["all", ["!has", "point_count"], ["==", "sensor", "MODIS"]] as any,
       paint: {
         "circle-radius": 11,
-        "circle-color": "#A78BFA",
-        "circle-opacity": (layerOpacity / 100) * 0.65,
+        "circle-color": "#F97316",
+        "circle-opacity": (layerOpacity / 100) * 0.7,
         "circle-stroke-width": 2,
-        "circle-stroke-color": "#8B5CF6",
+        "circle-stroke-color": "#EA580C",
       },
     });
 
-    // 4. VIIRS Point Layer (375m) - Cyan (#38BDF8)
+    // 4. VIIRS Point Layer (375m) - Scarlet Red (#EF4444)
     instance.addLayer({
       id: "viirs-layer",
       type: "circle",
@@ -180,14 +176,14 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       filter: ["all", ["!has", "point_count"], ["==", "sensor", "VIIRS"]] as any,
       paint: {
         "circle-radius": 5.5,
-        "circle-color": "#38BDF8",
+        "circle-color": "#EF4444",
         "circle-opacity": layerOpacity / 100,
         "circle-stroke-width": 1.5,
-        "circle-stroke-color": "#0284C7",
+        "circle-stroke-color": "#DC2626",
       },
     });
 
-    // 5. Matched Cross-Sensor Halo - Emerald / White dual ring (#34D399)
+    // 5. Matched Cross-Sensor Halo - Luminous Gold (#FBBF24)
     instance.addLayer({
       id: "matched-halo-layer",
       type: "circle",
@@ -197,7 +193,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         "circle-radius": 15,
         "circle-color": "transparent",
         "circle-stroke-width": 2.5,
-        "circle-stroke-color": "#34D399",
+        "circle-stroke-color": "#FBBF24",
         "circle-stroke-opacity": layerOpacity / 100,
       },
     });
@@ -374,21 +370,21 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[520px] rounded-2xl overflow-hidden border border-[#1E293B] shadow-2xl bg-black">
+    <div className="relative w-full h-[520px] rounded-2xl overflow-hidden border border-neutral-900 shadow-2xl bg-black">
       {/* MapLibre WebGL Canvas Container */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* Floating Left: Map Layers Panel */}
-      <div className="absolute top-4 left-4 z-10 w-64 bg-[#0B0F17]/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl flex flex-col gap-3 text-xs transition-all">
+      {/* Floating Left: Map Layers Panel in Obsidian Black */}
+      <div className="absolute top-4 left-4 z-10 w-64 bg-black/95 backdrop-blur-md border border-neutral-800 hover:border-orange-500/40 rounded-2xl p-3.5 shadow-2xl flex flex-col gap-3 text-xs transition-all">
         {/* Panel Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-          <div className="flex items-center gap-2 font-bold text-white tracking-tight">
-            <Layers className="w-4 h-4 text-sky-400" />
+        <div className="flex items-center justify-between pb-2 border-b border-neutral-900">
+          <div className="flex items-center gap-2 font-extrabold text-white tracking-tight">
+            <Layers className="w-4 h-4 text-orange-400" />
             <span>Map Layers</span>
           </div>
           <button
             onClick={() => setIsLayersPanelExpanded(!isLayersPanelExpanded)}
-            className="text-slate-400 hover:text-white p-0.5 rounded transition-colors"
+            className="text-neutral-400 hover:text-white p-0.5 rounded transition-colors"
           >
             {isLayersPanelExpanded ? (
               <ChevronUp className="w-3.5 h-3.5" />
@@ -402,90 +398,90 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
           <div className="flex flex-col gap-2.5">
             {/* Checkboxes List */}
             <div className="flex flex-col gap-1.5">
-              <label className="flex items-center justify-between text-slate-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-purple-400" />
+              <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
+                <span className="flex items-center gap-2 font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm shadow-orange-500/50" />
                   <span>MODIS (Terra/Aqua)</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showModis}
                   onChange={(e) => setShowModis(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-0"
+                  className="rounded border-neutral-700 bg-neutral-900 text-orange-500 focus:ring-0"
                 />
               </label>
 
-              <label className="flex items-center justify-between text-slate-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-sky-400" />
+              <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
+                <span className="flex items-center gap-2 font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50" />
                   <span>VIIRS (NOAA-20/21)</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showViirs}
                   onChange={(e) => setShowViirs(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-800 text-sky-500 focus:ring-0"
+                  className="rounded border-neutral-700 bg-neutral-900 text-red-500 focus:ring-0"
                 />
               </label>
 
-              <label className="flex items-center justify-between text-slate-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
+                <span className="flex items-center gap-2 font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50" />
                   <span>Matched Pairs</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showMatched}
                   onChange={(e) => setShowMatched(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-0"
+                  className="rounded border-neutral-700 bg-neutral-900 text-amber-500 focus:ring-0"
                 />
               </label>
 
-              <label className="flex items-center justify-between text-slate-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-400" />
+              <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
+                <span className="flex items-center gap-2 font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full bg-orange-600 shadow-sm shadow-orange-600/50" />
                   <span>MODIS Only</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showModisOnly}
                   onChange={(e) => setShowModisOnly(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-800 text-orange-500 focus:ring-0"
+                  className="rounded border-neutral-700 bg-neutral-900 text-orange-600 focus:ring-0"
                 />
               </label>
 
-              <label className="flex items-center justify-between text-slate-300 hover:text-white cursor-pointer py-0.5">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-400" />
+              <label className="flex items-center justify-between text-neutral-300 hover:text-white cursor-pointer py-0.5">
+                <span className="flex items-center gap-2 font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-700 shadow-sm shadow-red-700/50" />
                   <span>VIIRS Only</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showViirsOnly}
                   onChange={(e) => setShowViirsOnly(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-800 text-rose-500 focus:ring-0"
+                  className="rounded border-neutral-700 bg-neutral-900 text-red-700 focus:ring-0"
                 />
               </label>
 
-              <label className="flex items-center justify-between text-slate-400 hover:text-slate-300 cursor-pointer py-0.5">
+              <label className="flex items-center justify-between text-neutral-400 hover:text-neutral-300 cursor-pointer py-0.5">
                 <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-sm border border-slate-500" />
+                  <span className="w-2.5 h-2.5 rounded-sm border border-neutral-500" />
                   <span>Grid Overlay (1 km)</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showGridOverlay}
                   onChange={(e) => setShowGridOverlay(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-800 text-sky-500 focus:ring-0"
+                  className="rounded border-neutral-700 bg-neutral-900 text-orange-500 focus:ring-0"
                 />
               </label>
             </div>
 
             {/* Opacity Slider */}
-            <div className="flex flex-col gap-1 pt-2 border-t border-slate-800">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
-                <span>Opacity</span>
-                <span className="font-mono">{layerOpacity}%</span>
+            <div className="flex flex-col gap-1 pt-2 border-t border-neutral-900">
+              <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                <span className="font-semibold">Opacity</span>
+                <span className="font-mono text-orange-400 font-bold">{layerOpacity}%</span>
               </div>
               <input
                 type="range"
@@ -493,14 +489,14 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                 max="100"
                 value={layerOpacity}
                 onChange={(e) => setLayerOpacity(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-sky-400"
+                className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
               />
             </div>
 
             {/* Region Selector */}
             {presetAois.length > 0 && onSelectAoi && (
-              <div className="flex flex-col gap-1 pt-1.5 border-t border-slate-800">
-                <label className="text-[10px] uppercase font-bold text-slate-400">
+              <div className="flex flex-col gap-1 pt-1.5 border-t border-neutral-900">
+                <label className="text-[10px] uppercase font-bold text-orange-400">
                   Region
                 </label>
                 <select
@@ -509,7 +505,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                     const found = presetAois.find((a) => a.id === e.target.value);
                     if (found) onSelectAoi(found);
                   }}
-                  className="w-full bg-[#131B2B] border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-slate-200 focus:outline-none"
+                  className="w-full bg-[#0C0C0F] border border-neutral-800 rounded-lg px-2 py-1 text-[11px] text-neutral-200 focus:outline-none focus:border-orange-500"
                 >
                   {presetAois.map((aoi) => (
                     <option key={aoi.id} value={aoi.id}>
@@ -521,23 +517,23 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
             )}
 
             {/* Time Range */}
-            <div className="flex flex-col gap-1 pt-1 border-t border-slate-800 text-[10px]">
-              <span className="uppercase font-bold text-slate-400">Time Range</span>
-              <span className="font-mono text-slate-300">
+            <div className="flex flex-col gap-1 pt-1 border-t border-neutral-900 text-[10px]">
+              <span className="uppercase font-bold text-orange-400">Time Range</span>
+              <span className="font-mono text-neutral-300">
                 {startDate} &mdash; {endDate}
               </span>
             </div>
 
             {/* Display Interval buttons: All | Day | Week | Month */}
-            <div className="flex items-center justify-between bg-[#131B2B] p-0.5 rounded-lg border border-slate-800 text-[10px]">
+            <div className="flex items-center justify-between bg-[#0C0C0F] p-0.5 rounded-lg border border-neutral-900 text-[10px]">
               {(["all", "day", "week", "month"] as const).map((inter) => (
                 <button
                   key={inter}
                   onClick={() => setDisplayInterval(inter)}
-                  className={`px-2 py-0.5 rounded font-medium capitalize transition-all ${
+                  className={`px-2 py-1 rounded font-bold capitalize transition-all ${
                     displayInterval === inter
-                      ? "bg-sky-500 text-white font-bold"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-md shadow-orange-600/30"
+                      : "text-neutral-400 hover:text-white"
                   }`}
                 >
                   {inter}
@@ -548,26 +544,26 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         )}
       </div>
 
-      {/* Floating Right: Controls Toolstrip */}
+      {/* Floating Right: Controls Toolstrip in Obsidian Black */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         {/* Compass indicator */}
-        <div className="w-9 h-9 rounded-xl bg-[#0B0F17]/90 backdrop-blur border border-slate-700/80 flex items-center justify-center text-sky-400 shadow-xl">
-          <Compass className="w-4 h-4 animate-spin-slow" />
+        <div className="w-9 h-9 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 flex items-center justify-center text-orange-400 shadow-xl">
+          <Compass className="w-4 h-4" />
         </div>
 
         {/* Zoom In / Out */}
-        <div className="flex flex-col bg-[#0B0F17]/90 backdrop-blur border border-slate-700/80 rounded-xl overflow-hidden shadow-xl">
+        <div className="flex flex-col bg-black/95 backdrop-blur border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
           <button
             onClick={() => map.current?.zoomIn()}
-            className="w-9 h-9 flex items-center justify-center text-white hover:bg-slate-800 font-bold text-base transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-white hover:bg-neutral-800 hover:text-orange-400 font-bold text-base transition-colors"
             title="Zoom in"
           >
             +
           </button>
-          <div className="h-px bg-slate-800" />
+          <div className="h-px bg-neutral-900" />
           <button
             onClick={() => map.current?.zoomOut()}
-            className="w-9 h-9 flex items-center justify-center text-white hover:bg-slate-800 font-bold text-base transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-white hover:bg-neutral-800 hover:text-orange-400 font-bold text-base transition-colors"
             title="Zoom out"
           >
             -
@@ -577,7 +573,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         {/* Recenter */}
         <button
           onClick={handleRecenter}
-          className="w-9 h-9 rounded-xl bg-[#0B0F17]/90 backdrop-blur border border-slate-700/80 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 shadow-xl transition-colors"
+          className="w-9 h-9 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-orange-400 hover:bg-neutral-800 shadow-xl transition-colors"
           title="Recenter Map"
         >
           <Crosshair className="w-4 h-4" />
@@ -586,21 +582,21 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         {/* Basemap Toggle: Satellite vs Dark Vector */}
         <button
           onClick={toggleBasemap}
-          className="w-9 h-9 rounded-xl bg-[#0B0F17]/90 backdrop-blur border border-slate-700/80 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 shadow-xl transition-colors"
+          className="w-9 h-9 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-orange-400 hover:bg-neutral-800 shadow-xl transition-colors"
           title={`Switch to ${basemapType === "satellite" ? "Dark Vector" : "Satellite Imagery"}`}
         >
           {basemapType === "satellite" ? (
-            <MapIcon className="w-4 h-4 text-emerald-400" />
+            <MapIcon className="w-4 h-4 text-orange-400" />
           ) : (
-            <SatelliteIcon className="w-4 h-4 text-sky-400" />
+            <SatelliteIcon className="w-4 h-4 text-red-400" />
           )}
         </button>
 
         {/* Accessible Data Table Toggle */}
         <button
           onClick={() => setShowAccessibleTable(!showAccessibleTable)}
-          className={`w-9 h-9 rounded-xl bg-[#0B0F17]/90 backdrop-blur border border-slate-700/80 flex items-center justify-center shadow-xl transition-colors ${
-            showAccessibleTable ? "text-amber-400 bg-amber-500/20" : "text-slate-300 hover:text-white hover:bg-slate-800"
+          className={`w-9 h-9 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 flex items-center justify-center shadow-xl transition-colors ${
+            showAccessibleTable ? "text-orange-400 bg-orange-950/40 border-orange-500/50" : "text-neutral-300 hover:text-orange-400 hover:bg-neutral-800"
           }`}
           title="Toggle Accessible Data Table"
         >
@@ -610,18 +606,21 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
 
       {/* Floating Bottom-Right: Fire Intensity (FRP) Legend & Attribution */}
       <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-1.5">
-        {/* FRP Legend Card */}
-        <div className="px-3 py-2 rounded-xl bg-[#0B0F17]/90 backdrop-blur border border-slate-700/80 shadow-2xl flex flex-col gap-1 text-[10px]">
-          <span className="font-bold text-white">Fire Intensity (FRP)</span>
+        {/* FRP Legend Card in Black, Red, Orange */}
+        <div className="px-3 py-2 rounded-xl bg-black/95 backdrop-blur border border-neutral-800 shadow-2xl flex flex-col gap-1 text-[10px]">
+          <span className="font-extrabold text-white flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+            Fire Intensity (FRP)
+          </span>
           <div className="flex items-center gap-1.5">
-            <span className="text-slate-400">Low</span>
-            <div className="h-2 w-28 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 via-orange-500 to-red-600 border border-slate-700/60" />
-            <span className="text-slate-400">High</span>
+            <span className="text-neutral-400 font-semibold">Low</span>
+            <div className="h-2 w-28 rounded-full bg-gradient-to-r from-[#450A0A] via-[#EA580C] via-[#EF4444] to-[#FDE047] border border-neutral-800" />
+            <span className="text-orange-400 font-bold">High</span>
           </div>
         </div>
 
         {/* Attribution Bar */}
-        <div className="px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur text-[9px] text-slate-400 font-mono flex items-center gap-2">
+        <div className="px-2.5 py-1 rounded-lg bg-black/90 backdrop-blur text-[9px] text-neutral-400 font-mono flex items-center gap-2 border border-neutral-900">
           <span>&copy; OpenStreetMap contributors</span>
           <span>&bull;</span>
           <span>Imagery: NASA / USGS / ESRI</span>
@@ -630,32 +629,32 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-20 pointer-events-none">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0B0F17]/90 border border-slate-700 text-white text-xs font-semibold shadow-2xl">
-            <span className="w-3.5 h-3.5 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
-            <span>Harmonizing observations...</span>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-20 pointer-events-none">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-black/90 border border-orange-500/40 text-white text-xs font-bold shadow-2xl shadow-orange-950/50">
+            <span className="w-3.5 h-3.5 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+            <span className="text-orange-400">Harmonizing observations...</span>
           </div>
         </div>
       )}
 
       {/* Accessible Data Table Modal Overlay */}
       {showAccessibleTable && (
-        <div className="absolute inset-4 z-30 bg-[#0B0F17]/95 backdrop-blur-md border border-slate-700 rounded-2xl p-4 flex flex-col shadow-2xl overflow-hidden">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="absolute inset-4 z-30 bg-black/95 backdrop-blur-md border border-neutral-800 rounded-2xl p-4 flex flex-col shadow-2xl overflow-hidden">
+          <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
             <h4 className="text-sm font-bold text-white flex items-center gap-2">
-              <Table className="w-4 h-4 text-sky-400" />
+              <Table className="w-4 h-4 text-orange-400" />
               Harmonized Observations ({geoJsonData?.features?.length || 0} records)
             </h4>
             <button
               onClick={() => setShowAccessibleTable(false)}
-              className="text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800"
+              className="text-xs text-neutral-300 hover:text-white px-2.5 py-1 rounded bg-neutral-900 hover:bg-neutral-800 border border-neutral-700"
             >
               Close
             </button>
           </div>
           <div className="flex-1 overflow-auto mt-2">
-            <table className="w-full text-left text-xs font-mono text-slate-300">
-              <thead className="bg-[#131B2B] text-slate-400 sticky top-0">
+            <table className="w-full text-left text-xs font-mono text-neutral-300">
+              <thead className="bg-[#0C0C0F] text-orange-400 sticky top-0 border-b border-neutral-800">
                 <tr>
                   <th className="p-2">ID</th>
                   <th className="p-2">Sensor</th>
@@ -665,7 +664,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                   <th className="p-2">Classification</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-neutral-900">
                 {geoJsonData?.features.slice(0, 50).map((f) => (
                   <tr
                     key={f.properties.observation_id}
@@ -673,14 +672,14 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                       if (onSelectObservation) onSelectObservation(f.properties);
                       setShowAccessibleTable(false);
                     }}
-                    className="hover:bg-slate-800/60 cursor-pointer"
+                    className="hover:bg-neutral-900/80 cursor-pointer"
                   >
                     <td className="p-2 truncate max-w-[120px]">{f.properties.observation_id}</td>
-                    <td className="p-2">{f.properties.sensor}</td>
+                    <td className="p-2 text-white font-bold">{f.properties.sensor}</td>
                     <td className="p-2">{f.properties.platform}</td>
                     <td className="p-2">{f.properties.acq_datetime_utc}</td>
-                    <td className="p-2 text-amber-400">{f.properties.frp_mw?.toFixed(1) || "-"}</td>
-                    <td className="p-2">{f.properties.classification}</td>
+                    <td className="p-2 text-orange-400 font-bold">{f.properties.frp_mw?.toFixed(1) || "-"}</td>
+                    <td className="p-2 text-red-400">{f.properties.classification}</td>
                   </tr>
                 ))}
               </tbody>
