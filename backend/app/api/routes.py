@@ -99,6 +99,8 @@ def get_observations(
                 "observation_id": r.observation_id,
                 "sensor": r.sensor.value,
                 "platform": r.platform.value,
+                "latitude": r.latitude,
+                "longitude": r.longitude,
                 "acq_datetime_utc": r.acq_datetime_utc,
                 "confidence_category": r.confidence_category.value,
                 "raw_confidence": r.raw_confidence,

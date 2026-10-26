@@ -38,6 +38,8 @@ export interface GeoJSONPointFeature {
     observation_id: string;
     sensor: SensorType;
     platform: PlatformType;
+    latitude?: number;
+    longitude?: number;
     acq_datetime_utc: string;
     confidence_category: ConfidenceCategory;
     raw_confidence: string | number;

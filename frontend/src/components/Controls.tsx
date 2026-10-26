@@ -159,7 +159,7 @@ export const Controls: React.FC<ControlsProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="relative w-1/2">
+            <div className="w-1/2">
               <input
                 id="start-date-input"
                 type="date"
@@ -170,12 +170,9 @@ export const Controls: React.FC<ControlsProps> = ({
                 }}
                 className="w-full h-9 bg-[#090A0C] border border-[#282D35] rounded-lg px-3 text-xs font-mono tabular-nums text-[#F3F4F6] focus-visible:outline-none focus-visible:border-[#F59E0B] transition-colors duration-150"
               />
-              <span className="absolute right-2.5 top-2 text-xs text-[#A4AAB5] pointer-events-none hidden sm:inline">
-                {formatDateLabel(startDate)}
-              </span>
             </div>
             <span className="text-[#A4AAB5] text-xs" aria-hidden="true">&rarr;</span>
-            <div className="relative w-1/2">
+            <div className="w-1/2">
               <input
                 id="end-date-input"
                 type="date"
@@ -186,9 +183,6 @@ export const Controls: React.FC<ControlsProps> = ({
                 }}
                 className="w-full h-9 bg-[#090A0C] border border-[#282D35] rounded-lg px-3 text-xs font-mono tabular-nums text-[#F3F4F6] focus-visible:outline-none focus-visible:border-[#F59E0B] transition-colors duration-150"
               />
-              <span className="absolute right-2.5 top-2 text-xs text-[#A4AAB5] pointer-events-none hidden sm:inline">
-                {formatDateLabel(endDate)}
-              </span>
             </div>
           </div>
         </div>

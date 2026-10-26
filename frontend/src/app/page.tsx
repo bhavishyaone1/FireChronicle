@@ -84,6 +84,7 @@ export default function Home() {
   const [selectedObservation, setSelectedObservation] = useState<
     GeoJSONPointFeature["properties"] | null
   >(null);
+  const [mapCenterTarget, setMapCenterTarget] = useState<[number, number] | null>(null);
 
   // Fetched data states
   const [geoJsonData, setGeoJsonData] = useState<GeoJSONFeatureCollection | null>(null);
@@ -170,7 +171,13 @@ export default function Home() {
 
       // Auto-select first observation if available and none selected yet
       if (obs && obs.features && obs.features.length > 0 && !selectedObservation) {
-        setSelectedObservation(obs.features[0].properties);
+        const first = obs.features[0];
+        const props = { ...first.properties };
+        if (first.geometry && first.geometry.coordinates) {
+          props.longitude = first.geometry.coordinates[0];
+          props.latitude = first.geometry.coordinates[1];
+        }
+        setSelectedObservation(props);
       }
     } catch (error) {
       console.error("Data synchronization error:", error);
@@ -302,6 +309,7 @@ export default function Home() {
                     }}
                     startDate={startDate}
                     endDate={endDate}
+                    centerTarget={mapCenterTarget}
                   />
                 </div>
 
@@ -310,7 +318,9 @@ export default function Home() {
                     selectedObservation={selectedObservation}
                     onDeselectObservation={() => setSelectedObservation(null)}
                     onFlyToObservation={() => {
-                      // Handled within map
+                      if (selectedObservation?.longitude != null && selectedObservation?.latitude != null) {
+                        setMapCenterTarget([selectedObservation.longitude, selectedObservation.latitude]);
+                      }
                     }}
                     onOpenTableView={() => {
                       // Can open accessible table or jump to records
@@ -364,6 +374,7 @@ export default function Home() {
                 onSelectAoi={setSelectedAoi}
                 startDate={startDate}
                 endDate={endDate}
+                centerTarget={mapCenterTarget}
               />
             </div>
           )}

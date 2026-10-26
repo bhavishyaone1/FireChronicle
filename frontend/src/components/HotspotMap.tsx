@@ -25,6 +25,7 @@ interface HotspotMapProps {
   onSelectAoi?: (aoi: PresetAoi) => void;
   startDate?: string;
   endDate?: string;
+  centerTarget?: [number, number] | null;
 }
 
 const VECTOR_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
@@ -61,6 +62,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   onSelectAoi,
   startDate = "2024-08-01",
   endDate = "2024-08-20",
+  centerTarget = null,
 }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -210,7 +212,12 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
 
     const handlePointClick = (e: any) => {
       if (!e.features || !e.features.length) return;
-      const props = e.features[0].properties;
+      const feat = e.features[0];
+      const props = { ...feat.properties };
+      if (feat.geometry && feat.geometry.coordinates) {
+        props.longitude = feat.geometry.coordinates[0];
+        props.latitude = feat.geometry.coordinates[1];
+      }
       if (onSelectObservation) {
         onSelectObservation(props);
       }
@@ -297,6 +304,19 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       // ignore
     }
   }, [bbox, isMapLoaded]);
+
+  useEffect(() => {
+    if (!map.current || !isMapLoaded || !centerTarget) return;
+    try {
+      map.current.flyTo({
+        center: centerTarget,
+        zoom: 12,
+        duration: 900,
+      });
+    } catch {
+      // ignore
+    }
+  }, [centerTarget, isMapLoaded]);
 
   useEffect(() => {
     if (!map.current || !isMapLoaded) return;

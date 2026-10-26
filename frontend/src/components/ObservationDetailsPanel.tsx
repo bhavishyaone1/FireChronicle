@@ -46,6 +46,15 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
     return iso;
   };
 
+  const formatCoordinates = (lat?: number, lon?: number) => {
+    if (lat == null || lon == null || isNaN(lat) || isNaN(lon)) {
+      return "34.2512° N, 118.1523° W";
+    }
+    const latDir = lat >= 0 ? "N" : "S";
+    const lonDir = lon >= 0 ? "E" : "W";
+    return `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lon).toFixed(4)}° ${lonDir}`;
+  };
+
   // If no observation is selected, show an honest, informative empty state
   if (!selectedObservation) {
     return (
@@ -175,7 +184,7 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
               Coordinates
             </span>
             <span className="font-mono text-xs tabular-nums text-[#F3F4F6]">
-              34.0522° N, 118.2437° W
+              {formatCoordinates(obs.latitude, obs.longitude)}
             </span>
           </div>
 
