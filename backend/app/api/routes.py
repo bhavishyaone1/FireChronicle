@@ -5,7 +5,7 @@ from typing import Optional, List
 import io
 import numpy as np
 import pandas as pd
-from fastapi import APIRouter, Query, HTTPException, UploadFile, File
+from fastapi import APIRouter, Query, HTTPException, UploadFile, File, Response
 
 from backend.app.config import settings
 from backend.app.schemas.common import HealthResponse, BoundingBox, SensorType, ClassificationType
@@ -53,6 +53,11 @@ def get_metadata():
             {"id": "pantanal", "name": "Pantanal Wetland, Brazil", "bbox": [-58.0, -19.5, -55.5, -16.5]},
             {"id": "nsw_australia", "name": "New South Wales, Australia", "bbox": [149.0, -36.0, 151.5, -33.5]},
         ],
+        "suomi_npp_lifecycle": {
+            "cessation_date": "2026-11-01",
+            "operational_status": "Active until Nov 1, 2026. Automatic transition to NOAA-20 and NOAA-21.",
+            "recommended_live_products": ["VIIRS_NOAA20_SP", "VIIRS_NOAA21_SP"]
+        },
         "active_mode": settings.active_mode,
         "firms_configured": settings.is_firms_configured(),
         "provenance": storage_engine.get_dataset_provenance(),
@@ -113,6 +118,9 @@ def get_observations(
                 "matched_pair_id": r.matched_pair_id,
                 "match_distance_m": r.match_distance_m,
                 "match_time_delta_min": r.match_time_delta_min,
+                "match_score": r.match_score,
+                "is_ambiguous": r.is_ambiguous,
+                "candidate_count": r.candidate_count,
             }
         )
         features.append(feat)
@@ -170,6 +178,7 @@ def get_comparison(
     end_date: str = Query("2024-08-20", description="YYYY-MM-DD"),
     spatial_tolerance_m: float = Query(1000.0, ge=100.0, le=5000.0),
     temporal_tolerance_min: float = Query(60.0, ge=10.0, le=360.0),
+    method: str = Query("greedy", pattern="^(greedy|global_assignment)$", description="greedy (1-to-many baseline) or global_assignment (1-to-1 optimal)"),
 ):
     """Compare MODIS and VIIRS records for the selected space/time window."""
     try:
@@ -188,6 +197,7 @@ def get_comparison(
         records,
         spatial_tolerance_m=spatial_tolerance_m,
         temporal_tolerance_min=temporal_tolerance_min,
+        method=method,
     )
 
     modis_frp = [o.frp_mw for o in matched_obs if o.sensor == SensorType.MODIS and o.frp_mw is not None]
@@ -240,6 +250,9 @@ def get_comparison(
         frp_quantiles_modis=calc_quantiles(modis_frp),
         frp_quantiles_viirs=calc_quantiles(viirs_frp),
         sensitivity_curve=sensitivity,
+        algorithm=stats.get("algorithm", "greedy"),
+        algorithm_comparison=stats.get("algorithm_comparison"),
+        ambiguity_stats=stats.get("ambiguity"),
         notes=notes,
     )
 
@@ -307,3 +320,110 @@ async def import_csv_file(file: UploadFile = File(...)):
         }
     else:
         raise HTTPException(status_code=400, detail="No valid active fire records identified in CSV.")
+
+
+@router.get("/export")
+def export_dataset(
+    bbox: Optional[str] = Query(None, description="west,south,east,north"),
+    start_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    end_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    sensor: Optional[str] = Query("ALL", description="MODIS, VIIRS, or ALL"),
+    classification: Optional[str] = Query("ALL", description="matched, MODIS_only, VIIRS_only, or ALL"),
+    export_format: str = Query("geojson", pattern="^(geojson|csv)$"),
+):
+    """
+    Export filtered observations in GeoJSON or CSV format.
+    Includes full provenance, audit identifiers, and scientific metadata.
+    """
+    import json
+    bbox_list = None
+    if bbox:
+        try:
+            bbox_list = [float(x.strip()) for x in bbox.split(",")]
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid bbox format")
+
+    records, total_count = storage_engine.query_observations(
+        bbox=bbox_list,
+        start_date=start_date,
+        end_date=end_date,
+        sensor=sensor,
+        classification=classification,
+        limit=50000,
+        offset=0,
+    )
+
+    provenance = storage_engine.get_dataset_provenance()
+    tag = f"{start_date or 'all'}_{end_date or 'all'}"
+
+    if export_format == "csv":
+        df_records = []
+        for r in records:
+            d = r.model_dump()
+            df_records.append({
+                "observation_id": d["observation_id"],
+                "sensor": d["sensor"],
+                "platform": d["platform"],
+                "latitude": d["latitude"],
+                "longitude": d["longitude"],
+                "acq_datetime_utc": d["acq_datetime_utc"],
+                "acq_date_utc": d["acq_date_utc"],
+                "acq_time_utc": d["acq_time_utc"],
+                "confidence_category": d["confidence_category"],
+                "raw_confidence": str(d["raw_confidence"]),
+                "frp_mw": d["frp_mw"],
+                "daynight": d["daynight"],
+                "classification": d["classification"],
+                "matched_pair_id": d["matched_pair_id"],
+                "match_distance_m": d["match_distance_m"],
+                "match_time_delta_min": d["match_time_delta_min"],
+                "match_score": d["match_score"],
+                "is_ambiguous": d["is_ambiguous"],
+                "candidate_count": d["candidate_count"],
+                "grid_cell_id": d["grid_cell_id"],
+                "source_product": d["source_product"],
+                "source_file": d["source_file"],
+            })
+        out_df = pd.DataFrame(df_records)
+        csv_buffer = io.StringIO()
+        out_df.to_csv(csv_buffer, index=False)
+        return Response(
+            content=csv_buffer.getvalue(),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename=firechronicle_{tag}.csv"}
+        )
+
+    # Default GeoJSON
+    features = []
+    for r in records:
+        features.append({
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [r.longitude, r.latitude]
+            },
+            "properties": r.model_dump()
+        })
+
+    payload = {
+        "type": "FeatureCollection",
+        "metadata": {
+            "title": "FireChronicle Harmonized Active Fire Observations",
+            "exported_at_utc": datetime.now(timezone.utc).isoformat(),
+            "record_count": total_count,
+            "bbox": bbox_list,
+            "start_date": start_date,
+            "end_date": end_date,
+            "sensor_filter": sensor,
+            "classification_filter": classification,
+            "provenance": provenance,
+            "citation": "NASA FIRMS (MODIS Collection 6.1, VIIRS 375m) processed with FireChronicle CEA harmonization",
+            "scientific_guardrail": "Hotspot detections indicate active thermal radiation within the sensor pixel, not confirmed wildfire perimeters or burned area.",
+        },
+        "features": features
+    }
+    return Response(
+        content=json.dumps(payload, indent=2),
+        media_type="application/geo+json",
+        headers={"Content-Disposition": f"attachment; filename=firechronicle_{tag}.geojson"}
+    )

@@ -61,8 +61,14 @@ class StorageEngine:
                 matched_pair_id VARCHAR,
                 match_distance_m DOUBLE,
                 match_time_delta_min DOUBLE,
+                match_score DOUBLE,
+                is_ambiguous BOOLEAN,
+                candidate_count INTEGER,
                 grid_cell_id VARCHAR
             );
+            ALTER TABLE observations ADD COLUMN IF NOT EXISTS match_score DOUBLE;
+            ALTER TABLE observations ADD COLUMN IF NOT EXISTS is_ambiguous BOOLEAN;
+            ALTER TABLE observations ADD COLUMN IF NOT EXISTS candidate_count INTEGER;
             CREATE INDEX IF NOT EXISTS idx_obs_coords ON observations (latitude, longitude);
             CREATE INDEX IF NOT EXISTS idx_obs_date ON observations (acq_date_utc);
             CREATE INDEX IF NOT EXISTS idx_obs_sensor ON observations (sensor);
@@ -94,12 +100,14 @@ class StorageEngine:
         
         with self._lock:
             conn = self.get_connection()
+            cols = list(df.columns)
+            cols_str = ", ".join(cols)
             conn.register("df_temp", df)
             
-            # Insert or replace by observation_id
-            conn.execute("""
-                INSERT OR REPLACE INTO observations 
-                SELECT * FROM df_temp;
+            # Insert or replace by explicit column mapping
+            conn.execute(f"""
+                INSERT OR REPLACE INTO observations ({cols_str}) 
+                SELECT {cols_str} FROM df_temp;
             """)
             conn.unregister("df_temp")
 

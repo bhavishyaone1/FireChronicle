@@ -36,6 +36,11 @@ export interface MetadataResponse {
   active_mode: string;
   firms_configured: boolean;
   provenance?: DatasetProvenance;
+  suomi_npp_lifecycle?: {
+    cessation_date: string;
+    operational_status: string;
+    recommended_live_products: string[];
+  };
 }
 
 export interface GeoJSONPointFeature {
@@ -60,6 +65,9 @@ export interface GeoJSONPointFeature {
     matched_pair_id?: string;
     match_distance_m?: number;
     match_time_delta_min?: number;
+    match_score?: number | null;
+    is_ambiguous?: boolean;
+    candidate_count?: number;
   };
 }
 
@@ -140,6 +148,28 @@ export interface SensorComparisonResponse {
   frp_quantiles_modis?: QuantileSummary;
   frp_quantiles_viirs?: QuantileSummary;
   sensitivity_curve: SensitivityPoint[];
+  algorithm?: string;
+  algorithm_comparison?: {
+    greedy_1toMany?: {
+      pairs_count: number;
+      modis_matched: number;
+      viirs_matched: number;
+      mean_distance_m: number;
+      description: string;
+    };
+    global_assignment_1to1?: {
+      pairs_count: number;
+      modis_matched: number;
+      viirs_matched: number;
+      mean_distance_m: number;
+      description: string;
+    };
+  };
+  ambiguity_stats?: {
+    ambiguous_modis_count: number;
+    ambiguous_viirs_count: number;
+    total_ambiguous_detections: number;
+  };
   notes: string[];
 }
 

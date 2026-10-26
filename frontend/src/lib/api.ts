@@ -76,6 +76,7 @@ export async function fetchComparison(params: {
   endDate: string;
   spatialToleranceM?: number;
   temporalToleranceMin?: number;
+  method?: string;
 }): Promise<SensorComparisonResponse> {
   const query = new URLSearchParams({
     bbox: params.bbox.join(","),
@@ -83,6 +84,7 @@ export async function fetchComparison(params: {
     end_date: params.endDate,
     spatial_tolerance_m: (params.spatialToleranceM || 1000.0).toString(),
     temporal_tolerance_min: (params.temporalToleranceMin || 60.0).toString(),
+    method: params.method || "greedy",
   });
 
   const res = await fetch(`${API_BASE}/compare?${query.toString()}`, { cache: "no-store" });
@@ -91,6 +93,24 @@ export async function fetchComparison(params: {
     throw new Error(`Failed to fetch comparison (${res.status}): ${err}`);
   }
   return res.json();
+}
+
+export function getExportUrl(params: {
+  bbox?: [number, number, number, number];
+  startDate?: string;
+  endDate?: string;
+  sensor?: string;
+  classification?: string;
+  format?: "geojson" | "csv";
+}): string {
+  const query = new URLSearchParams();
+  if (params.bbox) query.set("bbox", params.bbox.join(","));
+  if (params.startDate) query.set("start_date", params.startDate);
+  if (params.endDate) query.set("end_date", params.endDate);
+  if (params.sensor && params.sensor !== "ALL") query.set("sensor", params.sensor);
+  if (params.classification && params.classification !== "ALL") query.set("classification", params.classification);
+  query.set("export_format", params.format || "geojson");
+  return `${API_BASE}/export?${query.toString()}`;
 }
 
 export async function fetchAnomalies(params: {

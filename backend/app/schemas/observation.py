@@ -45,6 +45,9 @@ class NormalizedObservation(BaseModel):
     matched_pair_id: Optional[str] = None
     match_distance_m: Optional[float] = None
     match_time_delta_min: Optional[float] = None
+    match_score: Optional[float] = None
+    is_ambiguous: Optional[bool] = False
+    candidate_count: Optional[int] = 0
     
     grid_cell_id: Optional[str] = None
 

@@ -103,24 +103,65 @@ def map_platform(sat_val: Any, sensor: SensorType) -> PlatformType:
         return PlatformType.SNPP
 
 
+R_EARTH_AUTHALIC_KM: float = 6371.0088  # WGS-84 / IUGG authalic sphere mean radius in km
+
+
 def compute_grid_cell_id(lat: float, lon: float, grid_size_km: float = 1.0) -> str:
     """
-    Compute an equal-area projected grid cell identifier.
-    Uses cylindrical equal-area projection approximation for high performance:
-    x = lon * cos(lat_rad) * 111.32 km
-    y = lat * 110.57 km
+    Compute an equal-area projected grid cell identifier using the standard
+    Lambert Cylindrical Equal-Area (CEA) projection on the authalic sphere (R = 6371.0088 km).
+    
+    Equations:
+        x = R * lambda (radians)
+        y = R * sin(phi) (radians)
+        
+    Area differential:
+        dA = dx * dy = R^2 * cos(phi) * dlambda * dphi == dA_sphere
+        
+    Every projected grid cell [x, x + S] x [y, y + S] has an exact surface area
+    of S^2 = 1.0 km^2 anywhere on Earth, eliminating latitude-dependent area distortions.
     """
     lat_rad = math.radians(lat)
-    km_per_lat = 110.574
-    km_per_lon = 111.320 * math.cos(lat_rad)
+    lon_rad = math.radians(lon)
     
-    # Avoid zero division near poles
-    if abs(km_per_lon) < 0.001:
-        km_per_lon = 0.001
-        
-    grid_y = int(math.floor((lat * km_per_lat) / grid_size_km))
-    grid_x = int(math.floor((lon * km_per_lon) / grid_size_km))
+    x_km = R_EARTH_AUTHALIC_KM * lon_rad
+    y_km = R_EARTH_AUTHALIC_KM * math.sin(lat_rad)
+    
+    grid_x = int(math.floor(x_km / grid_size_km))
+    grid_y = int(math.floor(y_km / grid_size_km))
     return f"grid_{grid_size_km}km_{grid_y}_{grid_x}"
+
+
+def get_grid_cell_bounds(cell_id: str) -> Dict[str, float]:
+    """
+    Reverse a CEA grid cell identifier into geographic bounding coordinates [west, south, east, north].
+    """
+    parts = cell_id.split("_")
+    # Expected format: grid_{size}km_{grid_y}_{grid_x}
+    grid_size_km = float(parts[1].replace("km", ""))
+    grid_y = int(parts[2])
+    grid_x = int(parts[3])
+    
+    x_min = grid_x * grid_size_km
+    x_max = (grid_x + 1) * grid_size_km
+    y_min = grid_y * grid_size_km
+    y_max = (grid_y + 1) * grid_size_km
+    
+    # Invert lambda = x / R
+    west = math.degrees(x_min / R_EARTH_AUTHALIC_KM)
+    east = math.degrees(x_max / R_EARTH_AUTHALIC_KM)
+    
+    # Invert sin(phi) = y / R
+    south = math.degrees(math.asin(max(-1.0, min(1.0, y_min / R_EARTH_AUTHALIC_KM))))
+    north = math.degrees(math.asin(max(-1.0, min(1.0, y_max / R_EARTH_AUTHALIC_KM))))
+    
+    return {
+        "west": round(west, 7),
+        "south": round(south, 7),
+        "east": round(east, 7),
+        "north": round(north, 7),
+        "grid_size_km": grid_size_km,
+    }
 
 
 def normalize_record(

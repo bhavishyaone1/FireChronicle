@@ -14,6 +14,7 @@ import { HistoricalPatternsCard } from "@/components/HistoricalPatternsCard";
 import { SensorDiscontinuityInspector } from "@/components/SensorDiscontinuityInspector";
 import { HistoricalAnomalies } from "@/components/HistoricalAnomalies";
 import { MethodologyProvenance } from "@/components/MethodologyProvenance";
+import { HarmonizationAuditView } from "@/components/HarmonizationAuditView";
 import {
   fetchHealth,
   fetchMetadata,
@@ -51,7 +52,7 @@ export default function Home() {
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace("#", "");
-      if (["overview", "calendar", "compare", "anomalies", "methodology"].includes(hash)) {
+      if (["overview", "calendar", "compare", "audit", "anomalies", "methodology"].includes(hash)) {
         setActiveTab(hash);
       }
     };
@@ -80,6 +81,7 @@ export default function Home() {
   const [sensorFilter, setSensorFilter] = useState("ALL");
   const [classificationFilter, setClassificationFilter] = useState("ALL");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [matchingMethod, setMatchingMethod] = useState("greedy");
 
   // Selected Observation for inspection panel
   const [selectedObservation, setSelectedObservation] = useState<
@@ -164,6 +166,7 @@ export default function Home() {
           startDate: targetStartDate,
           endDate: targetEndDate,
           spatialToleranceM,
+          method: matchingMethod,
         }).catch((err) => {
           console.error("fetchComparison error:", err);
           return null;
@@ -216,6 +219,7 @@ export default function Home() {
     spatialToleranceM,
     sensorFilter,
     classificationFilter,
+    matchingMethod,
   ]);
 
   // Derive true latest record date from active dataset
@@ -270,6 +274,7 @@ export default function Home() {
             { id: "overview", label: "Overview" },
             { id: "calendar", label: "Calendar" },
             { id: "compare", label: "Comparison" },
+            { id: "audit", label: "Audit" },
             { id: "anomalies", label: "Patterns" },
             { id: "methodology", label: "Methodology" },
           ].map((tab) => (
@@ -363,7 +368,7 @@ export default function Home() {
                       }
                     }}
                     onOpenTableView={() => {
-                      // Can open accessible table or jump to records
+                      handleTabChange("audit");
                     }}
                   />
                 </div>
@@ -422,6 +427,23 @@ export default function Home() {
           {activeTab === "compare" && (
             <SensorDiscontinuityInspector
               comparisonData={comparisonData}
+              isLoading={isLoading}
+            />
+          )}
+
+          {activeTab === "audit" && (
+            <HarmonizationAuditView
+              geoJsonData={geoJsonData}
+              comparisonData={comparisonData}
+              selectedAoi={selectedAoi}
+              startDate={startDate}
+              endDate={endDate}
+              selectedDate={selectedDate}
+              gridSizeKm={gridSizeKm}
+              spatialToleranceM={spatialToleranceM}
+              provenance={provenance}
+              activeMethod={matchingMethod}
+              onChangeMethod={(m) => setMatchingMethod(m)}
               isLoading={isLoading}
             />
           )}

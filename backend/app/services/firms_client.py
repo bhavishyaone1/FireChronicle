@@ -10,8 +10,27 @@ from backend.app.config import settings
 from backend.app.schemas.common import SensorType
 
 
+SUOMI_NPP_CESSATION_DATE = "2026-11-01"
+
+
+def resolve_viirs_product(source: str, target_date: Optional[str] = None) -> Tuple[str, Optional[str]]:
+    """
+    Handle NASA's announced November 1, 2026 cessation of Suomi-NPP data-product delivery.
+    If Suomi-NPP is requested on or after 2026-11-01, dynamically recommend/route to NOAA-20.
+    """
+    check_date = target_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if "SNPP" in source.upper() and check_date >= SUOMI_NPP_CESSATION_DATE:
+        replacement = source.upper().replace("SNPP", "NOAA20")
+        advisory = (
+            f"Suomi-NPP product delivery ceased on {SUOMI_NPP_CESSATION_DATE}. "
+            f"Automatically routed request to {replacement} (NOAA-20 / JPSS-1)."
+        )
+        return replacement, advisory
+    return source, None
+
+
 class FirmsApiClient:
-    """Client for NASA FIRMS Area API and Data Availability API."""
+    """Client for NASA FIRMS Area API and Data Availability API with caching and proxy security."""
     
     BASE_URL = "https://firms.modaps.eosdis.nasa.gov/api"
 
@@ -38,8 +57,14 @@ class FirmsApiClient:
         
         Returns: (csv_text_or_none, status_message)
         """
+        # Resolve Suomi-NPP cessation if applicable
+        effective_source, cessation_notice = resolve_viirs_product(source, target_date)
+
         if not self.is_configured():
-            return None, "FIRMS MAP_KEY is not configured. Serving local sample data."
+            msg = "FIRMS MAP_KEY is not configured. Serving local sample data."
+            if cessation_notice:
+                msg += f" ({cessation_notice})"
+            return None, msg
 
         west, south, east, north = bbox
         area_str = f"{west:.4f},{south:.4f},{east:.4f},{north:.4f}"
@@ -47,7 +72,18 @@ class FirmsApiClient:
         # Clamp day range between 1 and 5
         day_range = max(1, min(day_range, 5))
         
-        url = f"{self.BASE_URL}/area/csv/{self.map_key}/{source}/{area_str}/{day_range}"
+        # Check disk cache first to conserve NASA API rate limits
+        cache_date_tag = target_date or "latest"
+        cache_key = f"{effective_source}_{area_str}_{day_range}_{cache_date_tag}.csv".replace(",", "_")
+        cache_path = settings.raw_data_dir / cache_key
+        if cache_path.exists():
+            try:
+                cached_text = cache_path.read_text(encoding="utf-8")
+                return cached_text, f"Served from local disk cache ({len(cached_text.splitlines())} lines)."
+            except Exception:
+                pass
+
+        url = f"{self.BASE_URL}/area/csv/{self.map_key}/{effective_source}/{area_str}/{day_range}"
         if target_date:
             url += f"/{target_date}"
 
@@ -61,13 +97,13 @@ class FirmsApiClient:
                         if "Invalid MAP_KEY" in csv_content or "Transaction limit" in csv_content:
                             return None, f"FIRMS API Error: {csv_content.strip()}"
 
-                        # Cache raw content to disk with manifest
-                        now_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-                        cache_name = f"{source}_{now_str}.csv"
-                        cache_path = settings.raw_data_dir / cache_name
+                        # Cache raw content to disk
                         cache_path.write_text(csv_content, encoding="utf-8")
                         
-                        return csv_content, f"Retrieved {len(csv_content.splitlines())} lines from FIRMS."
+                        msg = f"Retrieved {len(csv_content.splitlines())} lines from FIRMS ({effective_source})."
+                        if cessation_notice:
+                            msg += f" [{cessation_notice}]"
+                        return csv_content, msg
                     elif resp.status_code == 429:
                         # Rate limited, backoff
                         await asyncio.sleep(2.0 ** attempt)

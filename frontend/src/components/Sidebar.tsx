@@ -8,6 +8,7 @@ import {
   SlidersHorizontal,
   TrendingUp,
   BookOpen,
+  FileSpreadsheet,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -20,6 +21,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "calendar", label: "Activity calendar", icon: Calendar },
     { id: "compare", label: "Sensor comparison", icon: SlidersHorizontal },
+    { id: "audit", label: "Harmonization audit", icon: FileSpreadsheet },
     { id: "anomalies", label: "Historical patterns", icon: TrendingUp },
     { id: "methodology", label: "How harmonization works", icon: BookOpen },
   ];

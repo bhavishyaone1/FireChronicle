@@ -1,6 +1,6 @@
 """Cross-Sensor Comparison and Discontinuity Schemas."""
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
 
 
@@ -44,6 +44,11 @@ class SensorComparisonResponse(BaseModel):
     
     # Matching sensitivity sweep
     sensitivity_curve: List[SensitivityPoint]
+    
+    # Algorithm & Ambiguity Analysis
+    algorithm: str = "greedy"
+    algorithm_comparison: Optional[Dict[str, Any]] = None
+    ambiguity_stats: Optional[Dict[str, Any]] = None
     
     # Scientific notes & caveats
     notes: List[str]
