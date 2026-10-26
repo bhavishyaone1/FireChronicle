@@ -61,7 +61,7 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
   const effectiveEnd = selectedDate || endDate;
 
   // Extract features
-  const features = geoJsonData?.features || [];
+  const features = useMemo(() => geoJsonData?.features || [], [geoJsonData]);
 
   // Filtered rows for the audit ledger
   const filteredRows = useMemo(() => {

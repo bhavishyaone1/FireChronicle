@@ -289,37 +289,103 @@ def get_anomalies(
 
 @router.post("/import")
 async def import_csv_file(file: UploadFile = File(...)):
-    """Safely import an authorized local or user-provided CSV file."""
-    if not file.filename.endswith(".csv"):
+    """
+    Safely import an authorized local or user-provided CSV file.
+    Performs upfront schema header verification, row-level validation, and
+    detailed error accounting (total, valid, malformed rows) without corrupting existing state.
+    """
+    if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are accepted.")
 
     content = await file.read()
+    if not content or len(content.strip()) == 0:
+        raise HTTPException(status_code=400, detail="Empty file: uploaded file contains zero bytes.")
+
     try:
         df = pd.read_csv(io.BytesIO(content))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Malformed CSV: {str(e)}")
 
+    if df.empty:
+        raise HTTPException(status_code=400, detail="Empty CSV: file contains headers but zero data rows.")
+
+    # Upfront schema verification for required FIRMS columns
+    cols_lower = {str(col).strip().lower(): col for col in df.columns}
+    has_lat = "latitude" in cols_lower or "lat" in cols_lower
+    has_lon = "longitude" in cols_lower or "lon" in cols_lower
+    has_date = "acq_date" in cols_lower or "date" in cols_lower
+
+    missing_cols = []
+    if not has_lat:
+        missing_cols.append("latitude")
+    if not has_lon:
+        missing_cols.append("longitude")
+    if not has_date:
+        missing_cols.append("acq_date")
+
+    if missing_cols:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Missing required NASA FIRMS column(s): {', '.join(missing_cols)}. "
+                f"Available columns: {', '.join(df.columns)}. "
+                "Expected standard NASA FIRMS CSV columns (latitude, longitude, acq_date)."
+            )
+        )
+
     observations = []
+    reasons = []
+    total_rows = len(df)
+
     for idx, row in df.iterrows():
+        row_dict = row.to_dict()
+        # Diagnostic validation checks
+        lat_val = row_dict.get(cols_lower.get("latitude", cols_lower.get("lat")))
+        lon_val = row_dict.get(cols_lower.get("longitude", cols_lower.get("lon")))
+        try:
+            f_lat = float(lat_val)
+            f_lon = float(lon_val)
+            if not (-90.0 <= f_lat <= 90.0 and -180.0 <= f_lon <= 180.0):
+                if len(reasons) < 10:
+                    reasons.append(f"Row {idx + 1}: Coordinates out of range ({f_lat}, {f_lon})")
+                continue
+        except (ValueError, TypeError):
+            if len(reasons) < 10:
+                reasons.append(f"Row {idx + 1}: Unparseable coordinates ('{lat_val}', '{lon_val}')")
+            continue
+
         norm = normalize_record(
-            row=row.to_dict(),
+            row=row_dict,
             source_file=file.filename,
             row_idx=int(idx),
         )
         if norm:
             observations.append(norm)
+        else:
+            if len(reasons) < 10:
+                reasons.append(f"Row {idx + 1}: Normalization failed (invalid timestamp or confidence)")
+
+    valid_rows = len(observations)
+    malformed_rows = total_rows - valid_rows
 
     if observations:
         matched_obs, stats = match_observations(observations)
         storage_engine.save_observations(matched_obs)
         return {
             "status": "success",
-            "imported_rows": len(observations),
-            "match_stats": stats,
             "filename": file.filename,
+            "total_rows": total_rows,
+            "imported_rows": valid_rows,
+            "malformed_rows": malformed_rows,
+            "match_stats": stats,
+            "sample_warnings": reasons[:5],
         }
     else:
-        raise HTTPException(status_code=400, detail="No valid active fire records identified in CSV.")
+        first_err = reasons[0] if reasons else "Invalid data format"
+        raise HTTPException(
+            status_code=400,
+            detail=f"No valid active fire records identified in CSV. All {total_rows} rows were skipped. First error: {first_err}"
+        )
 
 
 @router.get("/export")

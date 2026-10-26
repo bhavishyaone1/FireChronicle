@@ -129,3 +129,27 @@ export async function fetchAnomalies(params: {
   }
   return res.json();
 }
+
+export interface ImportCsvResponse {
+  status: "success";
+  filename: string;
+  total_rows: number;
+  imported_rows: number;
+  malformed_rows: number;
+  match_stats: Record<string, any>;
+  sample_warnings?: string[];
+}
+
+export async function uploadCsvFile(file: File): Promise<ImportCsvResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_BASE}/import`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ detail: "Import failed" }));
+    throw new Error(errorData.detail || `Import failed (${res.status})`);
+  }
+  return res.json();
+}

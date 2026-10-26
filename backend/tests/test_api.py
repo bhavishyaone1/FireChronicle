@@ -67,3 +67,56 @@ def test_anomalies_endpoint():
         if m["observed_active_cells"] is not None and m["observed_active_cells"] <= m["p75_active_cells"]:
             assert not m["is_anomaly"], f"False anomaly detected for {m['month_name']} where observed <= p75"
 
+
+def test_import_rejects_non_csv():
+    resp = client.post("/api/import", files={"file": ("test.txt", b"some text", "text/plain")})
+    assert resp.status_code == 400
+    assert "Only CSV files are accepted" in resp.json()["detail"]
+
+
+def test_import_rejects_empty_file():
+    resp = client.post("/api/import", files={"file": ("empty.csv", b"", "text/csv")})
+    assert resp.status_code == 400
+    assert "Empty file" in resp.json()["detail"]
+
+
+def test_import_rejects_empty_csv():
+    resp = client.post("/api/import", files={"file": ("empty_rows.csv", b"latitude,longitude,acq_date\n", "text/csv")})
+    assert resp.status_code == 400
+    assert "zero data rows" in resp.json()["detail"]
+
+
+def test_import_rejects_missing_required_columns():
+    resp = client.post("/api/import", files={"file": ("missing_cols.csv", b"temp,brightness\n300,320\n", "text/csv")})
+    assert resp.status_code == 400
+    assert "Missing required NASA FIRMS column(s)" in resp.json()["detail"]
+
+
+def test_import_reports_malformed_rows_and_accepts_valid():
+    csv_content = (
+        "latitude,longitude,acq_date,acq_time,confidence,frp,satellite\n"
+        "34.25,-118.15,2024-08-10,1230,80,25.5,Aqua\n"
+        "999.0,-118.15,2024-08-10,1230,80,25.5,Aqua\n"  # Invalid lat
+        "34.30,-118.20,2024-08-10,1230,nominal,15.2,N\n"
+    ).encode("utf-8")
+    resp = client.post("/api/import", files={"file": ("partial_valid.csv", csv_content, "text/csv")})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert data["total_rows"] == 3
+    assert data["imported_rows"] == 2
+    assert data["malformed_rows"] == 1
+    assert len(data["sample_warnings"]) >= 1
+
+
+def test_import_rejects_all_invalid_rows():
+    csv_content = (
+        "latitude,longitude,acq_date,acq_time,confidence,frp,satellite\n"
+        "999.0,-118.15,2024-08-10,1230,80,25.5,Aqua\n"
+        "-999.0,-118.15,2024-08-10,1230,80,25.5,Aqua\n"
+    ).encode("utf-8")
+    resp = client.post("/api/import", files={"file": ("all_invalid.csv", csv_content, "text/csv")})
+    assert resp.status_code == 400
+    assert "No valid active fire records identified in CSV" in resp.json()["detail"]
+
+

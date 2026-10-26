@@ -16,6 +16,7 @@ import { SensorDiscontinuityInspector } from "@/components/SensorDiscontinuityIn
 import { HistoricalAnomalies } from "@/components/HistoricalAnomalies";
 import { MethodologyProvenance } from "@/components/MethodologyProvenance";
 import { HarmonizationAuditView } from "@/components/HarmonizationAuditView";
+import { CsvImportModal } from "@/components/CsvImportModal";
 import {
   fetchHealth,
   fetchMetadata,
@@ -95,6 +96,7 @@ export default function Home() {
 
   const [mapCenterTarget, setMapCenterTarget] = useState<[number, number] | null>(null);
   const [provenance, setProvenance] = useState<DatasetProvenance | null>(null);
+  const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
 
   // Fetched data states
   const [geoJsonData, setGeoJsonData] = useState<GeoJSONFeatureCollection | null>(null);
@@ -104,35 +106,35 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Health and metadata initial load
-  useEffect(() => {
-    async function loadMeta() {
-      try {
-        const health = await fetchHealth();
-        setIsBackendConnected(true);
-        setIsFirmsConfigured(health.firms_configured);
-        setActiveMode(health.active_mode);
-        if (health.provenance) {
-          setProvenance(health.provenance);
-        }
-      } catch (err) {
-        setIsBackendConnected(false);
+  const loadMeta = useCallback(async () => {
+    try {
+      const health = await fetchHealth();
+      setIsBackendConnected(true);
+      setIsFirmsConfigured(health.firms_configured);
+      setActiveMode(health.active_mode);
+      if (health.provenance) {
+        setProvenance(health.provenance);
       }
-
-      try {
-        const meta = await fetchMetadata();
-        if (meta.preset_aois && meta.preset_aois.length > 0) {
-          setPresetAois(meta.preset_aois);
-          setSelectedAoi(meta.preset_aois[0]);
-        }
-        if (meta.provenance) {
-          setProvenance(meta.provenance);
-        }
-      } catch (err) {
-        // Fallback default remains active
-      }
+    } catch {
+      setIsBackendConnected(false);
     }
-    loadMeta();
+
+    try {
+      const meta = await fetchMetadata();
+      if (meta.preset_aois && meta.preset_aois.length > 0) {
+        setPresetAois(meta.preset_aois);
+      }
+      if (meta.provenance) {
+        setProvenance(meta.provenance);
+      }
+    } catch {
+      // Fallback default remains active
+    }
   }, []);
+
+  useEffect(() => {
+    loadMeta();
+  }, [loadMeta]);
 
   // Main synchronized data fetch
   const loadData = useCallback(async () => {
@@ -264,6 +266,16 @@ export default function Home() {
             }
           }}
           onOpenProvenance={() => handleTabChange("methodology")}
+          onOpenUploadModal={() => setIsCsvModalOpen(true)}
+        />
+
+        <CsvImportModal
+          isOpen={isCsvModalOpen}
+          onClose={() => setIsCsvModalOpen(false)}
+          onImportSuccess={() => {
+            loadData();
+            loadMeta();
+          }}
         />
 
         {/* Mobile Tab Navigation Strip (< 768px screens) */}

@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Database,
   ExternalLink,
+  Upload,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -16,6 +17,7 @@ interface HeaderProps {
   endDate: string;
   onOpenDateSelector?: () => void;
   onOpenProvenance?: () => void;
+  onOpenUploadModal?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   endDate,
   onOpenDateSelector,
   onOpenProvenance,
+  onOpenUploadModal,
 }) => {
   const [showDataSourceDropdown, setShowDataSourceDropdown] = useState(false);
 
@@ -86,20 +89,44 @@ export const Header: React.FC<HeaderProps> = ({
                   ? "Connected directly to NASA FIRMS API (MAP_KEY configured). Ingests near-real-time active fire records."
                   : "Running verified NASA FIRMS benchmark sample (10–15 Aug 2024). All spatial cross-matching algorithms are active."}
               </p>
+              {onOpenUploadModal && (
+                <button
+                  onClick={() => {
+                    setShowDataSourceDropdown(false);
+                    onOpenUploadModal();
+                  }}
+                  className="w-full text-center text-xs font-medium text-[#F1F5F9] hover:bg-[#1E242E] py-1.5 bg-[#151A22] rounded-lg transition-colors border border-[#28313D] flex items-center justify-center gap-1.5"
+                >
+                  <Upload className="w-3.5 h-3.5 text-[#F59E0B]" />
+                  <span>Upload custom FIRMS CSV</span>
+                </button>
+              )}
               {onOpenProvenance && (
                 <button
                   onClick={() => {
                     setShowDataSourceDropdown(false);
                     onOpenProvenance();
                   }}
-                  className="w-full text-center text-xs font-medium text-[#F59E0B] hover:text-[#F59E0B]/80 py-1.5 bg-[#151A22] hover:bg-[#1E242E] rounded-lg transition-colors border border-[#28313D]"
+                  className="w-full text-center text-xs font-medium text-[#A4AFBF] hover:text-[#F1F5F9] hover:bg-[#151A22] py-1 transition-colors"
                 >
-                  View data provenance and citations &rarr;
+                  View methodology &amp; citations &rarr;
                 </button>
               )}
             </div>
           )}
         </div>
+
+        {/* Quick Upload Button */}
+        {onOpenUploadModal && (
+          <button
+            onClick={onOpenUploadModal}
+            title="Import custom NASA FIRMS CSV dataset"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#10141B] hover:bg-[#151A22] border border-[#28313D] text-xs text-[#A4AFBF] hover:text-[#F1F5F9] transition-colors"
+          >
+            <Upload className="w-3.5 h-3.5 text-[#F59E0B]" />
+            <span className="hidden sm:inline font-medium text-[#F1F5F9]">Upload CSV</span>
+          </button>
+        )}
 
         {/* Date Range Pill */}
         <button
