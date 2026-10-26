@@ -171,10 +171,10 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       filter: ["all", ["!has", "point_count"], ["==", "sensor", "VIIRS"]] as any,
       paint: {
         "circle-radius": 5,
-        "circle-color": "#38BDF8",
+        "circle-color": "#EF4444",
         "circle-opacity": layerOpacity / 100,
         "circle-stroke-width": 1.5,
-        "circle-stroke-color": "#0284C7",
+        "circle-stroke-color": "#DC2626",
       },
     });
 
@@ -373,13 +373,16 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     );
   };
 
+  const currentAoi = presetAois.find((a) => a.id === selectedAoiId);
+  const aoiDisplayName = currentAoi ? currentAoi.name.split("(")[0].trim() : "Regional AOI";
+
   return (
     <div className="relative w-full h-[520px] rounded-xl overflow-hidden border border-[#282D35] bg-[#090A0C]">
       {/* Top Map Title Bar */}
       <div className="absolute top-3 left-3 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#101216]/90 backdrop-blur border border-[#282D35] text-xs">
         <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
         <span className="font-medium text-[#F3F4F6]">Interactive hotspot map</span>
-        <span className="text-[#A4AAB5] text-[11px] hidden sm:inline">&bull; Southern California</span>
+        <span className="text-[#A4AAB5] text-[11px] hidden sm:inline">&bull; {aoiDisplayName}</span>
       </div>
 
       {/* Map Canvas */}
@@ -391,7 +394,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         <div className="flex items-center justify-between pb-2 border-b border-[#282D35]">
           <div className="flex items-center gap-2 font-medium text-[#F3F4F6]">
             <Layers className="w-3.5 h-3.5 text-[#F59E0B]" />
-            <span>Map layers</span>
+            <span>Map layers &amp; legend</span>
           </div>
           <button
             onClick={() => setIsLayersPanelExpanded(!isLayersPanelExpanded)}
@@ -424,53 +427,27 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
 
               <label className="flex items-center justify-between text-[#A4AAB5] hover:text-[#F3F4F6] cursor-pointer py-0.5">
                 <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
+                  <span className="w-2 h-2 rounded-full bg-[#EF4444]" />
                   <span>VIIRS (375 m footprint)</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showViirs}
                   onChange={(e) => setShowViirs(e.target.checked)}
-                  className="rounded border-[#282D35] bg-[#16191F] text-[#38BDF8] focus:ring-0"
+                  className="rounded border-[#282D35] bg-[#16191F] text-[#EF4444] focus:ring-0"
                 />
               </label>
 
               <label className="flex items-center justify-between text-[#A4AAB5] hover:text-[#F3F4F6] cursor-pointer py-0.5">
                 <span className="flex items-center gap-2 text-xs">
                   <span className="w-2 h-2 rounded-full bg-[#10B981]" />
-                  <span>Candidate matches</span>
+                  <span>Candidate cross-matches</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showMatched}
                   onChange={(e) => setShowMatched(e.target.checked)}
                   className="rounded border-[#282D35] bg-[#16191F] text-[#10B981] focus:ring-0"
-                />
-              </label>
-
-              <label className="flex items-center justify-between text-[#A4AAB5] hover:text-[#F3F4F6] cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#D97706]" />
-                  <span>MODIS unique detections</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={showModisOnly}
-                  onChange={(e) => setShowModisOnly(e.target.checked)}
-                  className="rounded border-[#282D35] bg-[#16191F] text-[#D97706] focus:ring-0"
-                />
-              </label>
-
-              <label className="flex items-center justify-between text-[#A4AAB5] hover:text-[#F3F4F6] cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
-                  <span>VIIRS unique detections</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={showViirsOnly}
-                  onChange={(e) => setShowViirsOnly(e.target.checked)}
-                  className="rounded border-[#282D35] bg-[#16191F] text-[#0284C7] focus:ring-0"
                 />
               </label>
 

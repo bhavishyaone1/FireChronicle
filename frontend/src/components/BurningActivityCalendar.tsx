@@ -33,11 +33,11 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
     ? days.find((d) => d.date === selectedDate)
     : days.find((d) => d.unique_active_cells > 0) || days[0];
 
-  const activeDayDateStr = activeDay?.date || "2024-08-12";
-  const activeCells = activeDay?.unique_active_cells ?? 68;
-  const modisRaw = activeDay?.modis_raw_count ?? 43;
-  const viirsRaw = activeDay?.viirs_raw_count ?? 87;
-  const matchedPairs = activeDay?.matched_active_cells ?? 32;
+  const activeDayDateStr = activeDay?.date || (days[0]?.date ?? "2024-08-01");
+  const activeCells = activeDay?.unique_active_cells ?? 0;
+  const modisRaw = activeDay?.modis_raw_count ?? 0;
+  const viirsRaw = activeDay?.viirs_raw_count ?? 0;
+  const matchedPairs = activeDay?.matched_active_cells ?? 0;
 
   const formatDateDisplay = (iso: string) => {
     try {
@@ -168,10 +168,21 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
               const heatClass = c.inCurrentMonth
                 ? getCellHeatStyle(c.dateStr)
                 : "bg-transparent text-[#282D35]";
+              const dayRecord = days.find((d) => d.date === c.dateStr);
 
               return (
                 <button
                   key={idx}
+                  data-date={c.dateStr}
+                  title={
+                    c.inCurrentMonth
+                      ? `${c.dateStr}: ${
+                          dayRecord
+                            ? `${dayRecord.unique_active_cells} active cells, ${dayRecord.modis_raw_count} MODIS, ${dayRecord.viirs_raw_count} VIIRS`
+                            : "No active cells recorded"
+                        }`
+                      : undefined
+                  }
                   onClick={() => {
                     if (c.inCurrentMonth) {
                       onSelectDate(isSelected ? null : c.dateStr);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
@@ -29,6 +29,7 @@ import {
   CalendarResponse,
   SensorComparisonResponse,
   AnomalyResponse,
+  DatasetProvenance,
 } from "@/types";
 
 // Dynamic import for MapLibre GL to ensure client-only execution
@@ -84,7 +85,13 @@ export default function Home() {
   const [selectedObservation, setSelectedObservation] = useState<
     GeoJSONPointFeature["properties"] | null
   >(null);
+  const selectedObservationRef = useRef(selectedObservation);
+  useEffect(() => {
+    selectedObservationRef.current = selectedObservation;
+  }, [selectedObservation]);
+
   const [mapCenterTarget, setMapCenterTarget] = useState<[number, number] | null>(null);
+  const [provenance, setProvenance] = useState<DatasetProvenance | null>(null);
 
   // Fetched data states
   const [geoJsonData, setGeoJsonData] = useState<GeoJSONFeatureCollection | null>(null);
@@ -101,6 +108,9 @@ export default function Home() {
         setIsBackendConnected(true);
         setIsFirmsConfigured(health.firms_configured);
         setActiveMode(health.active_mode);
+        if (health.provenance) {
+          setProvenance(health.provenance);
+        }
       } catch (err) {
         setIsBackendConnected(false);
       }
@@ -110,6 +120,9 @@ export default function Home() {
         if (meta.preset_aois && meta.preset_aois.length > 0) {
           setPresetAois(meta.preset_aois);
           setSelectedAoi(meta.preset_aois[0]);
+        }
+        if (meta.provenance) {
+          setProvenance(meta.provenance);
         }
       } catch (err) {
         // Fallback default remains active
@@ -168,16 +181,26 @@ export default function Home() {
       setCalendarData(cal);
       setComparisonData(comp);
       setAnomalyData(anom);
+      if (obs?.metadata?.provenance) {
+        setProvenance(obs.metadata.provenance);
+      }
 
-      // Auto-select first observation if available and none selected yet
-      if (obs && obs.features && obs.features.length > 0 && !selectedObservation) {
-        const first = obs.features[0];
-        const props = { ...first.properties };
-        if (first.geometry && first.geometry.coordinates) {
-          props.longitude = first.geometry.coordinates[0];
-          props.latitude = first.geometry.coordinates[1];
+      // Keep selected observation synchronized with filtered results
+      if (obs && obs.features && obs.features.length > 0) {
+        const curId = selectedObservationRef.current?.observation_id;
+        const isCurrentStillPresent = curId &&
+          obs.features.some((f) => f.properties.observation_id === curId);
+        if (!isCurrentStillPresent) {
+          const first = obs.features[0];
+          const props = { ...first.properties };
+          if (first.geometry && first.geometry.coordinates) {
+            props.longitude = first.geometry.coordinates[0];
+            props.latitude = first.geometry.coordinates[1];
+          }
+          setSelectedObservation(props);
         }
-        setSelectedObservation(props);
+      } else {
+        setSelectedObservation(null);
       }
     } catch (error) {
       console.error("Data synchronization error:", error);
@@ -193,8 +216,19 @@ export default function Home() {
     spatialToleranceM,
     sensorFilter,
     classificationFilter,
-    selectedObservation,
   ]);
+
+  // Derive true latest record date from active dataset
+  const latestRecordDate = React.useMemo(() => {
+    if (!geoJsonData || !geoJsonData.features || geoJsonData.features.length === 0) {
+      return null;
+    }
+    const dates = geoJsonData.features
+      .map((f) => f.properties.acq_datetime_utc)
+      .filter(Boolean)
+      .sort();
+    return dates[dates.length - 1] || null;
+  }, [geoJsonData]);
 
   useEffect(() => {
     loadData();
@@ -259,7 +293,11 @@ export default function Home() {
           {activeTab === "overview" && (
             <>
               {/* Welcome / Hero Banner */}
-              <HeroBanner isFirmsConfigured={isFirmsConfigured} />
+              <HeroBanner
+                isFirmsConfigured={isFirmsConfigured}
+                provenance={provenance}
+                latestRecordDate={latestRecordDate}
+              />
 
               {/* Observation Filters & Harmonization Controls */}
               <Controls
@@ -290,6 +328,8 @@ export default function Home() {
               <MetricsCards
                 calendarData={calendarData}
                 comparisonData={comparisonData}
+                geoJsonData={geoJsonData}
+                selectedDate={selectedDate}
                 isLoading={isLoading}
               />
 

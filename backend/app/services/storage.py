@@ -173,6 +173,54 @@ class StorageEngine:
             records.append(NormalizedObservation(**clean_row))
         return records, total_count
 
+    def get_dataset_provenance(self) -> Dict[str, Any]:
+        """Detect provenance of currently stored active observations."""
+        with self._lock:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            try:
+                rows = cursor.execute("SELECT DISTINCT source_file FROM observations").fetchall()
+                files = [r[0] for r in rows if r[0]]
+            finally:
+                cursor.close()
+
+        if not files:
+            return {
+                "provenance_type": "EMPTY",
+                "label": "NO RECORDS IN DATABASE",
+                "is_synthetic": False,
+                "is_live": False,
+                "description": "Database contains no observation records."
+            }
+
+        is_sample = any("sample_" in str(f).lower() for f in files)
+        is_live = settings.is_firms_configured()
+
+        if is_live:
+            return {
+                "provenance_type": "LIVE_NASA_FIRMS",
+                "label": "LIVE NASA FIRMS",
+                "is_synthetic": False,
+                "is_live": True,
+                "description": "Live observations retrieved directly from NASA FIRMS API via active MAP_KEY."
+            }
+        elif is_sample:
+            return {
+                "provenance_type": "SYNTHETIC_DEMO",
+                "label": "SYNTHETIC DEMONSTRATION DATA",
+                "is_synthetic": True,
+                "is_live": False,
+                "description": "Illustrative demonstration fixture — not real-time or verified NASA satellite observations."
+            }
+        else:
+            return {
+                "provenance_type": "UPLOADED_NASA_FIRMS_CSV",
+                "label": "UPLOADED NASA FIRMS CSV",
+                "is_synthetic": False,
+                "is_live": False,
+                "description": f"User-imported NASA FIRMS observation records from {', '.join(files[:3])}."
+            }
+
     def close(self):
         if self._conn:
             self._conn.close()

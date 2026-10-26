@@ -4,6 +4,14 @@ export type ConfidenceCategory = "low" | "nominal" | "high";
 export type ClassificationType = "matched" | "MODIS_only" | "VIIRS_only";
 export type CoverageStatus = "full" | "partial" | "no_pass" | "cloud_obscured";
 
+export interface DatasetProvenance {
+  provenance_type: "LIVE_NASA_FIRMS" | "UPLOADED_NASA_FIRMS_CSV" | "SYNTHETIC_DEMO" | "EMPTY";
+  label: string;
+  is_synthetic: boolean;
+  is_live: boolean;
+  description: string;
+}
+
 export interface HealthResponse {
   status: string;
   timestamp: string;
@@ -11,6 +19,7 @@ export interface HealthResponse {
   firms_configured: boolean;
   duckdb_ready: boolean;
   active_mode: string;
+  provenance?: DatasetProvenance;
 }
 
 export interface PresetAoi {
@@ -26,6 +35,7 @@ export interface MetadataResponse {
   preset_aois: PresetAoi[];
   active_mode: string;
   firms_configured: boolean;
+  provenance?: DatasetProvenance;
 }
 
 export interface GeoJSONPointFeature {
@@ -63,6 +73,7 @@ export interface GeoJSONFeatureCollection {
     bbox?: number[];
     sensor_filter?: string;
     classification_filter?: string;
+    provenance?: DatasetProvenance;
   };
 }
 

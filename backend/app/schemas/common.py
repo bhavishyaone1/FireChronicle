@@ -1,7 +1,7 @@
 """Common Enums and Shared Models for FireChronicle."""
 
 from enum import Enum
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
 
@@ -49,6 +49,7 @@ class HealthResponse(BaseModel):
     firms_configured: bool
     duckdb_ready: bool
     active_mode: str = "HACKATHON_BUILD"
+    provenance: Optional[Dict[str, Any]] = None
 
 
 class BoundingBox(BaseModel):

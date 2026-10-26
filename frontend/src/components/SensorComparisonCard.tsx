@@ -35,7 +35,7 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
   const rawViirs = comparisonData?.viirs_total_detections ?? summary?.total_viirs_raw ?? 0;
   const rawTotal = rawModis + rawViirs;
   const matchedPairs = comparisonData?.matched_pairs_count ?? 0;
-  const jaccard = comparisonData?.spatial_agreement_jaccard ?? 0.6;
+  const jaccard = comparisonData?.spatial_agreement_jaccard ?? 0.0;
   const matchedFraction = rawTotal > 0 ? Math.round((matchedPairs / rawTotal) * 1000) / 10 : 0;
 
   const formatShortDate = (iso: string) => {
@@ -60,12 +60,16 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
     Matched: d.matched_active_cells,
   }));
 
-  const frpHistogramData = [
-    { range: "0-5", MODIS: 14, VIIRS: 42 },
-    { range: "5-20", MODIS: 18, VIIRS: 35 },
-    { range: "20-50", MODIS: 9, VIIRS: 16 },
-    { range: "50-100", MODIS: 4, VIIRS: 7 },
-    { range: ">100", MODIS: 1, VIIRS: 3 },
+  // Mathematically authentic FRP Quantiles derived from actual observations
+  const qMod = comparisonData?.frp_quantiles_modis;
+  const qVii = comparisonData?.frp_quantiles_viirs;
+  const hasFrpData = Boolean(qMod || qVii);
+
+  const frpQuantilesData = [
+    { metric: "p25", MODIS: qMod?.p25 ?? 0, VIIRS: qVii?.p25 ?? 0 },
+    { metric: "Median (p50)", MODIS: qMod?.p50 ?? 0, VIIRS: qVii?.p50 ?? 0 },
+    { metric: "p75", MODIS: qMod?.p75 ?? 0, VIIRS: qVii?.p75 ?? 0 },
+    { metric: "p95", MODIS: qMod?.p95 ?? 0, VIIRS: qVii?.p95 ?? 0 },
   ];
 
   return (
@@ -110,40 +114,24 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
         </div>
       </div>
 
-      {/* Quick Stats Strip */}
-      <div className="grid grid-cols-3 gap-2 py-2 my-1 bg-[#090A0C] rounded-xl px-3 border border-[#282D35] text-xs">
+      {/* Numerical Comparison Metrics Bar */}
+      <div className="grid grid-cols-3 gap-2 py-2 border-b border-[#282D35] text-xs">
         <div className="flex flex-col">
-          <span className="text-[11px] text-[#F59E0B] font-medium flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
-            MODIS detections
+          <span className="text-[#A4AAB5] text-[11px]">MODIS raw:</span>
+          <span className="font-mono tabular-nums font-semibold text-[#F59E0B]">
+            {rawModis}
           </span>
-          <span className="text-sm font-semibold text-[#F3F4F6] font-mono tabular-nums mt-0.5">
-            {rawModis.toLocaleString()}
-          </span>
-          <span className="text-[10px] text-[#A4AAB5]">Terra + Aqua</span>
         </div>
-
-        <div className="flex flex-col border-l border-[#282D35] pl-2.5">
-          <span className="text-[11px] text-red-400 font-medium flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-            VIIRS detections
+        <div className="flex flex-col">
+          <span className="text-[#A4AAB5] text-[11px]">VIIRS raw:</span>
+          <span className="font-mono tabular-nums font-semibold text-red-400">
+            {rawViirs}
           </span>
-          <span className="text-sm font-semibold text-[#F3F4F6] font-mono tabular-nums mt-0.5">
-            {rawViirs.toLocaleString()}
-          </span>
-          <span className="text-[10px] text-[#A4AAB5]">NOAA-20/21</span>
         </div>
-
-        <div className="flex flex-col border-l border-[#282D35] pl-2.5">
-          <span className="text-[11px] text-blue-400 font-medium flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            Candidate matches
-          </span>
-          <span className="text-sm font-semibold text-[#F3F4F6] font-mono tabular-nums mt-0.5">
-            {matchedPairs.toLocaleString()}
-          </span>
-          <span className="text-[10px] text-[#A4AAB5] font-mono tabular-nums">
-            {matchedFraction}% of detections
+        <div className="flex flex-col">
+          <span className="text-[#A4AAB5] text-[11px]">Matched pairs:</span>
+          <span className="font-mono tabular-nums font-semibold text-blue-400">
+            {matchedPairs} ({matchedFraction}%)
           </span>
         </div>
       </div>
@@ -152,7 +140,7 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
       <div className="flex-1 w-full min-h-[160px] py-1.5">
         <div className="flex items-center justify-between text-xs text-[#A4AAB5] mb-1">
           <span className="font-medium text-[#F3F4F6]">
-            {viewMode === "counts" ? "Detections over time (UTC)" : "FRP distribution (MW)"}
+            {viewMode === "counts" ? "Detections over time (UTC)" : "FRP quantiles by sensor (MW)"}
           </span>
           <div className="flex items-center gap-2.5 text-[11px]">
             <span className="flex items-center gap-1 text-[#F59E0B]">
@@ -207,12 +195,12 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
               <Area type="monotone" dataKey="Matched" stroke="#3B82F6" strokeWidth={1.8} fill="url(#colorMatchedFire)" />
             </AreaChart>
           </ResponsiveContainer>
-        ) : (
+        ) : hasFrpData ? (
           <ResponsiveContainer width="100%" height={140}>
-            <BarChart data={frpHistogramData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+            <BarChart data={frpQuantilesData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid stroke="#282D35" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="range" stroke="#A4AAB5" fontSize={11} tickLine={false} />
-              <YAxis stroke="#A4AAB5" fontSize={11} tickLine={false} />
+              <XAxis dataKey="metric" stroke="#A4AAB5" fontSize={11} tickLine={false} />
+              <YAxis stroke="#A4AAB5" fontSize={11} tickLine={false} unit=" MW" />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#101216",
@@ -227,6 +215,10 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
               <Bar dataKey="VIIRS" fill="#EF4444" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+        ) : (
+          <div className="h-[140px] flex items-center justify-center text-xs text-[#A4AAB5]">
+            No active FRP measurements in current selection
+          </div>
         )}
       </div>
 

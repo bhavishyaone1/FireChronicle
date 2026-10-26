@@ -2,35 +2,45 @@
 
 import React from "react";
 import { Flame, Satellite, Link2, Grid } from "lucide-react";
-import { CalendarResponse, SensorComparisonResponse } from "@/types";
+import { CalendarResponse, SensorComparisonResponse, GeoJSONFeatureCollection } from "@/types";
 
 interface MetricsCardsProps {
   calendarData: CalendarResponse | null;
   comparisonData: SensorComparisonResponse | null;
+  geoJsonData: GeoJSONFeatureCollection | null;
+  selectedDate?: string | null;
   isLoading?: boolean;
 }
 
 export const MetricsCards: React.FC<MetricsCardsProps> = ({
   calendarData,
   comparisonData,
+  geoJsonData,
+  selectedDate,
   isLoading = false,
 }) => {
-  const summary = calendarData?.summary;
-  const rawModis = summary?.total_modis_raw ?? 0;
-  const rawViirs = summary?.total_viirs_raw ?? 0;
-  const rawTotal = rawModis + rawViirs;
+  const isDataAvailable = geoJsonData !== null;
+  const features = geoJsonData?.features || [];
 
-  // SCIENTIFIC INVARIANT:
-  // If zero detections, matches and cells must strictly be zero
-  const hasDetections = rawTotal > 0;
-  const uniqueCells = hasDetections ? (summary?.total_unique_active_cells ?? 0) : 0;
-  const matchedPairs = hasDetections ? (comparisonData?.matched_pairs_count ?? 0) : 0;
+  // SCIENTIFIC SOURCE OF TRUTH:
+  // Derived directly from the active filtered observations (respects AOI, dates, sensor filters, and single-date focus)
+  const rawModis = isDataAvailable
+    ? features.filter((f) => f.properties.sensor === "MODIS").length
+    : null;
 
-  // Bias reduction vs point density:
-  const biasReductionPercent =
-    hasDetections && rawTotal > uniqueCells
-      ? Math.round(((rawTotal - uniqueCells) / rawTotal) * 1000) / 10
-      : 0;
+  const rawViirs = isDataAvailable
+    ? features.filter((f) => f.properties.sensor === "VIIRS").length
+    : null;
+
+  const matchedPairs = isDataAvailable
+    ? (comparisonData?.matched_pairs_count ?? 0)
+    : null;
+
+  // Unique active grid cells: count of distinct occupied grid IDs
+  const distinctGridIds = isDataAvailable
+    ? new Set(features.map((f) => f.properties.grid_cell_id).filter(Boolean))
+    : null;
+  const uniqueCells = distinctGridIds !== null ? distinctGridIds.size : null;
 
   const days = calendarData?.days || [];
 
@@ -84,11 +94,16 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
   const matchedSparkline = days.map((d) => d.matched_active_cells);
   const cellsSparkline = days.map((d) => d.unique_active_cells);
 
+  const renderValue = (val: number | null) => {
+    if (val === null) return "—";
+    return val.toLocaleString();
+  };
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 animate-pulse">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-28 bg-[#101216] border border-[#282D35] rounded-xl p-4" />
+          <div key={i} className="h-26 bg-[#101216] border border-[#282D35] rounded-xl p-4" />
         ))}
       </div>
     );
@@ -109,10 +124,16 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
           <span className="text-[28px] font-semibold text-[#F3F4F6] font-mono tabular-nums leading-none tracking-tight">
-            {rawModis.toLocaleString()}
+            {renderValue(rawModis)}
           </span>
           <div className="shrink-0">
-            {generateSparkline(modisSparkline, "#F59E0B")}
+            {selectedDate ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] text-[#F59E0B] font-mono border border-[#282D35]">
+                Single day
+              </span>
+            ) : (
+              generateSparkline(modisSparkline, "#F59E0B")
+            )}
           </div>
         </div>
 
@@ -136,10 +157,16 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
           <span className="text-[28px] font-semibold text-[#F3F4F6] font-mono tabular-nums leading-none tracking-tight">
-            {rawViirs.toLocaleString()}
+            {renderValue(rawViirs)}
           </span>
           <div className="shrink-0">
-            {generateSparkline(viirsSparkline, "#EF4444")}
+            {selectedDate ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] text-red-400 font-mono border border-[#282D35]">
+                Single day
+              </span>
+            ) : (
+              generateSparkline(viirsSparkline, "#EF4444")
+            )}
           </div>
         </div>
 
@@ -163,17 +190,23 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
           <span className="text-[28px] font-semibold text-[#F3F4F6] font-mono tabular-nums leading-none tracking-tight">
-            {matchedPairs.toLocaleString()}
+            {renderValue(matchedPairs)}
           </span>
           <div className="shrink-0">
-            {generateSparkline(matchedSparkline, "#3B82F6")}
+            {selectedDate ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] text-blue-400 font-mono border border-[#282D35]">
+                Single day
+              </span>
+            ) : (
+              generateSparkline(matchedSparkline, "#3B82F6")
+            )}
           </div>
         </div>
 
         {/* Concise Explanation Below */}
         <div className="pt-2 border-t border-[#282D35] flex items-center justify-between text-xs text-[#A4AAB5]">
           <span>Within 1.0 km &amp; 60 min</span>
-          <span className="font-mono text-[11px] text-blue-400">Co-observed</span>
+          <span className="font-mono text-[11px] text-blue-400">Collocated pairs</span>
         </div>
       </div>
 
@@ -190,18 +223,24 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
           <span className="text-[28px] font-semibold text-[#F3F4F6] font-mono tabular-nums leading-none tracking-tight">
-            {uniqueCells.toLocaleString()}
+            {renderValue(uniqueCells)}
           </span>
           <div className="shrink-0">
-            {generateSparkline(cellsSparkline, "#10B981")}
+            {selectedDate ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] text-emerald-400 font-mono border border-[#282D35]">
+                Single day
+              </span>
+            ) : (
+              generateSparkline(cellsSparkline, "#10B981")
+            )}
           </div>
         </div>
 
-        {/* Concise Explanation Below */}
+        {/* Concise Explanation Below (removed -55.9% bias badge) */}
         <div className="pt-2 border-t border-[#282D35] flex items-center justify-between text-xs text-[#A4AAB5]">
           <span>1.0 km equal-area grid</span>
           <span className="font-mono text-[11px] text-emerald-400">
-            {biasReductionPercent > 0 ? `-${biasReductionPercent}% bias` : "Harmonized"}
+            Distinct cells
           </span>
         </div>
       </div>

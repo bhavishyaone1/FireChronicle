@@ -32,6 +32,7 @@ def get_health():
         firms_configured=settings.is_firms_configured(),
         duckdb_ready=True,
         active_mode=settings.active_mode,
+        provenance=storage_engine.get_dataset_provenance(),
     )
 
 
@@ -54,6 +55,7 @@ def get_metadata():
         ],
         "active_mode": settings.active_mode,
         "firms_configured": settings.is_firms_configured(),
+        "provenance": storage_engine.get_dataset_provenance(),
     }
 
 
@@ -125,6 +127,7 @@ def get_observations(
             "bbox": bbox_list,
             "sensor_filter": sensor,
             "classification_filter": classification,
+            "provenance": storage_engine.get_dataset_provenance(),
         }
     )
 

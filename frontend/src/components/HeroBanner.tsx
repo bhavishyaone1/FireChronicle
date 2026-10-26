@@ -1,13 +1,61 @@
 "use client";
 
 import React from "react";
-import { Database, Clock, Info } from "lucide-react";
+import { Database, Clock, AlertTriangle } from "lucide-react";
+import { DatasetProvenance } from "@/types";
 
 interface HeroBannerProps {
   isFirmsConfigured?: boolean;
+  provenance?: DatasetProvenance | null;
+  latestRecordDate?: string | null;
 }
 
-export const HeroBanner: React.FC<HeroBannerProps> = ({ isFirmsConfigured = false }) => {
+export const HeroBanner: React.FC<HeroBannerProps> = ({
+  isFirmsConfigured = false,
+  provenance,
+  latestRecordDate,
+}) => {
+  const formatDateTime = (iso?: string | null) => {
+    if (!iso) return "No records in selected filter";
+    try {
+      const d = new Date(iso);
+      if (!isNaN(d.getTime())) {
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const m = months[d.getUTCMonth()];
+        const day = String(d.getUTCDate()).padStart(2, "0");
+        const yr = d.getUTCFullYear();
+        const hrs = String(d.getUTCHours()).padStart(2, "0");
+        const mins = String(d.getUTCMinutes()).padStart(2, "0");
+        return `${day} ${m} ${yr}, ${hrs}:${mins} UTC`;
+      }
+    } catch {
+      // fallback
+    }
+    return iso;
+  };
+
+  const isLive = provenance?.is_live || isFirmsConfigured;
+  const isSynthetic = provenance?.is_synthetic ?? !isLive;
+  const isUploaded = provenance?.provenance_type === "UPLOADED_NASA_FIRMS_CSV";
+
+  const provenanceLabel = isLive
+    ? "LIVE NASA FIRMS"
+    : isUploaded
+    ? "UPLOADED NASA FIRMS CSV"
+    : "SYNTHETIC DEMONSTRATION DATA";
+
+  const provenanceSubtitle = isLive
+    ? "Direct satellite API stream"
+    : isUploaded
+    ? "User-imported FIRMS observations"
+    : "Illustrative fixture (not real observations)";
+
+  const dataSourceName = isLive
+    ? "NASA FIRMS API"
+    : isUploaded
+    ? "NASA FIRMS CSV"
+    : "NASA FIRMS Benchmark (Sample)";
+
   return (
     <div className="rounded-xl bg-[#101216] border border-[#282D35] p-5 shadow-sm">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -31,37 +79,50 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ isFirmsConfigured = fals
                 Data source
               </span>
               <span className="text-xs font-medium text-[#F3F4F6] mt-0.5">
-                NASA FIRMS
+                {dataSourceName}
               </span>
             </div>
           </div>
 
-          {/* Latest Observation Chip */}
+          {/* Latest Record Chip */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#16191F] border border-[#282D35] text-xs">
             <Clock className="w-3.5 h-3.5 text-[#A4AAB5]" />
             <div className="flex flex-col">
               <span className="text-[10px] text-[#A4AAB5] leading-none">
-                Latest observation
+                Latest record in selected dataset
               </span>
               <span className="text-xs font-mono tabular-nums text-[#F3F4F6] mt-0.5">
-                20 Aug 2024 23:45 UTC
+                {formatDateTime(latestRecordDate)}
               </span>
             </div>
           </div>
 
-          {/* Demonstration Mode Badge */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#16191F] border border-[#282D35] text-xs">
+          {/* Data Provenance Badge */}
+          <div
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs ${
+              isLive
+                ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-200"
+                : isUploaded
+                ? "bg-blue-950/40 border-blue-500/40 text-blue-200"
+                : "bg-amber-950/40 border-amber-500/40 text-amber-200"
+            }`}
+            title={provenance?.description}
+          >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                isFirmsConfigured ? "bg-[#10B981]" : "bg-[#F59E0B]"
+                isLive
+                  ? "bg-emerald-400"
+                  : isUploaded
+                  ? "bg-blue-400"
+                  : "bg-[#F59E0B]"
               }`}
             />
             <div className="flex flex-col">
-              <span className="text-xs font-medium text-[#F3F4F6]">
-                {isFirmsConfigured ? "Live satellite feed" : "Demonstration data"}
+              <span className="text-xs font-semibold leading-tight tracking-tight">
+                {provenanceLabel}
               </span>
-              <span className="text-[10px] text-[#A4AAB5] mt-0.5">
-                {isFirmsConfigured ? "Active FIRMS key" : "Verified sample benchmark"}
+              <span className="text-[10px] opacity-80 mt-0.5">
+                {provenanceSubtitle}
               </span>
             </div>
           </div>
