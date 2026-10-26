@@ -118,19 +118,19 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
       <div className="grid grid-cols-3 gap-2 py-2 border-b border-[#28313D] text-xs">
         <div className="flex flex-col">
           <span className="text-[#A4AFBF] text-[11px]">MODIS raw:</span>
-          <span className="font-mono tabular-nums font-semibold text-[#8B5CF6]">
+          <span className="font-mono tabular-nums font-semibold text-[#A78BFA]">
             {rawModis}
           </span>
         </div>
         <div className="flex flex-col">
           <span className="text-[#A4AFBF] text-[11px]">VIIRS raw:</span>
-          <span className="font-mono tabular-nums font-semibold text-[#06B6D4]">
+          <span className="font-mono tabular-nums font-semibold text-[#38BDF8]">
             {rawViirs}
           </span>
         </div>
         <div className="flex flex-col">
           <span className="text-[#A4AFBF] text-[11px]">Matched pairs:</span>
-          <span className="font-mono tabular-nums font-semibold text-[#10B981]">
+          <span className="font-mono tabular-nums font-semibold text-[#34D399]">
             {matchedPairs} ({matchedFraction}%)
           </span>
         </div>
@@ -143,17 +143,17 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
             {viewMode === "counts" ? "Detections over time (UTC)" : "FRP quantiles by sensor (MW)"}
           </span>
           <div className="flex items-center gap-2.5 text-[11px]">
-            <span className="flex items-center gap-1 text-[#8B5CF6]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]" />
+            <span className="flex items-center gap-1 text-[#A78BFA]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#A78BFA]" />
               MODIS
             </span>
-            <span className="flex items-center gap-1 text-[#06B6D4]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#06B6D4]" />
+            <span className="flex items-center gap-1 text-[#38BDF8]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
               VIIRS
             </span>
             {viewMode === "counts" && (
-              <span className="flex items-center gap-1 text-[#10B981]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+              <span className="flex items-center gap-1 text-[#34D399]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
                 Matched
               </span>
             )}
@@ -165,16 +165,16 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
             <AreaChart data={timeseriesData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorModisFire" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#A78BFA" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#A78BFA" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorViirsFire" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorMatchedFire" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#34D399" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#34D399" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="#28313D" strokeDasharray="3 3" vertical={false} />
@@ -190,9 +190,9 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
                   fontFamily: "var(--font-geist-sans), sans-serif",
                 }}
               />
-              <Area type="monotone" dataKey="MODIS" stroke="#8B5CF6" strokeWidth={1.8} fill="url(#colorModisFire)" />
-              <Area type="monotone" dataKey="VIIRS" stroke="#06B6D4" strokeWidth={1.8} fill="url(#colorViirsFire)" />
-              <Area type="monotone" dataKey="Matched" stroke="#10B981" strokeWidth={1.8} fill="url(#colorMatchedFire)" />
+              <Area type="monotone" dataKey="MODIS" stroke="#A78BFA" strokeWidth={1.8} fill="url(#colorModisFire)" />
+              <Area type="monotone" dataKey="VIIRS" stroke="#38BDF8" strokeWidth={1.8} fill="url(#colorViirsFire)" />
+              <Area type="monotone" dataKey="Matched" stroke="#34D399" strokeWidth={1.8} fill="url(#colorMatchedFire)" />
             </AreaChart>
           </ResponsiveContainer>
         ) : hasFrpData ? (
@@ -211,8 +211,8 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
                   fontFamily: "var(--font-geist-sans), sans-serif",
                 }}
               />
-              <Bar dataKey="MODIS" fill="#8B5CF6" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="VIIRS" fill="#06B6D4" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="MODIS" fill="#A78BFA" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="VIIRS" fill="#38BDF8" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (

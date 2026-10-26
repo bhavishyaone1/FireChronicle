@@ -48,8 +48,8 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Left: Project Purpose Subtitle */}
       <div className="flex items-center gap-3">
         <span className="text-xs font-normal text-[#A4AFBF] hidden sm:inline-block">
-          Harmonizing <span className="text-[#8B5CF6] font-medium">MODIS (1 km)</span> and{" "}
-          <span className="text-[#06B6D4] font-medium">VIIRS (375 m)</span> satellite active fire observations
+          Harmonizing <span className="text-[#A78BFA] font-medium">MODIS (1 km)</span> and{" "}
+          <span className="text-[#38BDF8] font-medium">VIIRS (375 m)</span> satellite active fire observations
         </span>
       </div>
 
@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                isFirmsConfigured ? "bg-[#10B981]" : "bg-[#F59E0B]"
+                isFirmsConfigured ? "bg-[#34D399]" : "bg-[#F59E0B]"
               }`}
             />
             <span className="font-medium text-[#F1F5F9]">NASA FIRMS feed</span>

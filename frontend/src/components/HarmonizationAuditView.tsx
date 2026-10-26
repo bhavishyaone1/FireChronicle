@@ -191,7 +191,7 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
             <span className="text-2xl font-bold font-mono tabular-nums text-[#F59E0B]">{uniqueCells}</span>
             <span className="text-xs text-[#A4AFBF]">distinct 1.0 km cells</span>
           </div>
-          <span className="text-[11px] text-[#10B981] mt-2 block font-medium">
+          <span className="text-[11px] text-[#34D399] mt-2 block font-medium">
             &darr; {biasReduction}% point-density inflation eliminated
           </span>
         </div>
@@ -199,10 +199,10 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
         <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-[#A4AFBF]">
             <span>Spatial agreement (Jaccard)</span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono tabular-nums text-[#10B981]">
+            <span className="text-2xl font-bold font-mono tabular-nums text-[#34D399]">
               {comparisonData?.spatial_agreement_jaccard ?? "—"}
             </span>
             <span className="text-xs text-[#6E7A8A]">grid overlap index</span>
@@ -279,7 +279,7 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
               </div>
               <div>
                 <span className="text-[#6E7A8A] text-[10px] block">MODIS matched</span>
-                <span className="text-[#8B5CF6]">
+                <span className="text-[#A78BFA]">
                   {comparisonData?.algorithm_comparison?.greedy_1toMany?.modis_matched ?? "—"}
                 </span>
               </div>
@@ -320,7 +320,7 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
               </div>
               <div>
                 <span className="text-[#6E7A8A] text-[10px] block">MODIS matched</span>
-                <span className="text-[#8B5CF6]">
+                <span className="text-[#A78BFA]">
                   {comparisonData?.algorithm_comparison?.global_assignment_1to1?.modis_matched ?? "—"}
                 </span>
               </div>
@@ -429,7 +429,7 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
                         {p.observation_id.slice(0, 10)}...
                       </td>
                       <td className="py-2 px-3 font-sans">
-                        <span className={`inline-flex items-center gap-1 font-semibold ${isModis ? "text-[#8B5CF6]" : "text-[#06B6D4]"}`}>
+                        <span className={`inline-flex items-center gap-1 font-semibold ${isModis ? "text-[#A78BFA]" : "text-[#38BDF8]"}`}>
                           {p.sensor}
                         </span>
                         <span className="text-[#6E7A8A] text-[11px] block">{p.platform}</span>
@@ -450,10 +450,10 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
                       <td className="py-2 px-3 font-sans">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
                           p.classification === "matched"
-                            ? "bg-[#10B981]/20 text-[#6EE7B7] border border-[#10B981]/40"
+                            ? "bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/40"
                             : p.classification === "MODIS_only"
                             ? "bg-[#F59E0B]/20 text-[#FCD34D] border border-[#F59E0B]/40"
-                            : "bg-[#F43F5E]/20 text-[#FDA4AF] border border-[#F43F5E]/40"
+                            : "bg-[#F87171]/20 text-[#FDA4AF] border border-[#F87171]/40"
                         }`}>
                           {p.classification.replace("_", " ")}
                         </span>
@@ -461,7 +461,7 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
                       <td className="py-2 px-3 text-[11px]">
                         {p.matched_pair_id ? (
                           <div>
-                            <span className="text-[#10B981] font-medium block">
+                            <span className="text-[#34D399] font-medium block">
                               {p.match_distance_m ?? 0}m &bull; {p.match_time_delta_min ?? 0}m
                             </span>
                             <span className="text-[10px] text-[#727A88]">

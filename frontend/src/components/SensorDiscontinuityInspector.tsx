@@ -51,7 +51,7 @@ export const SensorDiscontinuityInspector: React.FC<SensorDiscontinuityInspector
         <div className="bg-[#090B0F] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between border-b border-[#28313D] pb-2 mb-3">
             <span className="font-semibold text-[#F1F5F9] flex items-center gap-1.5 text-xs">
-              <span className="w-2 h-2 rounded-full bg-[#8B5CF6] inline-block" />
+              <span className="w-2 h-2 rounded-full bg-[#A78BFA] inline-block" />
               MODIS (Terra &amp; Aqua)
             </span>
             <span className="text-[11px] px-2 py-0.5 rounded bg-[#151A22] text-[#A4AFBF] font-mono border border-[#28313D]">
@@ -65,7 +65,7 @@ export const SensorDiscontinuityInspector: React.FC<SensorDiscontinuityInspector
             </div>
             <div className="flex justify-between">
               <span className="text-[#A4AFBF] font-normal">Candidate matched with VIIRS:</span>
-              <span className="font-semibold text-[#10B981] font-mono tabular-nums">
+              <span className="font-semibold text-[#34D399] font-mono tabular-nums">
                 {Math.round(comparisonData.matched_fraction_modis * 100)}% ({comparisonData.matched_pairs_count} pairs)
               </span>
             </div>
@@ -88,7 +88,7 @@ export const SensorDiscontinuityInspector: React.FC<SensorDiscontinuityInspector
         <div className="bg-[#090B0F] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between border-b border-[#28313D] pb-2 mb-3">
             <span className="font-semibold text-[#F1F5F9] flex items-center gap-1.5 text-xs">
-              <span className="w-2 h-2 rounded-full bg-[#06B6D4] inline-block" />
+              <span className="w-2 h-2 rounded-full bg-[#38BDF8] inline-block" />
               VIIRS (NOAA-20, NOAA-21, S-NPP)
             </span>
             <span className="text-[11px] px-2 py-0.5 rounded bg-[#151A22] text-[#A4AFBF] font-mono border border-[#28313D]">
@@ -102,13 +102,13 @@ export const SensorDiscontinuityInspector: React.FC<SensorDiscontinuityInspector
             </div>
             <div className="flex justify-between">
               <span className="text-[#A4AFBF] font-normal">Candidate matched with MODIS:</span>
-              <span className="font-semibold text-[#10B981] font-mono tabular-nums">
+              <span className="font-semibold text-[#34D399] font-mono tabular-nums">
                 {Math.round(comparisonData.matched_fraction_viirs * 100)}% ({comparisonData.matched_pairs_count} pairs)
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#A4AFBF] font-normal">Sensor-unique detections:</span>
-              <span className="font-semibold text-[#F43F5E] font-mono tabular-nums">{comparisonData.viirs_only_count}</span>
+              <span className="font-semibold text-[#F87171] font-mono tabular-nums">{comparisonData.viirs_only_count}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#A4AFBF] font-normal">Median FRP:</span>

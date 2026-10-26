@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Layers,
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { GeoJSONPointFeature } from "@/types";
 import { Button } from "@/components/ui/Button";
 
@@ -140,95 +141,104 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
       </div>
 
       {/* Main Content Area */}
-      <div className="flex flex-col gap-3 py-3">
-        {/* Thermal Infrared Satellite Cutout Visualizer */}
-        <div className="relative h-28 w-full rounded-lg overflow-hidden bg-gradient-to-br from-[#090B0F] via-[#151A22] to-[#090B0F] border border-[#28313D] flex items-center justify-center">
-          {/* Calibrated Thermal Core (refined, static, no excessive pulse) */}
-          <div className="absolute w-14 h-14 rounded-full bg-[#DC2626]/25 blur-md" />
-          <div className="absolute w-7 h-7 rounded-full bg-[#F59E0B]/40 blur-sm" />
-          <div className="absolute w-2.5 h-2.5 rounded-full bg-amber-100 shadow-sm" />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={obs.observation_id || `${obs.latitude}-${obs.longitude}`}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+          className="flex flex-col gap-3 py-3"
+        >
+          {/* Thermal Infrared Satellite Cutout Visualizer */}
+          <div className="relative h-28 w-full rounded-lg overflow-hidden bg-gradient-to-br from-[#090B0F] via-[#151A22] to-[#090B0F] border border-[#28313D] flex items-center justify-center">
+            {/* Calibrated Thermal Core (refined, static, no excessive pulse) */}
+            <div className="absolute w-14 h-14 rounded-full bg-[#DC2626]/25 blur-md" />
+            <div className="absolute w-7 h-7 rounded-full bg-[#F59E0B]/40 blur-sm" />
+            <div className="absolute w-2.5 h-2.5 rounded-full bg-amber-100 shadow-sm" />
 
-          {/* Badges Overlay */}
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-            <span
-              className={`px-2 py-0.5 rounded-full text-[11px] font-medium tracking-normal flex items-center gap-1 shadow-sm ${
-                isViirs
-                  ? "bg-[#06B6D4]/15 text-[#67E8F9] border border-[#06B6D4]/40"
-                  : "bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/40"
-              }`}
-            >
+            {/* Badges Overlay */}
+            <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  isViirs ? "bg-[#06B6D4]" : "bg-[#8B5CF6]"
+                className={`px-2 py-0.5 rounded-full text-[11px] font-medium tracking-normal flex items-center gap-1 shadow-sm ${
+                  isViirs
+                    ? "bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/40"
+                    : "bg-[#A78BFA]/15 text-[#A78BFA] border border-[#A78BFA]/40"
                 }`}
-              />
-              {obs.sensor}
-            </span>
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isViirs ? "bg-[#38BDF8]" : "bg-[#A78BFA]"
+                  }`}
+                />
+                {obs.sensor}
+              </span>
 
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#151A22] text-[#A4AFBF] border border-[#28313D] shadow-sm capitalize">
-              {obs.confidence_category} confidence
-            </span>
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#151A22] text-[#A4AFBF] border border-[#28313D] shadow-sm capitalize">
+                {obs.confidence_category} confidence
+              </span>
+            </div>
+
+            {/* Timestamp on bottom right of thumbnail */}
+            <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-[#090B0F]/90 text-[11px] font-mono tabular-nums text-[#A4AFBF] backdrop-blur border border-[#28313D]">
+              {formatDateTime(obs.acq_datetime_utc)}
+            </div>
           </div>
 
-          {/* Timestamp on bottom right of thumbnail */}
-          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-[#090B0F]/90 text-[11px] font-mono tabular-nums text-[#A4AFBF] backdrop-blur border border-[#28313D]">
-            {formatDateTime(obs.acq_datetime_utc)}
-          </div>
-        </div>
+          {/* Observation Attributes Grid */}
+          <div className="flex flex-col gap-1.5 text-xs">
+            <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+              <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
+                Coordinates
+              </span>
+              <span className="font-mono text-xs tabular-nums text-[#F1F5F9]">
+                {formatCoordinates(obs.latitude, obs.longitude)}
+              </span>
+            </div>
 
-        {/* Observation Attributes Grid */}
-        <div className="flex flex-col gap-1.5 text-xs">
-          <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
-            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
-              Coordinates
-            </span>
-            <span className="font-mono text-xs tabular-nums text-[#F1F5F9]">
-              {formatCoordinates(obs.latitude, obs.longitude)}
-            </span>
-          </div>
+            <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+              <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
+                Sensor &amp; platform
+              </span>
+              <span className="text-[13px] font-normal text-[#F1F5F9]">
+                {obs.sensor} ({obs.platform})
+              </span>
+            </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
-            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
-              Sensor &amp; platform
-            </span>
-            <span className="text-[13px] font-normal text-[#F1F5F9]">
-              {obs.sensor} ({obs.platform})
-            </span>
-          </div>
+            <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+              <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-[#F59E0B]" aria-hidden="true" />
+                Fire radiative power (FRP)
+              </span>
+              <span className="font-mono text-[13px] font-semibold text-[#F59E0B] tabular-nums">
+                {obs.frp_mw != null ? `${obs.frp_mw.toFixed(1)} MW` : "N/A"}
+              </span>
+            </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
-            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-[#F59E0B]" aria-hidden="true" />
-              Fire radiative power (FRP)
-            </span>
-            <span className="font-mono text-[13px] font-semibold text-[#F59E0B] tabular-nums">
-              {obs.frp_mw != null ? `${obs.frp_mw.toFixed(1)} MW` : "N/A"}
-            </span>
-          </div>
+            <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+              <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
+                Confidence scale
+              </span>
+              <span className="text-[13px] font-normal text-[#F1F5F9] capitalize">
+                {obs.confidence_category} ({isViirs ? "Categorical" : `${obs.raw_confidence}%`})
+              </span>
+            </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
-            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
-              Confidence scale
-            </span>
-            <span className="text-[13px] font-normal text-[#F1F5F9] capitalize">
-              {obs.confidence_category} ({isViirs ? "Categorical" : `${obs.raw_confidence}%`})
-            </span>
+            <div className="flex items-center justify-between py-1.5">
+              <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
+                Satellite product
+              </span>
+              <span className="font-mono text-xs text-[#A4AFBF]">
+                {isViirs ? "VNP14IMGTDL (375 m)" : "MOD14 / MYD14 (1 km)"}
+              </span>
+            </div>
           </div>
-
-          <div className="flex items-center justify-between py-1.5">
-            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
-              Satellite product
-            </span>
-            <span className="font-mono text-xs text-[#A4AFBF]">
-              {isViirs ? "VNP14IMGTDL (375 m)" : "MOD14 / MYD14 (1 km)"}
-            </span>
-          </div>
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
 
       {/* Action Button & Scientific Integrity Note */}
       <div className="flex flex-col gap-2 pt-2 border-t border-[#28313D]">

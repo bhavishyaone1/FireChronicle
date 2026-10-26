@@ -111,9 +111,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 isLive
-                  ? "bg-[#10B981]"
+                  ? "bg-[#34D399]"
                   : isUploaded
-                  ? "bg-blue-400"
+                  ? "bg-[#38BDF8]"
                   : "bg-[#F59E0B]"
               }`}
             />

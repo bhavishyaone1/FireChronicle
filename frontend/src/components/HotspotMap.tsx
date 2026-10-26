@@ -158,10 +158,10 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       filter: ["all", ["!has", "point_count"], ["==", "sensor", "MODIS"]] as any,
       paint: {
         "circle-radius": 10,
-        "circle-color": "#8B5CF6",
+        "circle-color": "#A78BFA",
         "circle-opacity": (layerOpacity / 100) * 0.7,
         "circle-stroke-width": 1.5,
-        "circle-stroke-color": "#7C3AED",
+        "circle-stroke-color": "#8B5CF6",
       },
     });
 
@@ -173,10 +173,10 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       filter: ["all", ["!has", "point_count"], ["==", "sensor", "VIIRS"]] as any,
       paint: {
         "circle-radius": 5,
-        "circle-color": "#06B6D4",
+        "circle-color": "#38BDF8",
         "circle-opacity": layerOpacity / 100,
         "circle-stroke-width": 1.5,
-        "circle-stroke-color": "#0891B2",
+        "circle-stroke-color": "#0284C7",
       },
     });
 
@@ -190,7 +190,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         "circle-radius": 13,
         "circle-color": "transparent",
         "circle-stroke-width": 2,
-        "circle-stroke-color": "#10B981",
+        "circle-stroke-color": "#34D399",
         "circle-stroke-opacity": layerOpacity / 100,
       },
     });
@@ -459,40 +459,40 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
             <div className="flex flex-col gap-1.5">
               <label className="flex items-center justify-between text-[#A4AFBF] hover:text-[#F1F5F9] cursor-pointer py-0.5">
                 <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
+                  <span className="w-2 h-2 rounded-full bg-[#A78BFA]" />
                   <span>MODIS (1.0 km footprint)</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showModis}
                   onChange={(e) => setShowModis(e.target.checked)}
-                  className="rounded border-[#28313D] bg-[#151A22] text-[#8B5CF6] focus:ring-0"
+                  className="rounded border-[#28313D] bg-[#151A22] text-[#A78BFA] focus:ring-0"
                 />
               </label>
 
               <label className="flex items-center justify-between text-[#A4AFBF] hover:text-[#F1F5F9] cursor-pointer py-0.5">
                 <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#06B6D4]" />
+                  <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
                   <span>VIIRS (375 m footprint)</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showViirs}
                   onChange={(e) => setShowViirs(e.target.checked)}
-                  className="rounded border-[#28313D] bg-[#151A22] text-[#06B6D4] focus:ring-0"
+                  className="rounded border-[#28313D] bg-[#151A22] text-[#38BDF8] focus:ring-0"
                 />
               </label>
 
               <label className="flex items-center justify-between text-[#A4AFBF] hover:text-[#F1F5F9] cursor-pointer py-0.5">
                 <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+                  <span className="w-2 h-2 rounded-full bg-[#34D399]" />
                   <span>Candidate cross-matches</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showMatched}
                   onChange={(e) => setShowMatched(e.target.checked)}
-                  className="rounded border-[#28313D] bg-[#151A22] text-[#10B981] focus:ring-0"
+                  className="rounded border-[#28313D] bg-[#151A22] text-[#34D399] focus:ring-0"
                 />
               </label>
 
@@ -695,8 +695,8 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                     <td className="p-2 font-sans">
                       <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium ${
                         f.properties.sensor === "MODIS"
-                          ? "bg-[#8B5CF6]/20 text-[#A78BFA] border border-[#8B5CF6]/40"
-                          : "bg-[#06B6D4]/20 text-[#67E8F9] border border-[#06B6D4]/40"
+                          ? "bg-[#A78BFA]/20 text-[#A78BFA] border border-[#A78BFA]/40"
+                          : "bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40"
                       }`}>
                         {f.properties.sensor}
                       </span>

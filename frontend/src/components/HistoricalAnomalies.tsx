@@ -119,7 +119,7 @@ export const HistoricalAnomalies: React.FC<HistoricalAnomaliesProps> = ({
             </span>
           ) : (
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#151A22] border border-[#28313D] text-[#A4AFBF] text-xs font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
               All 2024 months within nominal historical baseline
             </span>
           )}

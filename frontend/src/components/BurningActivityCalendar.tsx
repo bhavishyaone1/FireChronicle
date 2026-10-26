@@ -8,6 +8,7 @@ import {
   ExternalLink,
   Flame,
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { CalendarResponse, CalendarDaySummary } from "@/types";
 
 interface BurningActivityCalendarProps {
@@ -201,56 +202,65 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
 
         {/* Right: Selected Day Activity Summary */}
         <div className="md:col-span-5 bg-[#090B0F] rounded-xl p-3 border border-[#28313D] flex flex-col justify-between">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between border-b border-[#28313D] pb-1.5">
-              <span className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-1.5 font-mono tabular-nums">
-                <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
-                {formatDateDisplay(activeDayDateStr)}
-              </span>
-              {selectedDate && (
-                <button
-                  onClick={() => onSelectDate(null)}
-                  className="text-[11px] text-[#F59E0B] hover:text-[#fbbf24] font-medium transition-colors duration-150"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
-                  Active grid cells
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeDayDateStr}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+              className="flex flex-col gap-2"
+            >
+              <div className="flex items-center justify-between border-b border-[#28313D] pb-1.5">
+                <span className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-1.5 font-mono tabular-nums">
+                  <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
+                  {formatDateDisplay(activeDayDateStr)}
                 </span>
-                <span className="font-mono tabular-nums font-semibold text-[#F1F5F9]">{activeCells}</span>
+                {selectedDate && (
+                  <button
+                    onClick={() => onSelectDate(null)}
+                    className="text-[11px] text-[#F59E0B] hover:text-[#fbbf24] font-medium transition-colors duration-150"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]" />
-                  MODIS detections
-                </span>
-                <span className="font-mono tabular-nums font-semibold text-[#8B5CF6]">{modisRaw}</span>
-              </div>
+              <div className="flex flex-col gap-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+                    Active grid cells
+                  </span>
+                  <span className="font-mono tabular-nums font-semibold text-[#F1F5F9]">{activeCells}</span>
+                </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#06B6D4]" />
-                  VIIRS detections
-                </span>
-                <span className="font-mono tabular-nums font-semibold text-[#06B6D4]">{viirsRaw}</span>
-              </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#A78BFA]" />
+                    MODIS detections
+                  </span>
+                  <span className="font-mono tabular-nums font-semibold text-[#A78BFA]">{modisRaw}</span>
+                </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-                  Candidate matches
-                </span>
-                <span className="font-mono tabular-nums font-semibold text-[#10B981]">{matchedPairs}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+                    VIIRS detections
+                  </span>
+                  <span className="font-mono tabular-nums font-semibold text-[#38BDF8]">{viirsRaw}</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
+                    Candidate matches
+                  </span>
+                  <span className="font-mono tabular-nums font-semibold text-[#34D399]">{matchedPairs}</span>
+                </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </AnimatePresence>
 
           <button
             onClick={() => onSelectDate(activeDayDateStr)}

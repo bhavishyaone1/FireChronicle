@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "motion/react";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { HeroBanner } from "@/components/HeroBanner";
@@ -294,8 +295,17 @@ export default function Home() {
 
         {/* Dashboard Content Container */}
         <main className="flex-1 p-5 space-y-5 max-w-[1720px] w-full mx-auto">
-          {/* OVERVIEW TAB (Primary Visual Target) */}
-          {activeTab === "overview" && (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="space-y-5"
+            >
+              {/* OVERVIEW TAB (Primary Visual Target) */}
+              {activeTab === "overview" && (
             <>
               {/* Welcome / Hero Banner */}
               <HeroBanner
@@ -458,13 +468,15 @@ export default function Home() {
           )}
 
           {activeTab === "methodology" && <MethodologyProvenance />}
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         {/* Global Scientific Footer */}
         <footer className="border-t border-[#28313D] py-4 px-6 bg-[#090B0F] text-xs text-[#A4AFBF] mt-auto shrink-0">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-[1720px] mx-auto">
             <span>
-              Data sources: <span className="text-[#F59E0B] font-medium">NASA FIRMS</span> &bull; <span className="text-[#8B5CF6]">MODIS (Terra/Aqua)</span> &bull; <span className="text-[#06B6D4]">VIIRS (NOAA-20/21)</span>
+              Data sources: <span className="text-[#F59E0B] font-medium">NASA FIRMS</span> &bull; <span className="text-[#A78BFA]">MODIS (Terra/Aqua)</span> &bull; <span className="text-[#38BDF8]">VIIRS (NOAA-20/21)</span>
             </span>
             <span className="text-xs text-[#A4AFBF] font-normal">
               Not an official NASA product. For educational and research purposes only.

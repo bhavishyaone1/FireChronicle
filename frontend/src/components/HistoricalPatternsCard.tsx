@@ -127,7 +127,7 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
         <div className="flex items-start gap-2">
           <AlertTriangle
             className={`w-4 h-4 shrink-0 mt-0.5 ${
-              hasAnomaly ? "text-[#F59E0B]" : "text-[#10B981]"
+              hasAnomaly ? "text-[#F59E0B]" : "text-[#34D399]"
             }`}
           />
           <div className="flex flex-col">
