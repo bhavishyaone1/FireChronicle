@@ -58,13 +58,13 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
   // If no observation is selected, show an honest, informative empty state
   if (!selectedObservation) {
     return (
-      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-5 flex flex-col justify-between shadow-sm h-full">
-        <div className="flex items-center justify-between pb-3 border-b border-[#282D35]">
+      <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-5 flex flex-col justify-between shadow-sm h-full">
+        <div className="flex items-center justify-between pb-3 border-b border-[#28313D]">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-[#16191F] border border-[#282D35] flex items-center justify-center">
-              <Crosshair className="w-3.5 h-3.5 text-[#A4AAB5]" aria-hidden="true" />
+            <div className="w-6 h-6 rounded-lg bg-[#151A22] border border-[#28313D] flex items-center justify-center">
+              <Crosshair className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
             </div>
-            <h3 className="text-base font-semibold text-[#F3F4F6] tracking-tight">
+            <h3 className="text-base font-semibold text-[#F1F5F9] tracking-tight">
               Selected observation
             </h3>
           </div>
@@ -81,18 +81,18 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
 
         {/* Empty State Graphic & Instructions */}
         <div className="my-auto py-8 flex flex-col items-center justify-center text-center px-4">
-          <div className="w-12 h-12 rounded-xl bg-[#16191F] border border-[#282D35] flex items-center justify-center mb-3">
-            <Crosshair className="w-6 h-6 text-[#A4AAB5]" aria-hidden="true" />
+          <div className="w-12 h-12 rounded-xl bg-[#151A22] border border-[#28313D] flex items-center justify-center mb-3">
+            <Crosshair className="w-6 h-6 text-[#A4AFBF]" aria-hidden="true" />
           </div>
-          <h4 className="text-sm font-semibold text-[#F3F4F6] mb-1">
+          <h4 className="text-sm font-semibold text-[#F1F5F9] mb-1">
             No observation selected
           </h4>
-          <p className="text-xs text-[#A4AAB5] leading-relaxed max-w-xs">
+          <p className="text-xs text-[#A4AFBF] leading-relaxed max-w-xs">
             Click any active fire hotspot on the map or select a date in the burning activity calendar to inspect sensor attributes, calibrated radiative power, and candidate matching status.
           </p>
         </div>
 
-        <div className="p-3 rounded-lg bg-[#090A0C] border border-[#282D35] flex items-start gap-2 text-xs text-[#A4AAB5] leading-relaxed">
+        <div className="p-3 rounded-lg bg-[#090B0F] border border-[#28313D] flex items-start gap-2 text-xs text-[#A4AFBF] leading-relaxed">
           <Info className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" aria-hidden="true" />
           <span>
             Observations reflect thermal infrared detections within the sensor footprint, not ground-verified wildfire perimeters.
@@ -106,14 +106,14 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
   const isViirs = obs.sensor === "VIIRS";
 
   return (
-    <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between shadow-sm h-full">
+    <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm h-full">
       {/* Panel Header with Deselect Action */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#282D35]">
+      <div className="flex items-center justify-between pb-3 border-b border-[#28313D]">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/25 flex items-center justify-center">
             <Crosshair className="w-3.5 h-3.5 text-[#F59E0B]" aria-hidden="true" />
           </div>
-          <h3 className="text-base font-semibold text-[#F3F4F6] tracking-tight">
+          <h3 className="text-base font-semibold text-[#F1F5F9] tracking-tight">
             Selected observation
           </h3>
         </div>
@@ -131,7 +131,7 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
             <button
               onClick={onDeselectObservation}
               title="Deselect observation"
-              className="p-1 rounded-md text-[#A4AAB5] hover:text-[#F3F4F6] hover:bg-[#16191F] transition-colors duration-150"
+              className="p-1 rounded-md text-[#A4AFBF] hover:text-[#F1F5F9] hover:bg-[#151A22] transition-colors duration-150"
             >
               <X className="w-4 h-4" />
             </button>
@@ -142,10 +142,10 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
       {/* Main Content Area */}
       <div className="flex flex-col gap-3 py-3">
         {/* Thermal Infrared Satellite Cutout Visualizer */}
-        <div className="relative h-28 w-full rounded-lg overflow-hidden bg-gradient-to-br from-[#090A0C] via-[#16191F] to-[#090A0C] border border-[#282D35] flex items-center justify-center">
+        <div className="relative h-28 w-full rounded-lg overflow-hidden bg-gradient-to-br from-[#090B0F] via-[#151A22] to-[#090B0F] border border-[#28313D] flex items-center justify-center">
           {/* Calibrated Thermal Core (refined, static, no excessive pulse) */}
-          <div className="absolute w-14 h-14 rounded-full bg-red-600/30 blur-md" />
-          <div className="absolute w-7 h-7 rounded-full bg-[#F59E0B]/50 blur-sm" />
+          <div className="absolute w-14 h-14 rounded-full bg-[#DC2626]/25 blur-md" />
+          <div className="absolute w-7 h-7 rounded-full bg-[#F59E0B]/40 blur-sm" />
           <div className="absolute w-2.5 h-2.5 rounded-full bg-amber-100 shadow-sm" />
 
           {/* Badges Overlay */}
@@ -153,53 +153,53 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
             <span
               className={`px-2 py-0.5 rounded-full text-[11px] font-medium tracking-normal flex items-center gap-1 shadow-sm ${
                 isViirs
-                  ? "bg-red-950/80 text-red-300 border border-red-500/40"
-                  : "bg-amber-950/80 text-amber-300 border border-[#F59E0B]/40"
+                  ? "bg-[#06B6D4]/15 text-[#67E8F9] border border-[#06B6D4]/40"
+                  : "bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/40"
               }`}
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
-                  isViirs ? "bg-red-400" : "bg-[#F59E0B]"
+                  isViirs ? "bg-[#06B6D4]" : "bg-[#8B5CF6]"
                 }`}
               />
               {obs.sensor}
             </span>
 
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#16191F] text-[#A4AAB5] border border-[#282D35] shadow-sm capitalize">
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#151A22] text-[#A4AFBF] border border-[#28313D] shadow-sm capitalize">
               {obs.confidence_category} confidence
             </span>
           </div>
 
           {/* Timestamp on bottom right of thumbnail */}
-          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-[#090A0C]/90 text-[11px] font-mono tabular-nums text-[#A4AAB5] backdrop-blur border border-[#282D35]">
+          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-[#090B0F]/90 text-[11px] font-mono tabular-nums text-[#A4AFBF] backdrop-blur border border-[#28313D]">
             {formatDateTime(obs.acq_datetime_utc)}
           </div>
         </div>
 
         {/* Observation Attributes Grid */}
         <div className="flex flex-col gap-1.5 text-xs">
-          <div className="flex items-center justify-between py-1.5 border-b border-[#282D35]">
-            <span className="text-[13px] font-medium text-[#A4AAB5] flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#A4AAB5]" aria-hidden="true" />
+          <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
               Coordinates
             </span>
-            <span className="font-mono text-xs tabular-nums text-[#F3F4F6]">
+            <span className="font-mono text-xs tabular-nums text-[#F1F5F9]">
               {formatCoordinates(obs.latitude, obs.longitude)}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-[#282D35]">
-            <span className="text-[13px] font-medium text-[#A4AAB5] flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[#A4AAB5]" aria-hidden="true" />
+          <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
               Sensor &amp; platform
             </span>
-            <span className="text-[13px] font-normal text-[#F3F4F6]">
+            <span className="text-[13px] font-normal text-[#F1F5F9]">
               {obs.sensor} ({obs.platform})
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-[#282D35]">
-            <span className="text-[13px] font-medium text-[#A4AAB5] flex items-center gap-1.5">
+          <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-[#F59E0B]" aria-hidden="true" />
               Fire radiative power (FRP)
             </span>
@@ -208,22 +208,22 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-[#282D35]">
-            <span className="text-[13px] font-medium text-[#A4AAB5] flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#A4AAB5]" aria-hidden="true" />
+          <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
               Confidence scale
             </span>
-            <span className="text-[13px] font-normal text-[#F3F4F6] capitalize">
+            <span className="text-[13px] font-normal text-[#F1F5F9] capitalize">
               {obs.confidence_category} ({isViirs ? "Categorical" : `${obs.raw_confidence}%`})
             </span>
           </div>
 
           <div className="flex items-center justify-between py-1.5">
-            <span className="text-[13px] font-medium text-[#A4AAB5] flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-[#A4AAB5]" aria-hidden="true" />
+            <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
               Satellite product
             </span>
-            <span className="font-mono text-xs text-[#A4AAB5]">
+            <span className="font-mono text-xs text-[#A4AFBF]">
               {isViirs ? "VNP14IMGTDL (375 m)" : "MOD14 / MYD14 (1 km)"}
             </span>
           </div>
@@ -231,7 +231,7 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
       </div>
 
       {/* Action Button & Scientific Integrity Note */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-[#282D35]">
+      <div className="flex flex-col gap-2 pt-2 border-t border-[#28313D]">
         <Button
           variant="secondary"
           size="md"
@@ -242,7 +242,7 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
           <span>Center on map</span>
         </Button>
 
-        <div className="p-2.5 rounded-lg bg-[#090A0C] border border-[#282D35] flex items-start gap-1.5 text-[11px] font-normal text-[#A4AAB5] leading-relaxed">
+        <div className="p-2.5 rounded-lg bg-[#090B0F] border border-[#28313D] flex items-start gap-1.5 text-[11px] font-normal text-[#A4AFBF] leading-relaxed">
           <Info className="w-3.5 h-3.5 text-[#F59E0B] shrink-0 mt-0.5" aria-hidden="true" />
           <span>
             Hotspot detections indicate active thermal radiation within the sensor pixel, not confirmed wildfire perimeters or burned area.

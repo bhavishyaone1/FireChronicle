@@ -108,18 +108,18 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Header & Data Provenance Bar */}
-      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-5 shadow-sm">
+      <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-5 shadow-sm">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="p-1.5 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/30 text-[#F59E0B]">
                 <FileSpreadsheet className="w-4 h-4" />
               </span>
-              <h2 className="text-lg font-semibold text-[#F3F4F6] tracking-tight">
-                Harmonization audit & verification ledger
+              <h2 className="text-lg font-semibold text-[#F1F5F9] tracking-tight">
+                Harmonization audit &amp; verification ledger
               </h2>
             </div>
-            <p className="text-xs text-[#A4AAB5] mt-1">
+            <p className="text-xs text-[#A4AFBF] mt-1">
               Deterministic traceability across raw satellite inputs, spatio-temporal matches, and equal-area grid aggregation.
             </p>
           </div>
@@ -129,7 +129,7 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
             <a
               href={geoJsonExportUrl}
               download
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#16191F] hover:bg-[#20252D] text-xs font-medium text-[#F3F4F6] border border-[#282D35] transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#151A22] hover:bg-[#1E242E] text-xs font-medium text-[#F1F5F9] border border-[#28313D] transition-colors"
             >
               <Download className="w-3.5 h-3.5 text-[#F59E0B]" />
               Export GeoJSON
@@ -146,93 +146,93 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
         </div>
 
         {/* Provenance and Parameters Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-[#1C2026] text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-[#1C232C] text-xs">
           <div>
-            <span className="text-[#727A88] block text-[11px]">Data provenance</span>
+            <span className="text-[#6E7A8A] block text-[11px]">Data provenance</span>
             <span className="font-semibold text-[#F59E0B]">{provenance?.label || "SYNTHETIC DEMO"}</span>
           </div>
           <div>
-            <span className="text-[#727A88] block text-[11px]">Region & window</span>
-            <span className="text-[#F3F4F6] font-mono tabular-nums">{selectedAoi.name} ({effectiveStart} to {effectiveEnd})</span>
+            <span className="text-[#6E7A8A] block text-[11px]">Region &amp; window</span>
+            <span className="text-[#F1F5F9] font-mono tabular-nums">{selectedAoi.name} ({effectiveStart} to {effectiveEnd})</span>
           </div>
           <div>
-            <span className="text-[#727A88] block text-[11px]">Matching thresholds</span>
-            <span className="text-[#F3F4F6] font-mono tabular-nums">&le; {spatialToleranceM}m &bull; &le; {temporalToleranceMin}min</span>
+            <span className="text-[#6E7A8A] block text-[11px]">Matching thresholds</span>
+            <span className="text-[#F1F5F9] font-mono tabular-nums">&le; {spatialToleranceM}m &bull; &le; {temporalToleranceMin}min</span>
           </div>
           <div>
-            <span className="text-[#727A88] block text-[11px]">Grid projection</span>
-            <span className="text-[#F3F4F6]">Lambert Cylindrical Equal-Area ({gridSizeKm} km)</span>
+            <span className="text-[#6E7A8A] block text-[11px]">Grid projection</span>
+            <span className="text-[#F1F5F9]">Lambert Cylindrical Equal-Area ({gridSizeKm} km)</span>
           </div>
         </div>
       </div>
 
       {/* 2. Before vs After Harmonization Impact */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-[#A4AAB5]">
+        <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between">
+          <div className="flex items-center justify-between text-xs text-[#A4AFBF]">
             <span>Raw satellite detections</span>
-            <Database className="w-3.5 h-3.5 text-[#727A88]" />
+            <Database className="w-3.5 h-3.5 text-[#6E7A8A]" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono tabular-nums text-[#F3F4F6]">{rawCount}</span>
-            <span className="text-xs text-[#727A88]">MODIS + VIIRS points</span>
+            <span className="text-2xl font-bold font-mono tabular-nums text-[#F1F5F9]">{rawCount}</span>
+            <span className="text-xs text-[#6E7A8A]">MODIS + VIIRS points</span>
           </div>
-          <span className="text-[11px] text-[#727A88] mt-2 block">
+          <span className="text-[11px] text-[#6E7A8A] mt-2 block">
             Subject to sensor footprint inflation (375m pixels covering 1/7th of 1km MODIS).
           </span>
         </div>
 
-        <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-[#A4AAB5]">
+        <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between">
+          <div className="flex items-center justify-between text-xs text-[#A4AFBF]">
             <span>Harmonized unique active cells</span>
             <Layers className="w-3.5 h-3.5 text-[#F59E0B]" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono tabular-nums text-[#F59E0B]">{uniqueCells}</span>
-            <span className="text-xs text-[#A4AAB5]">distinct 1.0 km cells</span>
+            <span className="text-xs text-[#A4AFBF]">distinct 1.0 km cells</span>
           </div>
           <span className="text-[11px] text-[#10B981] mt-2 block font-medium">
             &darr; {biasReduction}% point-density inflation eliminated
           </span>
         </div>
 
-        <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-[#A4AAB5]">
+        <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between">
+          <div className="flex items-center justify-between text-xs text-[#A4AFBF]">
             <span>Spatial agreement (Jaccard)</span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono tabular-nums text-blue-400">
+            <span className="text-2xl font-bold font-mono tabular-nums text-[#10B981]">
               {comparisonData?.spatial_agreement_jaccard ?? "—"}
             </span>
-            <span className="text-xs text-[#727A88]">grid overlap index</span>
+            <span className="text-xs text-[#6E7A8A]">grid overlap index</span>
           </div>
-          <span className="text-[11px] text-[#727A88] mt-2 block">
+          <span className="text-[11px] text-[#6E7A8A] mt-2 block">
             Intersection / Union of active equal-area cells between MODIS and VIIRS.
           </span>
         </div>
       </div>
 
       {/* 3. Algorithm Comparison: Greedy Baseline vs Optimal Assignment */}
-      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-5 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-[#282D35] gap-3">
+      <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-[#28313D] gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-[#F3F4F6]">
-              Matching algorithm comparison & ambiguity analysis
+            <h3 className="text-sm font-semibold text-[#F1F5F9]">
+              Matching algorithm comparison &amp; ambiguity analysis
             </h3>
-            <p className="text-xs text-[#A4AAB5] mt-0.5">
+            <p className="text-xs text-[#A4AFBF] mt-0.5">
               Evaluating baseline 1-to-many nearest-neighbor clustering against global 1-to-1 optimal bipartite assignment.
             </p>
           </div>
 
           {/* Algorithm Toggle */}
-          <div className="flex items-center gap-1 bg-[#090A0C] p-1 rounded-lg border border-[#282D35]">
+          <div className="flex items-center gap-1 bg-[#090B0F] p-1 rounded-lg border border-[#28313D]">
             <button
               onClick={() => onChangeMethod("greedy")}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 activeMethod === "greedy"
-                  ? "bg-[#16191F] text-[#F59E0B] border border-[#282D35]"
-                  : "text-[#A4AAB5] hover:text-[#F3F4F6]"
+                  ? "bg-[#151A22] text-[#F59E0B] border border-[#28313D]"
+                  : "text-[#A4AFBF] hover:text-[#F1F5F9]"
               }`}
             >
               Greedy 1-to-many (Baseline)
@@ -241,8 +241,8 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
               onClick={() => onChangeMethod("global_assignment")}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 activeMethod === "global_assignment"
-                  ? "bg-[#16191F] text-[#F59E0B] border border-[#282D35]"
-                  : "text-[#A4AAB5] hover:text-[#F3F4F6]"
+                  ? "bg-[#151A22] text-[#F59E0B] border border-[#28313D]"
+                  : "text-[#A4AFBF] hover:text-[#F1F5F9]"
               }`}
             >
               Global 1-to-1 Optimal
@@ -254,11 +254,11 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
           {/* Method A */}
           <div className={`p-4 rounded-xl border transition-all ${
             activeMethod === "greedy"
-              ? "bg-[#16191F]/60 border-[#F59E0B]/50 ring-1 ring-[#F59E0B]/20"
-              : "bg-[#090A0C] border-[#282D35]"
+              ? "bg-[#151A22]/60 border-[#F59E0B]/50 ring-1 ring-[#F59E0B]/20"
+              : "bg-[#090B0F] border-[#28313D]"
           }`}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#F3F4F6]">
+              <span className="text-xs font-semibold text-[#F1F5F9]">
                 Method A: Greedy Nearest-Neighbor (1-to-Many)
               </span>
               {activeMethod === "greedy" && (
@@ -267,25 +267,25 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-[#A4AAB5] mt-1 leading-relaxed">
+            <p className="text-[11px] text-[#A4AFBF] mt-1 leading-relaxed">
               Maps each VIIRS 375m detection to its closest MODIS detection. Allows multiple VIIRS detections inside one MODIS 1km footprint.
             </p>
-            <div className="grid grid-cols-3 gap-2 mt-3 text-xs pt-2 border-t border-[#282D35]/60 font-mono tabular-nums">
+            <div className="grid grid-cols-3 gap-2 mt-3 text-xs pt-2 border-t border-[#28313D]/60 font-mono tabular-nums">
               <div>
-                <span className="text-[#727A88] text-[10px] block">Pairs formed</span>
-                <span className="font-semibold text-[#F3F4F6]">
+                <span className="text-[#6E7A8A] text-[10px] block">Pairs formed</span>
+                <span className="font-semibold text-[#F1F5F9]">
                   {comparisonData?.algorithm_comparison?.greedy_1toMany?.pairs_count ?? comparisonData?.matched_pairs_count ?? 0}
                 </span>
               </div>
               <div>
-                <span className="text-[#727A88] text-[10px] block">MODIS matched</span>
-                <span className="text-[#F59E0B]">
+                <span className="text-[#6E7A8A] text-[10px] block">MODIS matched</span>
+                <span className="text-[#8B5CF6]">
                   {comparisonData?.algorithm_comparison?.greedy_1toMany?.modis_matched ?? "—"}
                 </span>
               </div>
               <div>
-                <span className="text-[#727A88] text-[10px] block">Mean distance</span>
-                <span className="text-[#F3F4F6]">
+                <span className="text-[#6E7A8A] text-[10px] block">Mean distance</span>
+                <span className="text-[#F1F5F9]">
                   {comparisonData?.algorithm_comparison?.greedy_1toMany?.mean_distance_m ? `${comparisonData.algorithm_comparison.greedy_1toMany.mean_distance_m}m` : "—"}
                 </span>
               </div>
@@ -295,11 +295,11 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
           {/* Method B */}
           <div className={`p-4 rounded-xl border transition-all ${
             activeMethod === "global_assignment"
-              ? "bg-[#16191F]/60 border-[#F59E0B]/50 ring-1 ring-[#F59E0B]/20"
-              : "bg-[#090A0C] border-[#282D35]"
+              ? "bg-[#151A22]/60 border-[#F59E0B]/50 ring-1 ring-[#F59E0B]/20"
+              : "bg-[#090B0F] border-[#28313D]"
           }`}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#F3F4F6]">
+              <span className="text-xs font-semibold text-[#F1F5F9]">
                 Method B: Hungarian Global Assignment (1-to-1)
               </span>
               {activeMethod === "global_assignment" && (
@@ -308,25 +308,25 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-[#A4AAB5] mt-1 leading-relaxed">
+            <p className="text-[11px] text-[#A4AFBF] mt-1 leading-relaxed">
               Solves the global minimum-cost bipartite assignment on composite distance and time delta. Strictly enforces 1-to-1 matching.
             </p>
-            <div className="grid grid-cols-3 gap-2 mt-3 text-xs pt-2 border-t border-[#282D35]/60 font-mono tabular-nums">
+            <div className="grid grid-cols-3 gap-2 mt-3 text-xs pt-2 border-t border-[#28313D]/60 font-mono tabular-nums">
               <div>
-                <span className="text-[#727A88] text-[10px] block">Pairs formed</span>
-                <span className="font-semibold text-[#F3F4F6]">
+                <span className="text-[#6E7A8A] text-[10px] block">Pairs formed</span>
+                <span className="font-semibold text-[#F1F5F9]">
                   {comparisonData?.algorithm_comparison?.global_assignment_1to1?.pairs_count ?? 0}
                 </span>
               </div>
               <div>
-                <span className="text-[#727A88] text-[10px] block">MODIS matched</span>
-                <span className="text-[#F59E0B]">
+                <span className="text-[#6E7A8A] text-[10px] block">MODIS matched</span>
+                <span className="text-[#8B5CF6]">
                   {comparisonData?.algorithm_comparison?.global_assignment_1to1?.modis_matched ?? "—"}
                 </span>
               </div>
               <div>
-                <span className="text-[#727A88] text-[10px] block">Mean distance</span>
-                <span className="text-[#F3F4F6]">
+                <span className="text-[#6E7A8A] text-[10px] block">Mean distance</span>
+                <span className="text-[#F1F5F9]">
                   {comparisonData?.algorithm_comparison?.global_assignment_1to1?.mean_distance_m ? `${comparisonData.algorithm_comparison.global_assignment_1to1.mean_distance_m}m` : "—"}
                 </span>
               </div>
@@ -336,12 +336,12 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
 
         {/* Ambiguity notice */}
         {comparisonData?.ambiguity_stats && (
-          <div className="mt-4 p-3 rounded-lg bg-[#090A0C] border border-[#282D35] flex items-center justify-between text-xs text-[#A4AAB5]">
+          <div className="mt-4 p-3 rounded-lg bg-[#090B0F] border border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
             <span className="flex items-center gap-2">
               <Info className="w-3.5 h-3.5 text-[#F59E0B]" />
-              Ambiguity report: <span className="text-[#F3F4F6] font-mono tabular-nums font-medium">{comparisonData.ambiguity_stats.total_ambiguous_detections}</span> observations had &ge; 2 candidates within matching thresholds.
+              Ambiguity report: <span className="text-[#F1F5F9] font-mono tabular-nums font-medium">{comparisonData.ambiguity_stats.total_ambiguous_detections}</span> observations had &ge; 2 candidates within matching thresholds.
             </span>
-            <span className="text-[11px] text-[#727A88]">
+            <span className="text-[11px] text-[#6E7A8A]">
               MODIS: {comparisonData.ambiguity_stats.ambiguous_modis_count} &bull; VIIRS: {comparisonData.ambiguity_stats.ambiguous_viirs_count}
             </span>
           </div>
@@ -349,13 +349,13 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
       </div>
 
       {/* 4. Interactive Observations Audit Ledger Table */}
-      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-5 shadow-sm">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-[#282D35] gap-3">
+      <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-[#28313D] gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-[#F3F4F6]">
-              Observation records & attribute ledger ({filteredRows.length} shown)
+            <h3 className="text-sm font-semibold text-[#F1F5F9]">
+              Observation records &amp; attribute ledger ({filteredRows.length} shown)
             </h3>
-            <p className="text-xs text-[#A4AAB5] mt-0.5">
+            <p className="text-xs text-[#A4AFBF] mt-0.5">
               Original sensor measurements, source confidence, FRP, matched attributes, and assigned equal-area grid IDs.
             </p>
           </div>
@@ -363,20 +363,20 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
           {/* Table Filters */}
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
             <div className="relative flex-1 md:w-48">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#727A88]" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#6E7A8A]" />
               <input
                 type="text"
                 placeholder="Search ID, cell, or pair..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-2.5 py-1 text-xs bg-[#090A0C] border border-[#282D35] rounded-lg text-[#F3F4F6] placeholder-[#727A88] focus:outline-none focus:border-[#F59E0B]"
+                className="w-full pl-8 pr-2.5 py-1 text-xs bg-[#090B0F] border border-[#28313D] rounded-lg text-[#F1F5F9] placeholder-[#6E7A8A] focus:outline-none focus:border-[#F59E0B]"
               />
             </div>
 
             <select
               value={sensorFilter}
               onChange={(e) => setSensorFilter(e.target.value)}
-              className="text-xs bg-[#090A0C] border border-[#282D35] rounded-lg px-2.5 py-1 text-[#F3F4F6] focus:outline-none focus:border-[#F59E0B]"
+              className="text-xs bg-[#090B0F] border border-[#28313D] rounded-lg px-2.5 py-1 text-[#F1F5F9] focus:outline-none focus:border-[#F59E0B]"
             >
               <option value="ALL">All Sensors</option>
               <option value="MODIS">MODIS only</option>
@@ -386,7 +386,7 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
             <select
               value={classificationFilter}
               onChange={(e) => setClassificationFilter(e.target.value)}
-              className="text-xs bg-[#090A0C] border border-[#282D35] rounded-lg px-2.5 py-1 text-[#F3F4F6] focus:outline-none focus:border-[#F59E0B]"
+              className="text-xs bg-[#090B0F] border border-[#28313D] rounded-lg px-2.5 py-1 text-[#F1F5F9] focus:outline-none focus:border-[#F59E0B]"
             >
               <option value="ALL">All Classifications</option>
               <option value="matched">Matched only</option>
@@ -397,12 +397,12 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
         </div>
 
         {/* Ledger Table */}
-        <div className="overflow-x-auto mt-4 max-h-[460px] border border-[#282D35] rounded-lg">
+        <div className="overflow-x-auto mt-4 max-h-[460px] border border-[#28313D] rounded-lg">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#090A0C] text-[#A4AAB5] border-b border-[#282D35] sticky top-0 z-10 text-[11px] uppercase tracking-wider">
+            <thead className="bg-[#090B0F] text-[#A4AFBF] border-b border-[#28313D] sticky top-0 z-10 text-[11px] uppercase tracking-wider">
               <tr>
                 <th className="py-2 px-3 font-medium">Record ID</th>
-                <th className="py-2 px-3 font-medium">Sensor & Sat</th>
+                <th className="py-2 px-3 font-medium">Sensor &amp; Sat</th>
                 <th className="py-2 px-3 font-medium">UTC Timestamp</th>
                 <th className="py-2 px-3 font-medium">Coordinates</th>
                 <th className="py-2 px-3 font-medium">Confidence</th>
@@ -412,10 +412,10 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
                 <th className="py-2 px-3 font-medium">Grid Cell ID</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1C2026] text-[#F3F4F6] font-mono tabular-nums">
+            <tbody className="divide-y divide-[#1C232C] text-[#F1F5F9] font-mono tabular-nums">
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-[#727A88] font-sans">
+                  <td colSpan={9} className="py-8 text-center text-[#6E7A8A] font-sans">
                     No active observations match the active filter criteria.
                   </td>
                 </tr>
@@ -424,15 +424,15 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
                   const p = feat.properties;
                   const isModis = p.sensor === "MODIS";
                   return (
-                    <tr key={p.observation_id} className="hover:bg-[#16191F]/40 transition-colors">
-                      <td className="py-2 px-3 font-medium text-[#F3F4F6] font-mono text-[11px]">
+                    <tr key={p.observation_id} className="hover:bg-[#151A22]/40 transition-colors">
+                      <td className="py-2 px-3 font-medium text-[#F1F5F9] font-mono text-[11px]">
                         {p.observation_id.slice(0, 10)}...
                       </td>
                       <td className="py-2 px-3 font-sans">
-                        <span className={`inline-flex items-center gap-1 font-semibold ${isModis ? "text-[#F59E0B]" : "text-red-400"}`}>
+                        <span className={`inline-flex items-center gap-1 font-semibold ${isModis ? "text-[#8B5CF6]" : "text-[#06B6D4]"}`}>
                           {p.sensor}
                         </span>
-                        <span className="text-[#727A88] text-[11px] block">{p.platform}</span>
+                        <span className="text-[#6E7A8A] text-[11px] block">{p.platform}</span>
                       </td>
                       <td className="py-2 px-3 text-[11px]">
                         {p.acq_datetime_utc.replace("T", " ").replace("Z", " UTC")}
@@ -441,19 +441,19 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
                         {p.latitude?.toFixed(4)}&deg;, {p.longitude?.toFixed(4)}&deg;
                       </td>
                       <td className="py-2 px-3 font-sans">
-                        <span className="capitalize text-xs text-[#F3F4F6] font-medium">{p.confidence_category}</span>
-                        <span className="text-[#727A88] text-[10px] block font-mono">({p.raw_confidence})</span>
+                        <span className="capitalize text-xs text-[#F1F5F9] font-medium">{p.confidence_category}</span>
+                        <span className="text-[#6E7A8A] text-[10px] block font-mono">({p.raw_confidence})</span>
                       </td>
-                      <td className="py-2 px-3 font-semibold text-[#F3F4F6]">
+                      <td className="py-2 px-3 font-semibold text-[#F1F5F9]">
                         {p.frp_mw !== null && p.frp_mw !== undefined ? `${p.frp_mw} MW` : "—"}
                       </td>
                       <td className="py-2 px-3 font-sans">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
                           p.classification === "matched"
-                            ? "bg-green-500/20 text-green-300 border border-green-500/40"
+                            ? "bg-[#10B981]/20 text-[#6EE7B7] border border-[#10B981]/40"
                             : p.classification === "MODIS_only"
-                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                            : "bg-red-500/20 text-red-300 border border-red-500/40"
+                            ? "bg-[#F59E0B]/20 text-[#FCD34D] border border-[#F59E0B]/40"
+                            : "bg-[#F43F5E]/20 text-[#FDA4AF] border border-[#F43F5E]/40"
                         }`}>
                           {p.classification.replace("_", " ")}
                         </span>
@@ -487,41 +487,41 @@ export const HarmonizationAuditView: React.FC<HarmonizationAuditViewProps> = ({
       {/* 5. Scientific Limitations & Operational Alerts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Suomi-NPP Cessation Card */}
-        <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between">
+        <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between">
           <div className="flex items-start gap-2.5">
             <span className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 shrink-0">
               <AlertTriangle className="w-4 h-4" />
             </span>
             <div>
-              <h4 className="text-xs font-semibold text-[#F3F4F6]">
-                NASA Suomi-NPP Lifecycle & Cessation Notice
+              <h4 className="text-xs font-semibold text-[#F1F5F9]">
+                NASA Suomi-NPP Lifecycle &amp; Cessation Notice
               </h4>
-              <p className="text-[11px] text-[#A4AAB5] mt-1 leading-relaxed">
+              <p className="text-[11px] text-[#A4AFBF] mt-1 leading-relaxed">
                 NASA has announced the cessation of Suomi-NPP science data product delivery effective November 1, 2026. FireChronicle incorporates automated product redirection to supported operational VIIRS constellations on NOAA-20 and NOAA-21.
               </p>
             </div>
           </div>
-          <div className="mt-3 pt-2 border-t border-[#1C2026] text-[11px] text-[#727A88]">
+          <div className="mt-3 pt-2 border-t border-[#1C232C] text-[11px] text-[#6E7A8A]">
             Supported live products: <span className="text-[#F59E0B]">VIIRS_NOAA20_SP</span> &bull; <span className="text-[#F59E0B]">VIIRS_NOAA21_SP</span>
           </div>
         </div>
 
         {/* FRP Non-Summation Constraint */}
-        <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between">
+        <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between">
           <div className="flex items-start gap-2.5">
             <span className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 shrink-0">
               <ShieldCheck className="w-4 h-4" />
             </span>
             <div>
-              <h4 className="text-xs font-semibold text-[#F3F4F6]">
-                FRP Non-Summation & Physical Ground Truth
+              <h4 className="text-xs font-semibold text-[#F1F5F9]">
+                FRP Non-Summation &amp; Physical Ground Truth
               </h4>
-              <p className="text-[11px] text-[#A4AAB5] mt-1 leading-relaxed">
+              <p className="text-[11px] text-[#A4AFBF] mt-1 leading-relaxed">
                 As demonstrated by Li et al. (2018), additive summation of FRP across collocated 1km MODIS and 375m VIIRS detections introduces severe double-counting bias. Distributions must be preserved separately.
               </p>
             </div>
           </div>
-          <div className="mt-3 pt-2 border-t border-[#1C2026] text-[11px] text-[#727A88]">
+          <div className="mt-3 pt-2 border-t border-[#1C232C] text-[11px] text-[#6E7A8A]">
             Citation: Li, F., et al., Remote Sensing of Environment (2018).
           </div>
         </div>

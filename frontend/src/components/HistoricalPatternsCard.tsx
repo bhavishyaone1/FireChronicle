@@ -55,18 +55,18 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
   const primaryCells = primaryAnomaly.cells;
 
   return (
-    <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between shadow-sm h-full">
+    <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm h-full">
       {/* Header with Title and Dropdowns */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#282D35]">
+      <div className="flex items-center justify-between pb-3 border-b border-[#28313D]">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/25 flex items-center justify-center">
             <TrendingUp className="w-3.5 h-3.5 text-[#F59E0B]" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-[#F3F4F6] tracking-tight">
+            <h3 className="text-base font-semibold text-[#F1F5F9] tracking-tight">
               Historical patterns
             </h3>
-            <p className="text-xs text-[#A4AAB5] font-normal">
+            <p className="text-xs text-[#A4AFBF] font-normal">
               Observed 2024 burning activity vs multi-year baseline (2018–2023)
             </p>
           </div>
@@ -74,15 +74,15 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
 
         <div className="flex items-center gap-1.5">
           {/* Year selector */}
-          <div className="flex items-center gap-1 bg-[#090A0C] px-2 py-1 rounded-lg border border-[#282D35] text-xs text-[#F3F4F6] font-medium">
+          <div className="flex items-center gap-1 bg-[#090B0F] px-2 py-1 rounded-lg border border-[#28313D] text-xs text-[#F1F5F9] font-medium">
             <span>{selectedYear}</span>
-            <ChevronDown className="w-3 h-3 text-[#A4AAB5]" />
+            <ChevronDown className="w-3 h-3 text-[#A4AFBF]" />
           </div>
 
           {/* Metric selector */}
-          <div className="flex items-center gap-1 bg-[#090A0C] px-2 py-1 rounded-lg border border-[#282D35] text-xs text-[#F3F4F6] font-medium">
+          <div className="flex items-center gap-1 bg-[#090B0F] px-2 py-1 rounded-lg border border-[#28313D] text-xs text-[#F1F5F9] font-medium">
             <span>Active grid cells</span>
-            <ChevronDown className="w-3 h-3 text-[#A4AAB5]" />
+            <ChevronDown className="w-3 h-3 text-[#A4AFBF]" />
           </div>
         </div>
       </div>
@@ -90,23 +90,23 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
       {/* Chart Section */}
       <div className="flex-1 w-full min-h-[160px] py-1.5 relative">
         {/* Floating peak callout badge */}
-        <div className="absolute top-1 right-28 z-10 px-2 py-0.5 rounded-md bg-[#16191F] border border-[#282D35] text-[#F3F4F6] text-[11px] font-medium flex items-center gap-1 shadow-sm font-mono tabular-nums">
+        <div className="absolute top-1 right-28 z-10 px-2 py-0.5 rounded-md bg-[#151A22] border border-[#28313D] text-[#F1F5F9] text-[11px] font-medium flex items-center gap-1 shadow-sm font-mono tabular-nums">
           <Flame className="w-3 h-3 text-[#F59E0B]" />
           <span>{primaryAnomaly.month} 2024: {primaryCells} cells</span>
         </div>
 
         <ResponsiveContainer width="100%" height={145}>
           <BarChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 0 }}>
-            <CartesianGrid stroke="#282D35" strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="month" stroke="#A4AAB5" fontSize={11} tickLine={false} />
-            <YAxis stroke="#A4AAB5" fontSize={11} tickLine={false} />
+            <CartesianGrid stroke="#28313D" strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="month" stroke="#A4AFBF" fontSize={11} tickLine={false} />
+            <YAxis stroke="#A4AFBF" fontSize={11} tickLine={false} />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#101216",
-                borderColor: "#282D35",
+                backgroundColor: "#10141B",
+                borderColor: "#28313D",
                 borderRadius: "8px",
                 fontSize: "11px",
-                color: "#F3F4F6",
+                color: "#F1F5F9",
                 fontFamily: "var(--font-geist-sans), sans-serif",
               }}
             />
@@ -114,7 +114,7 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={entry.isAnomaly ? "#F59E0B" : "#1E232B"}
+                  fill={entry.isAnomaly ? "#F59E0B" : "#1E242E"}
                 />
               ))}
             </Bar>
@@ -123,20 +123,20 @@ export const HistoricalPatternsCard: React.FC<HistoricalPatternsCardProps> = ({
       </div>
 
       {/* Bottom Alert Banner */}
-      <div className="p-2.5 rounded-xl bg-[#090A0C] border border-[#282D35] flex items-start justify-between gap-2 text-xs">
+      <div className="p-2.5 rounded-xl bg-[#090B0F] border border-[#28313D] flex items-start justify-between gap-2 text-xs">
         <div className="flex items-start gap-2">
           <AlertTriangle
             className={`w-4 h-4 shrink-0 mt-0.5 ${
-              hasAnomaly ? "text-[#F59E0B]" : "text-emerald-400"
+              hasAnomaly ? "text-[#F59E0B]" : "text-[#10B981]"
             }`}
           />
           <div className="flex flex-col">
-            <span className="font-medium text-[#F3F4F6] leading-tight">
+            <span className="font-medium text-[#F1F5F9] leading-tight">
               {hasAnomaly
                 ? "Elevated seasonal activity detected"
                 : "Nominal seasonal baseline"}
             </span>
-            <span className="text-[11px] text-[#A4AAB5] leading-snug mt-0.5 font-normal">
+            <span className="text-[11px] text-[#A4AFBF] leading-snug mt-0.5 font-normal">
               {hasAnomaly
                 ? `${anomalousMonths.map((m) => m.month).join(", ")} 2024 exceeds robust Z >= 2.0 and the 75th percentile of the 2018–2023 baseline.`
                 : "All observed months in 2024 remain within the historical non-parametric baseline."}

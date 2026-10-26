@@ -103,7 +103,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 animate-pulse">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-26 bg-[#101216] border border-[#282D35] rounded-xl p-4" />
+          <div key={i} className="h-26 bg-[#10141B] border border-[#28313D] rounded-xl p-4" />
         ))}
       </div>
     );
@@ -112,134 +112,134 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
       {/* 1. MODIS Detections */}
-      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between shadow-sm">
+      <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm">
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#A4AAB5]">
+          <span className="text-[13px] font-medium text-[#A4AFBF]">
             MODIS detections
           </span>
-          <Flame className="w-4 h-4 text-[#F59E0B]" aria-hidden="true" />
+          <Flame className="w-4 h-4 text-[#8B5CF6]" aria-hidden="true" />
         </div>
 
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
-          <span className="text-[28px] font-semibold text-[#F3F4F6] font-mono tabular-nums leading-none tracking-tight">
+          <span className="text-[28px] font-semibold text-[#F1F5F9] font-mono tabular-nums leading-none tracking-tight">
             {renderValue(rawModis)}
           </span>
           <div className="shrink-0">
             {selectedDate ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] text-[#F59E0B] font-mono border border-[#282D35]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#151A22] text-[#8B5CF6] font-mono border border-[#28313D]">
                 Single day
               </span>
             ) : (
-              generateSparkline(modisSparkline, "#F59E0B")
+              generateSparkline(modisSparkline, "#8B5CF6")
             )}
           </div>
         </div>
 
         {/* Concise Explanation Below */}
-        <div className="pt-2 border-t border-[#282D35] flex items-center justify-between text-xs text-[#A4AAB5]">
-          <span>Terra and Aqua satellites</span>
-          <span className="font-mono text-[11px] text-[#A4AAB5]">1.0 km nadir</span>
+        <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
+          <span>Terra &amp; Aqua satellites</span>
+          <span className="font-mono text-[11px] text-[#8B5CF6]">1.0 km nadir</span>
         </div>
       </div>
 
       {/* 2. VIIRS Detections */}
-      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between shadow-sm">
+      <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm">
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#A4AAB5]">
+          <span className="text-[13px] font-medium text-[#A4AFBF]">
             VIIRS detections
           </span>
-          <Satellite className="w-4 h-4 text-red-400" aria-hidden="true" />
+          <Satellite className="w-4 h-4 text-[#06B6D4]" aria-hidden="true" />
         </div>
 
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
-          <span className="text-[28px] font-semibold text-[#F3F4F6] font-mono tabular-nums leading-none tracking-tight">
+          <span className="text-[28px] font-semibold text-[#F1F5F9] font-mono tabular-nums leading-none tracking-tight">
             {renderValue(rawViirs)}
           </span>
           <div className="shrink-0">
             {selectedDate ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] text-red-400 font-mono border border-[#282D35]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#151A22] text-[#06B6D4] font-mono border border-[#28313D]">
                 Single day
               </span>
             ) : (
-              generateSparkline(viirsSparkline, "#EF4444")
+              generateSparkline(viirsSparkline, "#06B6D4")
             )}
           </div>
         </div>
 
         {/* Concise Explanation Below */}
-        <div className="pt-2 border-t border-[#282D35] flex items-center justify-between text-xs text-[#A4AAB5]">
+        <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
           <span>NOAA-20/21 &amp; S-NPP</span>
-          <span className="font-mono text-[11px] text-[#A4AAB5]">375 m nadir</span>
+          <span className="font-mono text-[11px] text-[#06B6D4]">375 m nadir</span>
         </div>
       </div>
 
       {/* 3. Candidate Sensor Matches */}
-      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between shadow-sm">
+      <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm">
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#A4AAB5]">
+          <span className="text-[13px] font-medium text-[#A4AFBF]">
             Candidate sensor matches
           </span>
-          <Link2 className="w-4 h-4 text-blue-400" aria-hidden="true" />
+          <Link2 className="w-4 h-4 text-[#10B981]" aria-hidden="true" />
         </div>
 
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
-          <span className="text-[28px] font-semibold text-[#F3F4F6] font-mono tabular-nums leading-none tracking-tight">
+          <span className="text-[28px] font-semibold text-[#F1F5F9] font-mono tabular-nums leading-none tracking-tight">
             {renderValue(matchedPairs)}
           </span>
           <div className="shrink-0">
             {selectedDate ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] text-blue-400 font-mono border border-[#282D35]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#151A22] text-[#10B981] font-mono border border-[#28313D]">
                 Single day
               </span>
             ) : (
-              generateSparkline(matchedSparkline, "#3B82F6")
+              generateSparkline(matchedSparkline, "#10B981")
             )}
           </div>
         </div>
 
         {/* Concise Explanation Below */}
-        <div className="pt-2 border-t border-[#282D35] flex items-center justify-between text-xs text-[#A4AAB5]">
+        <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
           <span>Within 1.0 km &amp; 60 min</span>
-          <span className="font-mono text-[11px] text-blue-400">Collocated pairs</span>
+          <span className="font-mono text-[11px] text-[#10B981]">Collocated pairs</span>
         </div>
       </div>
 
       {/* 4. Unique Active Grid Cells */}
-      <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between shadow-sm">
+      <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm">
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#A4AAB5]">
+          <span className="text-[13px] font-medium text-[#A4AFBF]">
             Unique active grid cells
           </span>
-          <Grid className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+          <Grid className="w-4 h-4 text-[#F59E0B]" aria-hidden="true" />
         </div>
 
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
-          <span className="text-[28px] font-semibold text-[#F3F4F6] font-mono tabular-nums leading-none tracking-tight">
+          <span className="text-[28px] font-semibold text-[#F1F5F9] font-mono tabular-nums leading-none tracking-tight">
             {renderValue(uniqueCells)}
           </span>
           <div className="shrink-0">
             {selectedDate ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#16191F] text-emerald-400 font-mono border border-[#282D35]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#151A22] text-[#F59E0B] font-mono border border-[#28313D]">
                 Single day
               </span>
             ) : (
-              generateSparkline(cellsSparkline, "#10B981")
+              generateSparkline(cellsSparkline, "#F59E0B")
             )}
           </div>
         </div>
 
-        {/* Concise Explanation Below (removed -55.9% bias badge) */}
-        <div className="pt-2 border-t border-[#282D35] flex items-center justify-between text-xs text-[#A4AAB5]">
+        {/* Concise Explanation Below */}
+        <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
           <span>1.0 km equal-area grid</span>
-          <span className="font-mono text-[11px] text-emerald-400">
+          <span className="font-mono text-[11px] text-[#F59E0B]">
             Distinct cells
           </span>
         </div>

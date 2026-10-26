@@ -80,48 +80,48 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
   const getCellHeatStyle = (cellDate: string) => {
     const dayRecord = days.find((d) => d.date === cellDate);
     if (!dayRecord) {
-      return "bg-[#16191F]/40 text-[#A4AAB5]/40 hover:bg-[#16191F]";
+      return "bg-[#151A22]/40 text-[#A4AFBF]/40 hover:bg-[#151A22]";
     }
     if (dayRecord.coverage_status === "no_pass" || dayRecord.coverage_status === "cloud_obscured") {
-      return "bg-[#16191F]/30 text-[#A4AAB5]/30 border border-dashed border-[#282D35]";
+      return "bg-[#151A22]/30 text-[#A4AFBF]/30 border border-dashed border-[#28313D]";
     }
     if (dayRecord.unique_active_cells === 0) {
-      return "bg-[#16191F]/60 text-[#A4AAB5]/60 hover:bg-[#16191F] hover:text-[#F3F4F6]";
+      return "bg-[#151A22]/60 text-[#A4AFBF]/60 hover:bg-[#151A22] hover:text-[#F1F5F9]";
     }
     const val = dayRecord.unique_active_cells;
-    if (val <= 2) return "bg-[#451A03] text-amber-200 border border-amber-600/40";
-    if (val <= 5) return "bg-[#9A3412] text-orange-100 border border-orange-500/50";
-    if (val <= 10) return "bg-[#C2410C] text-white";
-    return "bg-[#EF4444] text-white";
+    if (val <= 2) return "bg-[#FDE047]/15 text-[#FDE047] border border-[#FDE047]/30";
+    if (val <= 5) return "bg-[#F59E0B]/25 text-[#FBBF24] border border-[#F59E0B]/40";
+    if (val <= 10) return "bg-[#EA580C]/35 text-[#FB923C] border border-[#EA580C]/50";
+    return "bg-[#DC2626]/45 text-red-100 border border-[#DC2626]/60";
   };
 
   return (
-    <div className="bg-[#101216] border border-[#282D35] rounded-xl p-4 flex flex-col justify-between shadow-sm h-full">
+    <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm h-full">
       {/* Header with Title and Segmented Interval */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#282D35]">
+      <div className="flex items-center justify-between pb-3 border-b border-[#28313D]">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/25 flex items-center justify-center">
             <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-[#F3F4F6] tracking-tight">
+            <h3 className="text-base font-semibold text-[#F1F5F9] tracking-tight">
               Burning activity calendar
             </h3>
-            <p className="text-xs text-[#A4AAB5] font-normal">
+            <p className="text-xs text-[#A4AFBF] font-normal">
               Daily count of unique active 1.0 km grid cells
             </p>
           </div>
         </div>
 
-        <div className="flex items-center bg-[#090A0C] p-0.5 rounded-lg border border-[#282D35] text-xs">
+        <div className="flex items-center bg-[#090B0F] p-0.5 rounded-lg border border-[#28313D] text-xs">
           {(["daily", "weekly", "monthly"] as const).map((interval) => (
             <button
               key={interval}
               onClick={() => setViewInterval(interval)}
               className={`px-2.5 py-0.5 rounded-md font-medium capitalize transition-colors ${
                 viewInterval === interval
-                  ? "bg-[#16191F] text-[#F3F4F6] border border-[#282D35] font-semibold"
-                  : "text-[#A4AAB5] hover:text-[#F3F4F6]"
+                  ? "bg-[#151A22] text-[#F1F5F9] border border-[#28313D] font-semibold"
+                  : "text-[#A4AFBF] hover:text-[#F1F5F9]"
               }`}
             >
               {interval}
@@ -135,16 +135,16 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
         {/* Left: Month Navigator & 7x5 Calendar Grid */}
         <div className="md:col-span-7 flex flex-col gap-2">
           <div className="flex items-center justify-between px-1">
-            <span className="text-[13px] font-semibold text-[#F3F4F6]">August 2024</span>
+            <span className="text-[13px] font-semibold text-[#F1F5F9]">August 2024</span>
             <div className="flex items-center gap-1">
               <button
-                className="p-1 rounded-md bg-[#090A0C] hover:bg-[#16191F] text-[#A4AAB5] hover:text-[#F3F4F6] transition-colors border border-[#282D35]"
+                className="p-1 rounded-md bg-[#090B0F] hover:bg-[#151A22] text-[#A4AFBF] hover:text-[#F1F5F9] transition-colors border border-[#28313D]"
                 aria-label="Previous month"
               >
                 <ChevronLeft className="w-3 h-3" />
               </button>
               <button
-                className="p-1 rounded-md bg-[#090A0C] hover:bg-[#16191F] text-[#A4AAB5] hover:text-[#F3F4F6] transition-colors border border-[#282D35]"
+                className="p-1 rounded-md bg-[#090B0F] hover:bg-[#151A22] text-[#A4AFBF] hover:text-[#F1F5F9] transition-colors border border-[#28313D]"
                 aria-label="Next month"
               >
                 <ChevronRight className="w-3 h-3" />
@@ -152,7 +152,7 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-[#A4AAB5]">
+          <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-[#A4AFBF]">
             <span>Mon</span>
             <span>Tue</span>
             <span>Wed</span>
@@ -167,7 +167,7 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
               const isSelected = selectedDate === c.dateStr;
               const heatClass = c.inCurrentMonth
                 ? getCellHeatStyle(c.dateStr)
-                : "bg-transparent text-[#282D35]";
+                : "bg-transparent text-[#28313D]";
               const dayRecord = days.find((d) => d.date === c.dateStr);
 
               return (
@@ -189,7 +189,7 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
                     }
                   }}
                   className={`h-7 rounded-md text-xs font-mono tabular-nums font-medium flex items-center justify-center transition-colors duration-150 motion-reduce:transition-none ${heatClass} ${
-                    isSelected ? "ring-2 ring-[#F59E0B] font-bold bg-[#282D35] z-10" : ""
+                    isSelected ? "ring-2 ring-[#F59E0B] font-bold bg-[#28313D] z-10" : ""
                   }`}
                 >
                   {c.dayNum}
@@ -200,10 +200,10 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
         </div>
 
         {/* Right: Selected Day Activity Summary */}
-        <div className="md:col-span-5 bg-[#090A0C] rounded-xl p-3 border border-[#282D35] flex flex-col justify-between">
+        <div className="md:col-span-5 bg-[#090B0F] rounded-xl p-3 border border-[#28313D] flex flex-col justify-between">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between border-b border-[#282D35] pb-1.5">
-              <span className="text-xs font-semibold text-[#F3F4F6] flex items-center gap-1.5 font-mono tabular-nums">
+            <div className="flex items-center justify-between border-b border-[#28313D] pb-1.5">
+              <span className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-1.5 font-mono tabular-nums">
                 <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
                 {formatDateDisplay(activeDayDateStr)}
               </span>
@@ -219,42 +219,42 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
 
             <div className="flex flex-col gap-1.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[#A4AAB5] flex items-center gap-1.5 font-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
                   Active grid cells
                 </span>
-                <span className="font-mono tabular-nums font-semibold text-[#F3F4F6]">{activeCells}</span>
+                <span className="font-mono tabular-nums font-semibold text-[#F1F5F9]">{activeCells}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-[#A4AAB5] flex items-center gap-1.5 font-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]" />
                   MODIS detections
                 </span>
-                <span className="font-mono tabular-nums font-semibold text-amber-400">{modisRaw}</span>
+                <span className="font-mono tabular-nums font-semibold text-[#8B5CF6]">{modisRaw}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-[#A4AAB5] flex items-center gap-1.5 font-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#06B6D4]" />
                   VIIRS detections
                 </span>
-                <span className="font-mono tabular-nums font-semibold text-red-400">{viirsRaw}</span>
+                <span className="font-mono tabular-nums font-semibold text-[#06B6D4]">{viirsRaw}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-[#A4AAB5] flex items-center gap-1.5 font-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                <span className="text-[#A4AFBF] flex items-center gap-1.5 font-normal">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
                   Candidate matches
                 </span>
-                <span className="font-mono tabular-nums font-semibold text-blue-400">{matchedPairs}</span>
+                <span className="font-mono tabular-nums font-semibold text-[#10B981]">{matchedPairs}</span>
               </div>
             </div>
           </div>
 
           <button
             onClick={() => onSelectDate(activeDayDateStr)}
-            className="w-full mt-2 py-1.5 rounded-lg bg-[#16191F] hover:bg-[#20252E] text-[#F3F4F6] text-xs font-medium flex items-center justify-center gap-1 transition-colors duration-150 border border-[#282D35]"
+            className="w-full mt-2 py-1.5 rounded-lg bg-[#151A22] hover:bg-[#1E242E] text-[#F1F5F9] text-xs font-medium flex items-center justify-center gap-1 transition-colors duration-150 border border-[#28313D]"
           >
             <span>Inspect selected day</span>
             <ExternalLink className="w-3 h-3 text-[#F59E0B]" />
@@ -263,13 +263,13 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
       </div>
 
       {/* Footer Gradient Legend & Metric Definition */}
-      <div className="pt-2 border-t border-[#282D35] flex flex-col gap-1.5 text-[11px] text-[#A4AAB5]">
+      <div className="pt-2 border-t border-[#28313D] flex flex-col gap-1.5 text-[11px] text-[#A4AFBF]">
         <div className="flex items-center justify-between">
           <span>0 (Nominal)</span>
-          <div className="h-1.5 w-28 rounded-full bg-gradient-to-r from-[#451A03] via-[#C2410C] to-[#EF4444]" />
+          <div className="h-1.5 w-28 rounded-full bg-gradient-to-r from-[#FDE047] via-[#F59E0B] via-[#EA580C] to-[#DC2626]" />
           <span>High (10+ cells)</span>
         </div>
-        <p className="text-[10px] text-[#A4AAB5]/70 leading-tight">
+        <p className="text-[10px] text-[#A4AFBF]/70 leading-tight">
           Metric: Distinct 1.0 km equal-area grid cells with active thermal radiation per 24h UTC window.
         </p>
       </div>

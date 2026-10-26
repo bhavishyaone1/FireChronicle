@@ -239,7 +239,7 @@ export default function Home() {
   }, [loadData]);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-black text-neutral-100 font-sans antialiased">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#090B0F] text-[#F1F5F9] font-sans antialiased">
       {/* 1. Left Persistent Sidebar */}
       <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
@@ -267,7 +267,7 @@ export default function Home() {
 
         {/* Mobile Tab Navigation Strip (< 768px screens) */}
         <nav
-          className="md:hidden flex items-center overflow-x-auto gap-1 px-4 py-2 bg-[#090A0C] border-b border-[#282D35] shrink-0"
+          className="md:hidden flex items-center overflow-x-auto gap-1 px-4 py-2 bg-[#090B0F] border-b border-[#28313D] shrink-0"
           aria-label="Mobile section navigation"
         >
           {[
@@ -283,8 +283,8 @@ export default function Home() {
               onClick={() => handleTabChange(tab.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors duration-150 ${
                 activeTab === tab.id
-                  ? "bg-[#16191F] text-[#F59E0B] border border-[#282D35]"
-                  : "text-[#A4AAB5] hover:text-[#F3F4F6]"
+                  ? "bg-[#151A22] text-[#F59E0B] border border-[#28313D]"
+                  : "text-[#A4AFBF] hover:text-[#F1F5F9]"
               }`}
             >
               {tab.label}
@@ -355,6 +355,7 @@ export default function Home() {
                     startDate={startDate}
                     endDate={endDate}
                     centerTarget={mapCenterTarget}
+                    selectedObservationId={selectedObservation?.observation_id}
                   />
                 </div>
 
@@ -420,6 +421,7 @@ export default function Home() {
                 startDate={startDate}
                 endDate={endDate}
                 centerTarget={mapCenterTarget}
+                selectedObservationId={selectedObservation?.observation_id}
               />
             </div>
           )}
@@ -459,12 +461,12 @@ export default function Home() {
         </main>
 
         {/* Global Scientific Footer */}
-        <footer className="border-t border-[#282D35] py-4 px-6 bg-[#090A0C] text-xs text-[#A4AAB5] mt-auto shrink-0">
+        <footer className="border-t border-[#28313D] py-4 px-6 bg-[#090B0F] text-xs text-[#A4AFBF] mt-auto shrink-0">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-[1720px] mx-auto">
             <span>
-              Data sources: <span className="text-[#F59E0B] font-medium">NASA FIRMS</span> &bull; <span className="text-[#F59E0B]">MODIS (Terra/Aqua)</span> &bull; <span className="text-red-400">VIIRS (NOAA-20/21)</span>
+              Data sources: <span className="text-[#F59E0B] font-medium">NASA FIRMS</span> &bull; <span className="text-[#8B5CF6]">MODIS (Terra/Aqua)</span> &bull; <span className="text-[#06B6D4]">VIIRS (NOAA-20/21)</span>
             </span>
-            <span className="text-xs text-[#A4AAB5] font-normal">
+            <span className="text-xs text-[#A4AFBF] font-normal">
               Not an official NASA product. For educational and research purposes only.
             </span>
           </div>

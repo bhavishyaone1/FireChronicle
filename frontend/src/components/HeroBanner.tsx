@@ -57,14 +57,14 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
     : "NASA FIRMS Benchmark (Sample)";
 
   return (
-    <div className="rounded-xl bg-[#101216] border border-[#282D35] p-5 shadow-sm">
+    <div className="rounded-xl bg-[#10141B] border border-[#28313D] p-5 shadow-sm">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Left: Recommended Title and Subtitle */}
         <div className="flex flex-col gap-1 max-w-2xl">
-          <h2 className="text-2xl sm:text-[26px] font-semibold tracking-tight text-[#F3F4F6] leading-tight">
+          <h2 className="text-2xl sm:text-[26px] font-semibold tracking-tight text-[#F1F5F9] leading-tight">
             Fire activity overview
           </h2>
-          <p className="text-sm font-normal text-[#A4AAB5] leading-relaxed">
+          <p className="text-sm font-normal text-[#A4AFBF] leading-relaxed">
             Explore and compare satellite observations of active fire.
           </p>
         </div>
@@ -72,26 +72,26 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         {/* Right Status Chips */}
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           {/* Data Source Chip */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#16191F] border border-[#282D35] text-xs">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#151A22] border border-[#28313D] text-xs">
             <Database className="w-3.5 h-3.5 text-[#F59E0B]" />
             <div className="flex flex-col">
-              <span className="text-[10px] text-[#A4AAB5] leading-none">
+              <span className="text-[10px] text-[#A4AFBF] leading-none">
                 Data source
               </span>
-              <span className="text-xs font-medium text-[#F3F4F6] mt-0.5">
+              <span className="text-xs font-medium text-[#F1F5F9] mt-0.5">
                 {dataSourceName}
               </span>
             </div>
           </div>
 
           {/* Latest Record Chip */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#16191F] border border-[#282D35] text-xs">
-            <Clock className="w-3.5 h-3.5 text-[#A4AAB5]" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#151A22] border border-[#28313D] text-xs">
+            <Clock className="w-3.5 h-3.5 text-[#A4AFBF]" />
             <div className="flex flex-col">
-              <span className="text-[10px] text-[#A4AAB5] leading-none">
+              <span className="text-[10px] text-[#A4AFBF] leading-none">
                 Latest record in selected dataset
               </span>
-              <span className="text-xs font-mono tabular-nums text-[#F3F4F6] mt-0.5">
+              <span className="text-xs font-mono tabular-nums text-[#F1F5F9] mt-0.5">
                 {formatDateTime(latestRecordDate)}
               </span>
             </div>
@@ -111,7 +111,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 isLive
-                  ? "bg-emerald-400"
+                  ? "bg-[#10B981]"
                   : isUploaded
                   ? "bg-blue-400"
                   : "bg-[#F59E0B]"
