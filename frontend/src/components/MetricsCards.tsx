@@ -77,7 +77,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             y1="10"
             x2="64"
             y2="10"
-            stroke="#282D35"
+            stroke="#2A3039"
             strokeWidth="1.5"
             strokeDasharray="2 2"
           />
@@ -126,7 +126,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 animate-pulse">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-26 bg-[#10141B] border border-[#28313D] rounded-xl p-4" />
+          <div key={i} className="h-26 bg-[#101216] border border-[#2A3039] rounded-xl p-4" />
         ))}
       </div>
     );
