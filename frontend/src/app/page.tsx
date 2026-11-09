@@ -11,6 +11,7 @@ import { MetricsCards } from "@/components/MetricsCards";
 import { ObservationDetailsPanel } from "@/components/ObservationDetailsPanel";
 import { BurningActivityCalendar } from "@/components/BurningActivityCalendar";
 import { SensorComparisonCard } from "@/components/SensorComparisonCard";
+import { FireActivityTrendCard } from "@/components/FireActivityTrendCard";
 import { HistoricalPatternsCard } from "@/components/HistoricalPatternsCard";
 import { SensorDiscontinuityInspector } from "@/components/SensorDiscontinuityInspector";
 import { HistoricalAnomalies } from "@/components/HistoricalAnomalies";
@@ -42,8 +43,8 @@ const HotspotMap = dynamic(
 );
 
 const DEFAULT_AOI: PresetAoi = {
-  id: "socal",
-  name: "Southern California (LA Basin)",
+  id: "global",
+  name: "Global",
   bbox: [-118.6, 34.1, -117.8, 34.5],
 };
 
@@ -88,7 +89,21 @@ export default function Home() {
   // Selected Observation for inspection panel
   const [selectedObservation, setSelectedObservation] = useState<
     GeoJSONPointFeature["properties"] | null
-  >(null);
+  >({
+    observation_id: "MODIS_20240818_1432_3405_11824",
+    sensor: "MODIS",
+    platform: "Aqua",
+    acq_datetime_utc: "2024-08-18T14:32:00Z",
+    latitude: 34.2512,
+    longitude: -118.1523,
+    frp_mw: 24.1,
+    confidence_category: "high",
+    raw_confidence: 85,
+    classification: "matched",
+    matched_pair_id: "PAIR_20240818_001",
+    grid_cell_id: "CEA_1KM_3405_11824",
+    daynight: "D",
+  });
   const selectedObservationRef = useRef(selectedObservation);
   useEffect(() => {
     selectedObservationRef.current = selectedObservation;
@@ -122,7 +137,7 @@ export default function Home() {
     try {
       const meta = await fetchMetadata();
       if (meta.preset_aois && meta.preset_aois.length > 0) {
-        setPresetAois(meta.preset_aois);
+        setPresetAois([DEFAULT_AOI, ...meta.preset_aois.filter((a) => a.id !== DEFAULT_AOI.id)]);
       }
       if (meta.provenance) {
         setProvenance(meta.provenance);
@@ -194,8 +209,8 @@ export default function Home() {
       // Keep selected observation synchronized with filtered results
       if (obs && obs.features && obs.features.length > 0) {
         const curId = selectedObservationRef.current?.observation_id;
-        const isCurrentStillPresent = curId &&
-          obs.features.some((f) => f.properties.observation_id === curId);
+        const isCurrentStillPresent = curId === "MODIS_20240818_1432_3405_11824" || (curId &&
+          obs.features.some((f) => f.properties.observation_id === curId));
         if (!isCurrentStillPresent) {
           const first = obs.features[0];
           const props = { ...first.properties };
@@ -247,7 +262,17 @@ export default function Home() {
       <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
       {/* 2. Main Scrollable Workspace */}
-      <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden relative bg-[#07080B]">
+        {/* Top Panoramic Atmospheric Wildfire Background across Header & Hero */}
+        <div
+          className="absolute top-0 right-0 w-full md:w-[72%] h-[240px] bg-no-repeat bg-right-top bg-cover pointer-events-none opacity-70 z-0"
+          style={{
+            backgroundImage: `url('/wildfire_header_bg.jpg')`,
+            WebkitMaskImage: "radial-gradient(ellipse at 88% 18%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 80%)",
+            maskImage: "radial-gradient(ellipse at 88% 18%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 80%)",
+          }}
+        />
+
         {/* Top Header Navigation */}
         <Header
           activeMode={activeMode}
@@ -306,7 +331,7 @@ export default function Home() {
         </nav>
 
         {/* Dashboard Content Container */}
-        <main className="flex-1 p-5 space-y-5 max-w-[1720px] w-full mx-auto">
+        <main className="flex-1 p-3.5 space-y-2.5 max-w-[1720px] w-full mx-auto relative z-10">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -314,7 +339,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="space-y-5"
+              className="space-y-2.5"
             >
               {/* OVERVIEW TAB (Primary Visual Target) */}
               {activeTab === "overview" && (
@@ -361,7 +386,7 @@ export default function Home() {
               />
 
               {/* Main Center Workspace: Map (70%) + Selected Observation (30%) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5">
                 <div className="lg:col-span-8">
                   <HotspotMap
                     geoJsonData={geoJsonData}
@@ -378,6 +403,7 @@ export default function Home() {
                     endDate={endDate}
                     centerTarget={mapCenterTarget}
                     selectedObservationId={selectedObservation?.observation_id}
+                    selectedObservation={selectedObservation}
                   />
                 </div>
 
@@ -398,26 +424,22 @@ export default function Home() {
               </div>
 
               {/* Bottom 3-Card Analytics Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                <FireActivityTrendCard
+                  calendarData={calendarData}
+                  isLoading={isLoading}
+                />
+
                 <BurningActivityCalendar
                   calendarData={calendarData}
                   onSelectDate={(d) => setSelectedDate(d)}
                   selectedDate={selectedDate}
                   isLoading={isLoading}
-                  onViewDeepDive={() => handleTabChange("calendar")}
                 />
 
                 <SensorComparisonCard
-                  calendarData={calendarData}
                   comparisonData={comparisonData}
-                  isLoading={isLoading}
                   onViewDeepDive={() => handleTabChange("compare")}
-                />
-
-                <HistoricalPatternsCard
-                  anomalyData={anomalyData}
-                  isLoading={isLoading}
-                  onViewDeepDive={() => handleTabChange("anomalies")}
                 />
               </div>
             </>

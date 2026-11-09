@@ -29,12 +29,14 @@ interface HotspotMapProps {
   endDate?: string;
   centerTarget?: [number, number] | null;
   selectedObservationId?: string | null;
+  selectedObservation?: GeoJSONPointFeature["properties"] | null;
 }
 
 const VECTOR_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
 
 const SATELLITE_RASTER_STYLE: any = {
   version: 8,
+  glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
   sources: {
     "esri-satellite": {
       type: "raster",
@@ -67,9 +69,11 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   endDate = "2024-08-20",
   centerTarget = null,
   selectedObservationId = null,
+  selectedObservation = null,
 }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
+  const haloMarkerRef = useRef<maplibregl.Marker | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
@@ -86,7 +90,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     properties: GeoJSONPointFeature["properties"];
   } | null>(null);
 
-  const [isLayersPanelExpanded, setIsLayersPanelExpanded] = useState(true);
+  const [isLayersPanelExpanded, setIsLayersPanelExpanded] = useState(false);
   const [showModis, setShowModis] = useState(true);
   const [showViirs, setShowViirs] = useState(true);
   const [showMatched, setShowMatched] = useState(true);
@@ -95,6 +99,8 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   const [showGridOverlay, setShowGridOverlay] = useState(false);
   const [layerOpacity, setLayerOpacity] = useState(85);
   const [displayInterval, setDisplayInterval] = useState<"all" | "day" | "week" | "month">("all");
+  const [activeViewMode, setActiveViewMode] = useState<"map" | "heatmap" | "grid">("map");
+  const [showBasemapMenu, setShowBasemapMenu] = useState(false);
   const [showAccessibleTable, setShowAccessibleTable] = useState(false);
 
   const latestDataRef = useRef(geoJsonData);
@@ -111,9 +117,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
     instance.addSource("hotspots", {
       type: "geojson",
       data: currentData,
-      cluster: true,
-      clusterMaxZoom: 8,
-      clusterRadius: 35,
+      cluster: false,
     });
 
     // Cluster circles using restrained yellow-to-orange-to-red scale
@@ -149,19 +153,23 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       },
     });
 
-    instance.addLayer({
-      id: "cluster-count",
-      type: "symbol",
-      source: "hotspots",
-      filter: ["has", "point_count"],
-      layout: {
-        "text-field": "{point_count_abbreviated}",
-        "text-size": 11,
-      },
-      paint: {
-        "text-color": "#090B0F",
-      },
-    });
+    try {
+      instance.addLayer({
+        id: "cluster-count",
+        type: "symbol",
+        source: "hotspots",
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": "{point_count_abbreviated}",
+          "text-size": 11,
+        },
+        paint: {
+          "text-color": "#090B0F",
+        },
+      });
+    } catch {
+      // glyphs fallback
+    }
 
     // MODIS Footprint Layer (1.0 km nadir) - Violet
     instance.addLayer({
@@ -208,17 +216,34 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       },
     });
 
-    // Selected Observation Distinct Halo Ring
+    // Active Fire Glowing Red/Orange Concentric Halo Ring
+    instance.addLayer({
+      id: "selected-observation-halo-glow",
+      type: "circle",
+      source: "hotspots",
+      filter: ["==", "observation_id", ""],
+      paint: {
+        "circle-radius": 24,
+        "circle-color": "#EF4444",
+        "circle-opacity": 0.35,
+        "circle-stroke-width": 2.5,
+        "circle-stroke-color": "#FF5500",
+        "circle-stroke-opacity": 0.85,
+      },
+    });
+
+    // Selected Observation Distinct Inner Halo Ring
     instance.addLayer({
       id: "selected-observation-halo",
       type: "circle",
       source: "hotspots",
       filter: ["==", "observation_id", ""],
       paint: {
-        "circle-radius": 15,
-        "circle-color": "transparent",
-        "circle-stroke-width": 2.5,
-        "circle-stroke-color": "#F1F5F9",
+        "circle-radius": 13,
+        "circle-color": "#FFAA00",
+        "circle-opacity": 0.45,
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#FFFFFF",
         "circle-stroke-opacity": 0.95,
       },
     });
@@ -416,18 +441,44 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
 
   useEffect(() => {
     if (!map.current || !isMapLoaded) return;
-    try {
-      if (map.current.getLayer("selected-observation-halo")) {
-        map.current.setFilter("selected-observation-halo", [
-          "==",
-          "observation_id",
-          selectedObservationId || "",
-        ]);
+
+    let targetCoords: [number, number] | null = null;
+    if (selectedObservation?.longitude != null && selectedObservation?.latitude != null) {
+      targetCoords = [selectedObservation.longitude, selectedObservation.latitude];
+    } else if (centerTarget) {
+      targetCoords = centerTarget;
+    } else if (geoJsonData?.features && geoJsonData.features.length > 0) {
+      const first = geoJsonData.features[0];
+      if (first.geometry && first.geometry.coordinates) {
+        targetCoords = [first.geometry.coordinates[0], first.geometry.coordinates[1]];
       }
-    } catch {
-      // ignore
     }
-  }, [selectedObservationId, isMapLoaded]);
+
+    if (targetCoords) {
+      if (!haloMarkerRef.current) {
+        const el = document.createElement("div");
+        el.className = "fire-concentric-halo-marker pointer-events-none";
+        el.style.width = "64px";
+        el.style.height = "64px";
+        el.style.position = "relative";
+        el.style.display = "flex";
+        el.style.alignItems = "center";
+        el.style.justifyContent = "center";
+        el.style.zIndex = "40";
+        el.innerHTML = `
+          <div style="position: absolute; width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle, rgba(239, 68, 68, 0.6) 0%, rgba(249, 115, 22, 0.35) 50%, rgba(0, 0, 0, 0) 75%); animation: pulse 2.2s infinite ease-in-out;"></div>
+          <div style="position: absolute; width: 44px; height: 44px; border-radius: 50%; border: 3.5px solid #FF5500; background: radial-gradient(circle, rgba(255, 68, 0, 0.85) 0%, rgba(220, 38, 38, 0.5) 100%); box-shadow: 0 0 25px #FF3B00;"></div>
+          <div style="position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid #FFFFFF; background: #FF3B00; box-shadow: 0 0 14px #FF5500;"></div>
+          <div style="position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 8px #FFFFFF;"></div>
+        `;
+        haloMarkerRef.current = new maplibregl.Marker({ element: el, anchor: "center" })
+          .setLngLat(targetCoords)
+          .addTo(map.current);
+      } else {
+        haloMarkerRef.current.setLngLat(targetCoords);
+      }
+    }
+  }, [selectedObservation, centerTarget, geoJsonData, isMapLoaded]);
 
   const toggleBasemap = () => {
     if (!map.current) return;
@@ -460,76 +511,177 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
 
   return (
     <div
-      className={`relative w-full rounded-xl overflow-hidden border border-[#2A3039] bg-[#08090B] transition-all duration-200 ${
+      className={`relative w-full rounded-2xl overflow-hidden border border-[#1E2433] bg-[#0D1017] shadow-lg flex flex-col transition-all duration-200 ${
         isFullscreen
           ? "fixed inset-0 z-50 h-screen w-screen rounded-none"
-          : "h-[520px]"
+          : "h-[295px]"
       }`}
     >
-      {/* Top Map Title Bar */}
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#101216]/90 backdrop-blur border border-[#2A3039] text-xs">
-        <span className="w-2 h-2 rounded-full bg-[#F5B32F]" />
-        <span className="font-medium text-[#F4F5F7]">Interactive hotspot map</span>
-        <span className="text-[#B1B7C1] text-[11px] hidden sm:inline">&bull; {aoiDisplayName}</span>
+      {/* 1. Map Card Top Toolbar */}
+      <div className="h-12 px-3 sm:px-4 bg-[#0D1017] border-b border-[#1E2433] flex items-center justify-between shrink-0 z-20">
+        {/* Left Segmented View Tabs */}
+        <div className="flex items-center gap-1 bg-[#121622] p-1 rounded-xl border border-[#23293A]">
+          <button
+            onClick={() => setActiveViewMode("map")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              activeViewMode === "map"
+                ? "bg-[#181E2E] text-[#F97316] border border-[#F97316]/50 shadow-[0_0_10px_rgba(249,115,22,0.2)]"
+                : "text-[#8E96A5] hover:text-white"
+            }`}
+          >
+            <MapIcon className="w-3.5 h-3.5 text-[#F97316]" />
+            <span>Map View</span>
+          </button>
+          <button
+            onClick={() => setActiveViewMode("heatmap")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              activeViewMode === "heatmap"
+                ? "bg-[#181E2E] text-[#F97316] border border-[#F97316]/50 shadow-[0_0_10px_rgba(249,115,22,0.2)]"
+                : "text-[#8E96A5] hover:text-white"
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>Heatmap</span>
+          </button>
+          <button
+            onClick={() => setActiveViewMode("grid")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              activeViewMode === "grid"
+                ? "bg-[#181E2E] text-[#F97316] border border-[#F97316]/50 shadow-[0_0_10px_rgba(249,115,22,0.2)]"
+                : "text-[#8E96A5] hover:text-white"
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Grid View</span>
+          </button>
+        </div>
+
+        {/* Right Actions: Layers, Basemap, Fullscreen */}
+        <div className="flex items-center gap-2">
+          {/* Layers Popover Button */}
+          <div className="relative">
+            <button
+              onClick={() => setIsLayersPanelExpanded(!isLayersPanelExpanded)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121622] hover:bg-[#181D2C] border border-[#23293A] text-xs font-medium text-[#E2E8F0] transition-colors"
+            >
+              <span>Layers</span>
+              <ChevronDown className={`w-3 h-3 text-[#7B8596] transition-transform ${isLayersPanelExpanded ? "rotate-180" : ""}`} />
+            </button>
+          </div>
+
+          {/* Basemap Toggle Button */}
+          <button
+            onClick={toggleBasemap}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121622] hover:bg-[#181D2C] border border-[#23293A] text-xs font-medium text-[#E2E8F0] transition-colors"
+          >
+            <span>Basemap</span>
+            <ChevronDown className="w-3 h-3 text-[#7B8596]" />
+          </button>
+
+          {/* Fullscreen Button */}
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="p-2 rounded-xl bg-[#121622] hover:bg-[#181D2C] border border-[#23293A] text-[#E2E8F0] transition-colors"
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 text-[#F5B32F]" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
+        </div>
       </div>
 
-      {/* Map Canvas */}
-      <div ref={mapContainer} className="w-full h-full" />
+      {/* 2. Interactive Map Container Canvas */}
+      <div className="relative flex-1 w-full h-full overflow-hidden">
+        <div ref={mapContainer} className="w-full h-full" />
 
-      {/* Basemap degraded error alert banner if needed */}
-      {mapError && (
-        <div className="absolute top-12 right-14 z-20 px-3 py-1.5 bg-[#171A20]/95 border border-[#F5B32F]/50 rounded-lg text-amber-200 text-xs flex items-center gap-2 shadow-lg backdrop-blur">
-          <span>{mapError}</span>
-          <button
-            onClick={() => setMapError(null)}
-            className="text-[#F5B32F] hover:text-[#F4F5F7] font-bold ml-1 text-xs"
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
-      {/* Floating Left: Map Layers Panel */}
-      <div className="absolute top-14 left-3 z-10 w-64 bg-[#101216]/95 backdrop-blur-md border border-[#2A3039] rounded-xl p-3 shadow-lg flex flex-col gap-2.5 text-xs">
-        {/* Panel Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-[#2A3039]">
-          <div className="flex items-center gap-2 font-medium text-[#F4F5F7]">
-            <Layers className="w-3.5 h-3.5 text-[#F5B32F]" />
-            <span>Map layers &amp; legend</span>
+        {/* Floating Left: Zoom and Recenter Controls */}
+        <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
+          <div className="flex flex-col bg-[#0D1017]/90 backdrop-blur-md border border-[#23293A] rounded-xl overflow-hidden shadow-md">
+            <button
+              onClick={() => map.current?.zoomIn()}
+              className="w-8 h-8 flex items-center justify-center text-white hover:bg-[#181D2C] font-bold text-base transition-colors"
+              title="Zoom in"
+            >
+              +
+            </button>
+            <div className="h-px bg-[#23293A]" />
+            <button
+              onClick={() => map.current?.zoomOut()}
+              className="w-8 h-8 flex items-center justify-center text-white hover:bg-[#181D2C] font-bold text-base transition-colors"
+              title="Zoom out"
+            >
+              −
+            </button>
           </div>
+
           <button
-            onClick={() => setIsLayersPanelExpanded(!isLayersPanelExpanded)}
-            className="text-[#B1B7C1] hover:text-[#F4F5F7] p-0.5 rounded transition-colors"
+            onClick={handleRecenter}
+            className="w-8 h-8 rounded-xl bg-[#0D1017]/90 backdrop-blur-md border border-[#23293A] flex items-center justify-center text-[#F5B32F] hover:bg-[#181D2C] transition-colors shadow-md"
+            title="Recenter Area of Interest"
           >
-            {isLayersPanelExpanded ? (
-              <ChevronUp className="w-3.5 h-3.5" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5" />
-            )}
+            <Crosshair className="w-4 h-4" />
           </button>
         </div>
 
+        {/* Floating Bottom: Horizontal Legend Strip */}
+        <div className="absolute bottom-3.5 left-4 z-10 flex flex-wrap items-center gap-4 px-4 py-2 rounded-xl bg-[#0D1017]/90 backdrop-blur-md border border-[#23293A] text-xs font-semibold text-white shadow-lg pointer-events-auto">
+          <span className="flex items-center gap-1.5 text-[#C084FC]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#A855F7] shadow-[0_0_6px_#A855F7]" />
+            <span>MODIS</span>
+          </span>
+          <span className="flex items-center gap-1.5 text-[#38BDF8]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#38BDF8] shadow-[0_0_6px_#38BDF8]" />
+            <span>VIIRS</span>
+          </span>
+          <span className="flex items-center gap-1.5 text-[#FBBF24]">
+            <span className="w-2.5 h-2.5 rotate-45 bg-[#F5B32F] rounded-xs shadow-[0_0_6px_#F5B32F]" />
+            <span>MODIS Only</span>
+          </span>
+          <span className="flex items-center gap-1.5 text-[#F87171]">
+            <span className="w-2.5 h-2.5 rotate-45 bg-[#EF4444] rounded-xs shadow-[0_0_6px_#EF4444]" />
+            <span>VIIRS Only</span>
+          </span>
+          <span className="flex items-center gap-1.5 text-[#34D399]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shadow-[0_0_6px_#10B981]" />
+            <span>Matched</span>
+          </span>
+        </div>
+
+        {/* Floating Bottom-Right: NASA Pill Badge */}
+        <div className="absolute bottom-3.5 right-4 z-10 px-3 py-1.5 rounded-xl bg-[#0D1017]/90 backdrop-blur-md border border-[#23293A] text-[11px] font-bold text-white flex items-center gap-1.5 shadow-lg">
+          <span className="tracking-wider">NASA</span>
+          <span className="w-3.5 h-3.5 rounded-full bg-[#1F2937] text-[9px] text-[#9CA3AF] flex items-center justify-center font-serif">i</span>
+        </div>
+
+        {/* Dropdown Layers Panel when Expanded */}
         {isLayersPanelExpanded && (
-          <div className="flex flex-col gap-2">
-            {/* Checkboxes List */}
+          <div className="absolute top-4 right-4 z-20 w-64 bg-[#0D1017]/95 backdrop-blur-md border border-[#23293A] rounded-2xl p-3.5 shadow-2xl flex flex-col gap-2.5 text-xs animate-in fade-in duration-150">
+            <div className="flex items-center justify-between pb-2 border-b border-[#23293A]">
+              <span className="font-semibold text-white">Map Layers</span>
+              <button
+                onClick={() => setIsLayersPanelExpanded(false)}
+                className="text-[#8E96A5] hover:text-white"
+              >
+                &times;
+              </button>
+            </div>
             <div className="flex flex-col gap-1.5">
-              <label className="flex items-center justify-between text-[#B1B7C1] hover:text-[#F4F5F7] cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#A78BFA]" />
-                  <span>MODIS (1.0 km footprint)</span>
+              <label className="flex items-center justify-between text-[#B1B7C1] hover:text-white cursor-pointer py-0.5">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#A855F7]" />
+                  <span>MODIS Footprints</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showModis}
                   onChange={(e) => setShowModis(e.target.checked)}
-                  className="rounded border-[#2A3039] bg-[#171A20] text-[#A78BFA] focus:ring-0"
+                  className="rounded border-[#2A3039] bg-[#171A20] text-[#A855F7] focus:ring-0"
                 />
               </label>
 
-              <label className="flex items-center justify-between text-[#B1B7C1] hover:text-[#F4F5F7] cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 text-xs">
+              <label className="flex items-center justify-between text-[#B1B7C1] hover:text-white cursor-pointer py-0.5">
+                <span className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
-                  <span>VIIRS (375 m footprint)</span>
+                  <span>VIIRS Detections</span>
                 </span>
                 <input
                   type="checkbox"
@@ -539,178 +691,21 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
                 />
               </label>
 
-              <label className="flex items-center justify-between text-[#B1B7C1] hover:text-[#F4F5F7] cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#34D399]" />
-                  <span>Candidate correspondences</span>
+              <label className="flex items-center justify-between text-[#B1B7C1] hover:text-white cursor-pointer py-0.5">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+                  <span>Candidate Matches</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={showMatched}
                   onChange={(e) => setShowMatched(e.target.checked)}
-                  className="rounded border-[#2A3039] bg-[#171A20] text-[#34D399] focus:ring-0"
+                  className="rounded border-[#2A3039] bg-[#171A20] text-[#10B981] focus:ring-0"
                 />
               </label>
-
-              <label className="flex items-center justify-between text-[#B1B7C1] hover:text-[#F4F5F7] cursor-pointer py-0.5">
-                <span className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-sm border border-[#858D99]" />
-                  <span>1.0 km equal-area grid</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={showGridOverlay}
-                  onChange={(e) => setShowGridOverlay(e.target.checked)}
-                  className="rounded border-[#2A3039] bg-[#171A20] text-[#F5B32F] focus:ring-0"
-                />
-              </label>
-            </div>
-
-            {/* Opacity Slider */}
-            <div className="flex flex-col gap-1 pt-1.5 border-t border-[#2A3039]">
-              <div className="flex items-center justify-between text-[11px] text-[#B1B7C1]">
-                <span>Layer opacity</span>
-                <span className="font-mono tabular-nums text-[#F4F5F7]">{layerOpacity}%</span>
-              </div>
-              <input
-                type="range"
-                min="20"
-                max="100"
-                value={layerOpacity}
-                onChange={(e) => setLayerOpacity(Number(e.target.value))}
-                className="w-full h-1 bg-[#2A3039] rounded-lg appearance-none cursor-pointer accent-[#F5B32F]"
-              />
-            </div>
-
-            {/* Region Selector */}
-            {presetAois.length > 0 && onSelectAoi && (
-              <div className="flex flex-col gap-1 pt-1.5 border-t border-[#2A3039]">
-                <label className="text-[11px] font-medium text-[#B1B7C1]">
-                  Region
-                </label>
-                <select
-                  value={selectedAoiId}
-                  onChange={(e) => {
-                    const found = presetAois.find((a) => a.id === e.target.value);
-                    if (found) onSelectAoi(found);
-                  }}
-                  className="w-full bg-[#171A20] border border-[#2A3039] rounded-lg px-2 py-1 text-xs text-[#F4F5F7] focus:outline-none"
-                >
-                  {presetAois.map((aoi) => (
-                    <option key={aoi.id} value={aoi.id}>
-                      {aoi.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Display Interval buttons */}
-            <div className="flex items-center justify-between bg-[#171A20] p-0.5 rounded-lg border border-[#2A3039] text-[11px] mt-1">
-              {(["all", "day", "week", "month"] as const).map((inter) => (
-                <button
-                  key={inter}
-                  onClick={() => setDisplayInterval(inter)}
-                  className={`px-2 py-1 rounded font-medium capitalize transition-all ${
-                    displayInterval === inter
-                      ? "bg-[#2A3039] text-[#F4F5F7]"
-                      : "text-[#B1B7C1] hover:text-[#F4F5F7]"
-                  }`}
-                >
-                  {inter}
-                </button>
-              ))}
             </div>
           </div>
         )}
-      </div>
-
-      {/* Floating Right: Controls Toolstrip */}
-      <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
-        <div className="w-8 h-8 rounded-lg bg-[#101216]/90 backdrop-blur border border-[#2A3039] flex items-center justify-center text-[#B1B7C1] shadow-sm">
-          <Compass className="w-3.5 h-3.5" />
-        </div>
-
-        <div className="flex flex-col bg-[#101216]/90 backdrop-blur border border-[#2A3039] rounded-lg overflow-hidden shadow-sm">
-          <button
-            onClick={() => map.current?.zoomIn()}
-            className="w-8 h-8 flex items-center justify-center text-[#F4F5F7] hover:bg-[#171A20] text-sm transition-colors"
-            title="Zoom in"
-          >
-            +
-          </button>
-          <div className="h-px bg-[#2A3039]" />
-          <button
-            onClick={() => map.current?.zoomOut()}
-            className="w-8 h-8 flex items-center justify-center text-[#F4F5F7] hover:bg-[#171A20] text-sm transition-colors"
-            title="Zoom out"
-          >
-            -
-          </button>
-        </div>
-
-        <button
-          onClick={handleRecenter}
-          className="w-8 h-8 rounded-lg bg-[#101216]/90 backdrop-blur border border-[#2A3039] flex items-center justify-center text-[#B1B7C1] hover:text-[#F4F5F7] hover:bg-[#171A20] shadow-sm transition-colors"
-          title="Recenter map"
-        >
-          <Crosshair className="w-3.5 h-3.5" />
-        </button>
-
-        <button
-          onClick={toggleBasemap}
-          className="w-8 h-8 rounded-lg bg-[#101216]/90 backdrop-blur border border-[#2A3039] flex items-center justify-center text-[#B1B7C1] hover:text-[#F4F5F7] hover:bg-[#171A20] shadow-sm transition-colors"
-          title={`Switch to ${basemapType === "satellite" ? "dark vector" : "satellite imagery"}`}
-        >
-          {basemapType === "satellite" ? (
-            <MapIcon className="w-3.5 h-3.5 text-[#F5B32F]" />
-          ) : (
-            <SatelliteIcon className="w-3.5 h-3.5 text-[#38BDF8]" />
-          )}
-        </button>
-
-        <button
-          onClick={() => setIsFullscreen(!isFullscreen)}
-          className="w-8 h-8 rounded-lg bg-[#101216]/90 backdrop-blur border border-[#2A3039] flex items-center justify-center text-[#B1B7C1] hover:text-[#F4F5F7] hover:bg-[#171A20] shadow-sm transition-colors"
-          title={isFullscreen ? "Exit fullscreen" : "Expand map fullscreen"}
-        >
-          {isFullscreen ? (
-            <Minimize2 className="w-3.5 h-3.5 text-[#F5B32F]" />
-          ) : (
-            <Maximize2 className="w-3.5 h-3.5" />
-          )}
-        </button>
-
-        <button
-          onClick={() => setShowAccessibleTable(!showAccessibleTable)}
-          className={`w-8 h-8 rounded-lg bg-[#101216]/90 backdrop-blur border border-[#2A3039] flex items-center justify-center shadow-sm transition-colors ${
-            showAccessibleTable ? "text-[#F5B32F] bg-[#171A20]" : "text-[#B1B7C1] hover:text-[#F4F5F7] hover:bg-[#171A20]"
-          }`}
-          title="Toggle tabular observation records"
-        >
-          <Table className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* Floating Bottom-Right: Fire Radiative Power (MW) Legend & Attribution */}
-      <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1">
-        <div className="px-3 py-1.5 rounded-lg bg-[#101216]/90 backdrop-blur border border-[#2A3039] shadow-sm flex flex-col gap-1 text-[11px]">
-          <span className="font-medium text-[#F4F5F7]">
-            Fire radiative power (MW)
-          </span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[#B1B7C1] text-[10px]">Low (&lt;5 MW)</span>
-            <div className="h-1.5 w-24 rounded-full bg-gradient-to-r from-[#FFD166] via-[#F5B32F] via-[#F47A24] to-[#E5484D]" />
-            <span className="text-[#B1B7C1] text-[10px]">High (&gt;50 MW)</span>
-          </div>
-        </div>
-
-        <div className="px-2 py-0.5 rounded bg-[#08090B]/90 backdrop-blur text-[10px] text-[#858D99] font-mono flex items-center gap-1.5 border border-[#2A3039]">
-          <span>&copy; OpenStreetMap</span>
-          <span>&bull;</span>
-          <span>NASA FIRMS / ESRI</span>
-        </div>
-      </div>
 
       {/* Live Cursor Coordinate & Zoom HUD Readout */}
       {cursorCoords && (
@@ -767,6 +762,7 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
           </div>
         </div>
       )}
+      </div>
 
       {/* Accessible Data Table Modal Overlay */}
       {showAccessibleTable && (

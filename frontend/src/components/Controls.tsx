@@ -2,17 +2,15 @@
 
 import React, { useState } from "react";
 import {
-  MapPin,
+  Globe,
   Calendar as CalendarIcon,
-  Sliders,
-  Filter,
+  Layers,
+  Settings2,
   RotateCcw,
+  Filter,
   ChevronDown,
-  ChevronUp,
-  Flame,
 } from "lucide-react";
 import { PresetAoi } from "@/types";
-import { Button } from "@/components/ui/Button";
 
 interface ControlsProps {
   presetAois: PresetAoi[];
@@ -57,27 +55,23 @@ export const Controls: React.FC<ControlsProps> = ({
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  let activeFilterCount = 0;
-  if (startDate !== "2024-08-01" || endDate !== "2024-08-20") activeFilterCount++;
-  if (sensorFilter !== "ALL") activeFilterCount++;
-  if (classificationFilter !== "ALL") activeFilterCount++;
-  if (gridSizeKm !== 1.0) activeFilterCount++;
-  if (spatialToleranceM !== 1000) activeFilterCount++;
-  if (selectedDate) activeFilterCount++;
-
   const formatDateLabel = (isoDate: string) => {
     try {
       const parts = isoDate.split("-");
       if (parts.length === 3) {
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const mIdx = parseInt(parts[1], 10) - 1;
-        return `${parts[2]} ${months[mIdx]} ${parts[0]}`;
+        return `${months[mIdx]} ${parts[2]}`;
       }
     } catch {
       // fallback
     }
     return isoDate;
   };
+
+  const formattedDateRange = selectedDate
+    ? `Single: ${formatDateLabel(selectedDate)}`
+    : `${formatDateLabel(startDate)} – ${formatDateLabel(endDate)}, 2024`;
 
   const handleResetFilters = () => {
     setStartDate("2024-08-01");
@@ -91,270 +85,182 @@ export const Controls: React.FC<ControlsProps> = ({
   };
 
   return (
-    <div className="bg-[#101216] border border-[#2A3039] rounded-xl p-3.5 shadow-sm flex flex-col gap-3">
-      {/* Primary Accessible Filter Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-        {/* 1. Region / AOI (3 cols) */}
-        <div className="md:col-span-3 flex flex-col gap-1">
-          <label
-            htmlFor="aoi-selector"
-            className="text-[12px] font-medium text-[#B1B7C1] flex items-center justify-between"
-          >
-            <span className="flex items-center gap-1.5 text-[#F4F5F7]">
-              <MapPin className="w-3.5 h-3.5 text-[#F5B32F]" aria-hidden="true" />
-              Region / AOI
-            </span>
-          </label>
-          <select
-            id="aoi-selector"
-            value={selectedAoiId}
-            onChange={(e) => {
-              const found = presetAois.find((a) => a.id === e.target.value);
-              if (found) onSelectAoi(found);
-            }}
-            className="w-full h-8.5 bg-[#08090B] border border-[#2A3039] rounded-lg px-2.5 text-xs text-[#F4F5F7] focus-visible:outline-none focus-visible:border-[#F5B32F] transition-colors duration-150"
-          >
-            {presetAois.map((aoi) => (
-              <option key={aoi.id} value={aoi.id}>
-                {aoi.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* 2. Observation Window & Presets (4 cols) */}
-        <div className="md:col-span-4 flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="start-date-input"
-              className="text-[12px] font-medium text-[#B1B7C1] flex items-center gap-1.5"
-            >
-              <CalendarIcon className="w-3.5 h-3.5 text-[#F5B32F]" aria-hidden="true" />
-              Date range (UTC)
-            </label>
-            <div className="flex items-center gap-1 text-[11px]">
-              <button
-                type="button"
-                onClick={() => {
-                  setStartDate("2024-08-01");
-                  setEndDate("2024-08-20");
-                  if (onClearSelectedDate) onClearSelectedDate();
+    <div className="flex flex-col gap-3">
+      {/* Horizontal Translucent Capsule Filter Bar */}
+      <div className="bg-[#0C0F17]/90 backdrop-blur-md border border-[#1E2433] rounded-xl p-1.5 px-3 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+        {/* Left Filter Dropdowns */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* 1. Global / AOI Selector */}
+          <div className="relative">
+            <label htmlFor="aoi-select" className="sr-only">Select Region or Area of Interest</label>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#121622] hover:bg-[#181D2C] border border-[#23293A] text-xs font-medium text-[#E2E8F0] transition-colors cursor-pointer">
+              <Globe className="w-3.5 h-3.5 text-[#F5B32F]" />
+              <select
+                id="aoi-select"
+                aria-label="Select Region or Area of Interest"
+                value={selectedAoiId}
+                onChange={(e) => {
+                  const found = presetAois.find((a) => a.id === e.target.value);
+                  if (found) onSelectAoi(found);
                 }}
-                className={`px-1.5 py-0.5 rounded text-[10px] transition-colors font-medium border ${
-                  startDate === "2024-08-01" && endDate === "2024-08-20"
-                    ? "bg-[#171A20] border-[#F5B32F] text-[#F5B32F]"
-                    : "bg-[#08090B] border-[#2A3039] text-[#B1B7C1] hover:text-[#F4F5F7]"
-                }`}
+                className="bg-transparent text-xs text-[#E2E8F0] focus:outline-none cursor-pointer pr-1"
               >
-                01–20 Aug
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setStartDate("2024-08-10");
-                  setEndDate("2024-08-15");
-                  if (onClearSelectedDate) onClearSelectedDate();
-                }}
-                className={`px-1.5 py-0.5 rounded text-[10px] transition-colors font-medium border ${
-                  startDate === "2024-08-10" && endDate === "2024-08-15"
-                    ? "bg-[#171A20] border-[#F5B32F] text-[#F5B32F]"
-                    : "bg-[#08090B] border-[#2A3039] text-[#B1B7C1] hover:text-[#F4F5F7]"
-                }`}
-              >
-                10–15 Aug
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setStartDate("2024-08-16");
-                  setEndDate("2024-08-20");
-                  if (onClearSelectedDate) onClearSelectedDate();
-                }}
-                className={`px-1.5 py-0.5 rounded text-[10px] transition-colors font-medium border ${
-                  startDate === "2024-08-16" && endDate === "2024-08-20"
-                    ? "bg-[#171A20] border-[#F5B32F] text-[#F5B32F]"
-                    : "bg-[#08090B] border-[#2A3039] text-[#B1B7C1] hover:text-[#F4F5F7]"
-                }`}
-              >
-                16–20 Aug
-              </button>
+                {presetAois.map((aoi) => (
+                  <option key={aoi.id} value={aoi.id} className="bg-[#10141F]">
+                    {aoi.name.replace("Southern California (LA Basin)", "S. California (LA)")}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3 h-3 text-[#7B8596] pointer-events-none" />
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <input
-              id="start-date-input"
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                if (onClearSelectedDate) onClearSelectedDate();
-              }}
-              className="w-1/2 h-8.5 bg-[#08090B] border border-[#2A3039] rounded-lg px-2 text-xs font-mono tabular-nums text-[#F4F5F7] focus-visible:outline-none focus-visible:border-[#F5B32F] transition-colors duration-150"
-            />
-            <span className="text-[#B1B7C1] text-xs">&rarr;</span>
-            <input
-              id="end-date-input"
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                if (onClearSelectedDate) onClearSelectedDate();
-              }}
-              className="w-1/2 h-8.5 bg-[#08090B] border border-[#2A3039] rounded-lg px-2 text-xs font-mono tabular-nums text-[#F4F5F7] focus-visible:outline-none focus-visible:border-[#F5B32F] transition-colors duration-150"
-            />
+          {/* 2. Date Range Preset Selector */}
+          <div className="relative">
+            <label htmlFor="date-range-select" className="sr-only">Select Date Range Window</label>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#121622] hover:bg-[#181D2C] border border-[#23293A] text-xs font-medium text-[#E2E8F0] transition-colors cursor-pointer">
+              <CalendarIcon className="w-3.5 h-3.5 text-[#F5B32F]" />
+              <select
+                id="date-range-select"
+                aria-label="Select Date Range Window"
+                value={selectedDate ? "custom" : `${startDate}_${endDate}`}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "2024-08-01_2024-08-20") {
+                    setStartDate("2024-08-01");
+                    setEndDate("2024-08-20");
+                    if (onClearSelectedDate) onClearSelectedDate();
+                  } else if (val === "2024-08-10_2024-08-15") {
+                    setStartDate("2024-08-10");
+                    setEndDate("2024-08-15");
+                    if (onClearSelectedDate) onClearSelectedDate();
+                  } else if (val === "2024-08-16_2024-08-20") {
+                    setStartDate("2024-08-16");
+                    setEndDate("2024-08-20");
+                    if (onClearSelectedDate) onClearSelectedDate();
+                  }
+                }}
+                className="bg-transparent text-xs text-[#E2E8F0] focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="2024-08-01_2024-08-20" className="bg-[#10141F]">
+                  Aug 01 – Aug 20, 2024
+                </option>
+                <option value="2024-08-10_2024-08-15" className="bg-[#10141F]">
+                  Aug 10 – Aug 15, 2024 (Peak)
+                </option>
+                <option value="2024-08-16_2024-08-20" className="bg-[#10141F]">
+                  Aug 16 – Aug 20, 2024
+                </option>
+                {selectedDate && (
+                  <option value="custom" className="bg-[#10141F]">
+                    {formattedDateRange}
+                  </option>
+                )}
+              </select>
+              <ChevronDown className="w-3 h-3 text-[#7B8596] pointer-events-none" />
+            </div>
           </div>
-        </div>
 
-        {/* 3. Primary Sensor Selector (2 cols) */}
-        <div className="md:col-span-2 flex flex-col gap-1">
-          <label className="text-[12px] font-medium text-[#B1B7C1] flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-[#B1B7C1]" aria-hidden="true" />
-            Sensor
-          </label>
-          <select
-            value={sensorFilter}
-            onChange={(e) => setSensorFilter(e.target.value)}
-            className="w-full h-8.5 bg-[#08090B] border border-[#2A3039] rounded-lg px-2 text-xs text-[#F4F5F7] focus-visible:outline-none focus-visible:border-[#F5B32F] transition-colors duration-150"
-          >
-            <option value="ALL">All sensors</option>
-            <option value="MODIS">MODIS only (1 km)</option>
-            <option value="VIIRS">VIIRS only (375 m)</option>
-          </select>
-        </div>
+          {/* 3. Sensor Selector */}
+          <div className="relative">
+            <label htmlFor="sensor-select" className="sr-only">Select Satellite Sensor Filter</label>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#121622] hover:bg-[#181D2C] border border-[#23293A] text-xs font-medium text-[#E2E8F0] transition-colors cursor-pointer">
+              <Layers className="w-3.5 h-3.5 text-[#F5B32F]" />
+              <select
+                id="sensor-select"
+                aria-label="Select Satellite Sensor Filter"
+                value={sensorFilter}
+                onChange={(e) => setSensorFilter(e.target.value)}
+                className="bg-transparent text-xs text-[#E2E8F0] focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="ALL" className="bg-[#10141F]">All Sensors</option>
+                <option value="MODIS" className="bg-[#10141F]">MODIS Only (1.0 km)</option>
+                <option value="VIIRS" className="bg-[#10141F]">VIIRS Only (375 m)</option>
+              </select>
+              <ChevronDown className="w-3 h-3 text-[#7B8596] pointer-events-none" />
+            </div>
+          </div>
 
-        {/* 4. Action Buttons & Advanced Toggle (3 cols) */}
-        <div className="md:col-span-3 flex items-center justify-end gap-1.5 pt-1 md:pt-0">
-          <Button
-            variant="subtle"
-            size="sm"
-            onClick={handleResetFilters}
-            title="Reset filters to standard defaults"
-            className="relative"
-          >
-            <RotateCcw className="w-3 h-3 mr-1" />
-            <span>Reset</span>
-            {activeFilterCount > 0 && (
-              <span className="ml-1.5 px-1.5 py-0.2 rounded-full bg-[#F5B32F]/20 text-[#F5B32F] border border-[#F5B32F]/40 text-[10px] font-mono font-medium">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-
-          <Button
-            variant="subtle"
-            size="sm"
+          {/* 4. Advanced Settings Button */}
+          <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="border-[#2A3039] text-[#B1B7C1] hover:text-[#F4F5F7]"
-            title="Toggle advanced harmonization settings"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              showAdvanced
+                ? "bg-[#181E2E] text-[#F5B32F] border border-[#F5B32F]/50"
+                : "bg-[#121622] hover:bg-[#181D2C] border border-[#23293A] text-[#E2E8F0]"
+            }`}
           >
-            <Sliders className="w-3 h-3 mr-1 text-[#F5B32F]" />
-            <span>Settings</span>
-            {showAdvanced ? (
-              <ChevronUp className="w-3 h-3 ml-1" />
-            ) : (
-              <ChevronDown className="w-3 h-3 ml-1" />
-            )}
-          </Button>
+            <Settings2 className="w-3.5 h-3.5 text-[#F5B32F]" />
+            <span>Advanced Settings</span>
+            <ChevronDown className={`w-3 h-3 text-[#7B8596] transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+          </button>
+        </div>
 
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onApplyFilters}
+        {/* Right Action Buttons: Reset & Apply Filters */}
+        <div className="flex items-center gap-2">
+          {/* Reset Button */}
+          <button
+            onClick={handleResetFilters}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121622] hover:bg-[#181D2C] border border-[#23293A] text-xs font-medium text-[#9AA3B4] hover:text-white transition-colors"
           >
-            Apply filters
-          </Button>
+            <RotateCcw className="w-3 h-3" />
+            <span>Reset</span>
+          </button>
+
+          {/* Apply Filters Vibrant Gradient Button */}
+          <button
+            onClick={() => {
+              if (onApplyFilters) onApplyFilters();
+            }}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#EA580C] hover:from-[#FBBF24] hover:to-[#F97316] text-[#0A0B0E] font-bold text-xs shadow-[0_0_16px_rgba(245,158,11,0.35)] active:scale-95 transition-all"
+          >
+            <Filter className="w-3.5 h-3.5 fill-current" />
+            <span>Apply Filters</span>
+          </button>
         </div>
       </div>
 
-      {/* Active Focused Date Banner */}
-      {selectedDate && (
-        <div className="bg-[#171A20] border border-[#F5B32F]/40 rounded-lg px-3 py-2 flex items-center justify-between text-xs text-[#F4F5F7]">
-          <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-[#F5B32F]" />
-            <span>
-              Focused date: <strong className="font-semibold text-[#F4F5F7]">{formatDateLabel(selectedDate)}</strong>
-            </span>
-            <span className="text-[#B1B7C1] text-[11px] hidden sm:inline">
-              &bull; Every panel is filtered to this 24h UTC period
-            </span>
-          </div>
-          {onClearSelectedDate && (
-            <Button
-              variant="subtle"
-              size="sm"
-              onClick={onClearSelectedDate}
-              className="text-[#F5B32F] hover:text-[#F47A24] font-medium"
-            >
-              <RotateCcw className="w-3 h-3 mr-1" />
-              Back to full range
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Collapsible Advanced Settings Section */}
+      {/* Expandable Advanced Settings Drawer */}
       {showAdvanced && (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pt-3 border-t border-[#2A3039] bg-[#08090B]/50 rounded-lg p-3">
-          {/* Harmonization Grid Size (4 cols) */}
-          <div className="md:col-span-4 flex flex-col gap-1">
-            <div className="flex items-center justify-between text-[11px] text-[#B1B7C1]">
-              <span className="font-medium text-[#F4F5F7] flex items-center gap-1">
-                <Sliders className="w-3 h-3 text-[#F5B32F]" />
-                Grid size: {gridSizeKm.toFixed(1)} km
-              </span>
-              <span>Equal-area cylindrical</span>
-            </div>
-            <input
-              type="range"
-              min="0.5"
-              max="3.0"
-              step="0.5"
+        <div className="bg-[#0C0F17]/95 border border-[#1E2433] rounded-2xl p-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
+          <div>
+            <label className="text-[11px] font-semibold text-[#8E96A5] block mb-1">
+              Equal-Area Grid Resolution ({gridSizeKm} km)
+            </label>
+            <select
               value={gridSizeKm}
               onChange={(e) => setGridSizeKm(parseFloat(e.target.value))}
-              className="w-full accent-[#F5B32F] cursor-pointer h-1.5 bg-[#171A20] rounded-lg"
-            />
-            <div className="flex justify-between text-[10px] text-[#858D99]">
-              <span>0.5 km (Fine)</span>
-              <span className="text-[#F5B32F]">1.0 km (Nominal MODIS)</span>
-              <span>3.0 km (Regional)</span>
-            </div>
+              className="w-full h-8 bg-[#121622] border border-[#23293A] rounded-lg px-2 text-[#E2E8F0] text-xs focus:outline-none focus:border-[#F5B32F]"
+            >
+              <option value={0.5}>0.5 km (High resolution)</option>
+              <option value={1.0}>1.0 km (Standard Lambert CEA)</option>
+              <option value={2.0}>2.0 km (Regional aggregation)</option>
+            </select>
           </div>
 
-          {/* Spatial Match Tolerance (4 cols) */}
-          <div className="md:col-span-4 flex flex-col gap-1">
-            <div className="flex items-center justify-between text-[11px] text-[#B1B7C1]">
-              <span className="font-medium text-[#F4F5F7] flex items-center gap-1">
-                <Sliders className="w-3 h-3 text-[#38BDF8]" />
-                Match tolerance: {spatialToleranceM}m
-              </span>
-              <span>&le; 60 min orbital delta</span>
-            </div>
-            <input
-              type="range"
-              min="500"
-              max="2000"
-              step="250"
+          <div>
+            <label className="text-[11px] font-semibold text-[#8E96A5] block mb-1">
+              Cross-Sensor Match Distance (&le; {spatialToleranceM}m)
+            </label>
+            <select
               value={spatialToleranceM}
               onChange={(e) => setSpatialToleranceM(parseInt(e.target.value, 10))}
-              className="w-full accent-[#38BDF8] cursor-pointer h-1.5 bg-[#171A20] rounded-lg"
-            />
-            <div className="flex justify-between text-[10px] text-[#858D99]">
-              <span>500m (Strict)</span>
-              <span className="text-[#38BDF8]">1000m (MODIS Nadir)</span>
-              <span>2000m (Permissive)</span>
-            </div>
+              className="w-full h-8 bg-[#121622] border border-[#23293A] rounded-lg px-2 text-[#E2E8F0] text-xs focus:outline-none focus:border-[#F5B32F]"
+            >
+              <option value={500}>500 m (Strict nadir collocation)</option>
+              <option value={1000}>1000 m (Standard MODIS footprint)</option>
+              <option value={1500}>1500 m (Expanded view angle)</option>
+            </select>
           </div>
 
-          {/* Classification Filter (4 cols) */}
-          <div className="md:col-span-4 flex flex-col gap-1">
-            <label className="text-[11px] font-medium text-[#B1B7C1]">
-              Record classification
+          <div>
+            <label className="text-[11px] font-semibold text-[#8E96A5] block mb-1">
+              Classification Sub-Filter
             </label>
             <select
               value={classificationFilter}
               onChange={(e) => setClassificationFilter(e.target.value)}
-              className="w-full h-8 bg-[#171A20] border border-[#2A3039] rounded-lg px-2 text-xs text-[#F4F5F7] focus-visible:outline-none focus-visible:border-[#F5B32F] transition-colors duration-150"
+              className="w-full h-8 bg-[#121622] border border-[#23293A] rounded-lg px-2 text-[#E2E8F0] text-xs focus:outline-none focus:border-[#F5B32F]"
             >
               <option value="ALL">All records</option>
               <option value="matched">Candidate matches only</option>

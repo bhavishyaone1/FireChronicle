@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Database, Clock, AlertTriangle } from "lucide-react";
 import { DatasetProvenance } from "@/types";
 
 interface HeroBannerProps {
@@ -10,122 +9,26 @@ interface HeroBannerProps {
   latestRecordDate?: string | null;
 }
 
-export const HeroBanner: React.FC<HeroBannerProps> = ({
-  isFirmsConfigured = false,
-  provenance,
-  latestRecordDate,
-}) => {
-  const formatDateTime = (iso?: string | null) => {
-    if (!iso) return "No records in selected filter";
-    try {
-      const d = new Date(iso);
-      if (!isNaN(d.getTime())) {
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const m = months[d.getUTCMonth()];
-        const day = String(d.getUTCDate()).padStart(2, "0");
-        const yr = d.getUTCFullYear();
-        const hrs = String(d.getUTCHours()).padStart(2, "0");
-        const mins = String(d.getUTCMinutes()).padStart(2, "0");
-        return `${day} ${m} ${yr}, ${hrs}:${mins} UTC`;
-      }
-    } catch {
-      // fallback
-    }
-    return iso;
-  };
-
-  const isLive = provenance?.is_live || isFirmsConfigured;
-  const isSynthetic = provenance?.is_synthetic ?? !isLive;
-  const isUploaded = provenance?.provenance_type === "UPLOADED_NASA_FIRMS_CSV";
-
-  const provenanceLabel = isLive
-    ? "LIVE NASA FIRMS"
-    : isUploaded
-    ? "UPLOADED NASA FIRMS CSV"
-    : "SYNTHETIC DEMONSTRATION DATA";
-
-  const provenanceSubtitle = isLive
-    ? "Direct satellite API stream"
-    : isUploaded
-    ? "User-imported FIRMS observations"
-    : "Illustrative fixture (not real observations)";
-
-  const dataSourceName = isLive
-    ? "NASA FIRMS API"
-    : isUploaded
-    ? "NASA FIRMS CSV"
-    : "NASA FIRMS Benchmark (Sample)";
-
+export const HeroBanner: React.FC<HeroBannerProps> = () => {
   return (
-    <div className="rounded-xl bg-[#101216] border border-[#2A3039] p-5 shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Left: Section Header */}
-        <div className="flex flex-col gap-1 max-w-2xl">
-          <h2 className="text-2xl sm:text-[26px] font-semibold tracking-tight text-[#F4F5F7] leading-tight">
-            Fire activity overview
-          </h2>
-          <p className="text-sm font-normal text-[#B1B7C1] leading-relaxed">
-            Explore and compare satellite observations of active fire across space and time.
+    <div className="relative pt-1 pb-1">
+      {/* Warm Ambient Glow behind Title */}
+      <div className="absolute -top-4 left-0 w-96 h-24 bg-orange-600/10 blur-3xl pointer-events-none" />
+
+      {/* Main Title Row with Vertical Ember Gradient Accent */}
+      <div className="relative z-10 flex items-center gap-3.5">
+        {/* Vertical glowing gradient line */}
+        <div className="w-1.5 h-11 rounded-full bg-gradient-to-b from-[#FFAA00] via-[#FF6600] to-[#E52E06] shadow-[0_0_14px_rgba(255,102,0,0.7)] shrink-0" />
+
+        <div className="flex flex-col">
+          <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-white flex items-center gap-2 leading-none">
+            <span>Fire</span>
+            <span className="text-[#FF7A1A]">Activity</span>
+            <span>Overview</span>
+          </h1>
+          <p className="text-xs sm:text-[13px] text-[#9AA3B4] mt-1.5 font-normal">
+            Explore and analyse satellite observations of active fires across the globe.
           </p>
-        </div>
-
-        {/* Right Status Chips */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          {/* Data Source Chip */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#171A20] border border-[#2A3039] text-xs">
-            <Database className="w-3.5 h-3.5 text-[#F5B32F]" />
-            <div className="flex flex-col">
-              <span className="text-[10px] text-[#B1B7C1] leading-none">
-                Data source
-              </span>
-              <span className="text-xs font-medium text-[#F4F5F7] mt-0.5">
-                {dataSourceName}
-              </span>
-            </div>
-          </div>
-
-          {/* Latest Record Chip */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#171A20] border border-[#2A3039] text-xs">
-            <Clock className="w-3.5 h-3.5 text-[#B1B7C1]" />
-            <div className="flex flex-col">
-              <span className="text-[10px] text-[#B1B7C1] leading-none">
-                Latest record in selected dataset
-              </span>
-              <span className="text-xs font-mono tabular-nums text-[#F4F5F7] mt-0.5">
-                {formatDateTime(latestRecordDate)}
-              </span>
-            </div>
-          </div>
-
-          {/* Data Provenance Badge */}
-          <div
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs ${
-              isLive
-                ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-200"
-                : isUploaded
-                ? "bg-blue-950/40 border-blue-500/40 text-blue-200"
-                : "bg-[#8F2529]/30 border-[#E5484D]/40 text-amber-200"
-            }`}
-            title={provenance?.description}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                isLive
-                  ? "bg-[#34D399]"
-                  : isUploaded
-                  ? "bg-[#38BDF8]"
-                  : "bg-[#F5B32F]"
-              }`}
-            />
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold leading-tight tracking-tight">
-                {provenanceLabel}
-              </span>
-              <span className="text-[10px] opacity-80 mt-0.5">
-                {provenanceSubtitle}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
