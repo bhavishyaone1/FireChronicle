@@ -242,7 +242,7 @@ export default function Home() {
   }, [loadData]);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#090B0F] text-[#F1F5F9] font-sans antialiased">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#08090B] text-[#F4F5F7] font-sans antialiased">
       {/* 1. Left Persistent Sidebar */}
       <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
@@ -484,15 +484,28 @@ export default function Home() {
           </AnimatePresence>
         </main>
 
-        {/* Global Scientific Footer */}
-        <footer className="border-t border-[#28313D] py-4 px-6 bg-[#090B0F] text-xs text-[#A4AFBF] mt-auto shrink-0">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-[1720px] mx-auto">
-            <span>
-              Data sources: <span className="text-[#F59E0B] font-medium">NASA FIRMS</span> &bull; <span className="text-[#A78BFA]">MODIS (Terra/Aqua)</span> &bull; <span className="text-[#38BDF8]">VIIRS (NOAA-20/21)</span>
-            </span>
-            <span className="text-xs text-[#A4AFBF] font-normal">
-              Not an official NASA product. For educational and research purposes only.
-            </span>
+        {/* Global Scientific Footer & Provenance Strip */}
+        <footer className="border-t border-[#2A3039] py-3.5 px-6 bg-[#08090B] text-xs text-[#B1B7C1] mt-auto shrink-0">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-2.5 max-w-[1720px] mx-auto">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span>
+                Data sources: <span className="text-[#F5B32F] font-medium">NASA FIRMS</span> &bull; <span className="text-[#A78BFA] font-medium">MODIS C6.1 (Terra/Aqua)</span> &bull; <span className="text-[#38BDF8] font-medium">VIIRS C2 (NOAA-20/21)</span>
+              </span>
+              <span className="text-[#858D99] hidden sm:inline">&bull;</span>
+              <span className="font-mono text-[11px] text-[#858D99]">
+                Period: {startDate} &rarr; {endDate} UTC
+              </span>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-[#858D99]">
+              <button
+                onClick={() => handleTabChange("methodology")}
+                className="hover:text-[#F4F5F7] transition-colors underline underline-offset-2"
+              >
+                Methodology &amp; provenance
+              </button>
+              <span>&bull;</span>
+              <span>Not an official NASA product. For scientific exploration only.</span>
+            </div>
           </div>
         </footer>
       </div>

@@ -2,7 +2,6 @@
 
 import React from "react";
 import {
-  Flame,
   LayoutDashboard,
   Calendar,
   SlidersHorizontal,
@@ -10,6 +9,7 @@ import {
   BookOpen,
   FileSpreadsheet,
 } from "lucide-react";
+import { FireChronicleLogo } from "./FireChronicleLogo";
 
 interface SidebarProps {
   activeTab: string;
@@ -23,24 +23,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     { id: "compare", label: "Sensor comparison", icon: SlidersHorizontal },
     { id: "audit", label: "Harmonization audit", icon: FileSpreadsheet },
     { id: "anomalies", label: "Historical patterns", icon: TrendingUp },
-    { id: "methodology", label: "How harmonization works", icon: BookOpen },
+    { id: "methodology", label: "Methodology & citations", icon: BookOpen },
   ];
 
   return (
-    <aside className="hidden md:flex md:w-60 lg:w-64 bg-[#090B0F] border-r border-[#28313D] flex-col justify-between shrink-0 select-none z-30">
+    <aside className="hidden md:flex md:w-56 lg:w-60 bg-[#08090B] border-r border-[#2A3039] flex-col justify-between shrink-0 select-none z-30">
       {/* Top Logo and Navigation */}
-      <div className="p-4 flex flex-col gap-5">
+      <div className="p-3.5 flex flex-col gap-4">
         {/* Brand Header */}
         <div className="flex items-center gap-2.5 px-1 py-1">
-          <div className="w-8 h-8 rounded-lg bg-[#151A22] border border-[#28313D] flex items-center justify-center shrink-0">
-            <Flame className="w-4 h-4 text-[#F59E0B]" />
+          <div className="w-8 h-8 rounded-lg bg-[#101216] border border-[#2A3039] flex items-center justify-center shrink-0">
+            <FireChronicleLogo size={18} />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-sm font-semibold tracking-tight text-[#F1F5F9] leading-none">
+            <h1 className="text-sm font-semibold tracking-tight text-[#F4F5F7] leading-none">
               FireChronicle
             </h1>
-            <span className="text-[11px] font-normal text-[#A4AFBF] tracking-normal mt-1">
-              Satellite fire activity intelligence
+            <span className="text-[11px] font-normal text-[#B1B7C1] tracking-normal mt-1">
+              Satellite fire intelligence
             </span>
           </div>
         </div>
@@ -56,13 +56,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-colors duration-150 text-left ${
                   isActive
-                    ? "bg-[#151A22] text-[#F1F5F9] border-l-2 border-[#F59E0B] font-medium"
-                    : "text-[#A4AFBF] hover:text-[#F1F5F9] hover:bg-[#151A22]/50 font-normal"
+                    ? "bg-[#171A20] text-[#F4F5F7] border-l-2 border-[#F5B32F] font-medium"
+                    : "text-[#B1B7C1] hover:text-[#F4F5F7] hover:bg-[#101216] font-normal"
                 }`}
               >
                 <Icon
                   className={`w-4 h-4 shrink-0 ${
-                    isActive ? "text-[#F59E0B]" : "text-[#6E7A8A]"
+                    isActive ? "text-[#F5B32F]" : "text-[#858D99]"
                   }`}
                 />
                 <span className="truncate">{item.label}</span>
@@ -73,18 +73,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       </div>
 
       {/* Bottom Summary Card & Metadata */}
-      <div className="p-4 flex flex-col gap-3">
-        <div className="rounded-xl bg-[#10141B] border border-[#28313D] p-3 text-xs flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium text-[#F59E0B]">
+      <div className="p-3.5 flex flex-col gap-3">
+        <div className="rounded-xl bg-[#101216] border border-[#2A3039] p-3 text-xs flex flex-col gap-1.5">
+          <span className="text-[11px] font-medium text-[#F5B32F]">
             Scientific purpose
           </span>
-          <p className="text-[11px] font-normal text-[#A4AFBF] leading-relaxed">
-            Harmonizing MODIS (1 km) and VIIRS (375 m) satellite hotspot detections into an interpretable burning activity calendar.
+          <p className="text-[11px] font-normal text-[#B1B7C1] leading-relaxed">
+            Harmonizing MODIS (1 km) and VIIRS (375 m) active-fire observations into an interpretable burning activity calendar.
           </p>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-[#6E7A8A] px-1 pt-1 border-t border-[#1C232C]">
-          <span>NASA Space Apps 2026</span>
+        <div className="flex items-center justify-between text-[11px] text-[#858D99] px-1 pt-1 border-t border-[#1C232C]">
+          <span>NASA FIRMS Core</span>
           <span className="font-mono text-[10px]">v1.2.0</span>
         </div>
       </div>

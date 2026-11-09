@@ -73,30 +73,30 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
   ];
 
   return (
-    <div className="bg-[#10141B] border border-[#28313D] rounded-xl p-4 flex flex-col justify-between shadow-sm h-full">
+    <div className="bg-[#101216] border border-[#2A3039] rounded-xl p-4 flex flex-col justify-between shadow-sm h-full">
       {/* Header with Title and Mode Switcher */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#28313D]">
+      <div className="flex items-center justify-between pb-3 border-b border-[#2A3039]">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/25 flex items-center justify-center">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#F59E0B]" />
+          <div className="w-6 h-6 rounded-lg bg-[#F5B32F]/10 border border-[#F5B32F]/25 flex items-center justify-center">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#F5B32F]" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-[#F1F5F9] tracking-tight">
+            <h3 className="text-base font-semibold text-[#F4F5F7] tracking-tight">
               Sensor comparison
             </h3>
-            <p className="text-xs text-[#A4AFBF] font-normal">
-              Detections over time by instrument and candidate matches
+            <p className="text-xs text-[#B1B7C1] font-normal">
+              Detections over time by instrument and candidate correspondences
             </p>
           </div>
         </div>
 
-        <div className="flex items-center bg-[#090B0F] p-0.5 rounded-lg border border-[#28313D] text-xs">
+        <div className="flex items-center bg-[#08090B] p-0.5 rounded-lg border border-[#2A3039] text-xs">
           <button
             onClick={() => setViewMode("counts")}
             className={`px-2.5 py-0.5 rounded-md font-medium transition-colors ${
               viewMode === "counts"
-                ? "bg-[#151A22] text-[#F1F5F9] border border-[#28313D] font-semibold"
-                : "text-[#A4AFBF] hover:text-[#F1F5F9]"
+                ? "bg-[#171A20] text-[#F4F5F7] border border-[#2A3039] font-semibold"
+                : "text-[#B1B7C1] hover:text-[#F4F5F7]"
             }`}
           >
             Counts
@@ -105,8 +105,8 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
             onClick={() => setViewMode("frp")}
             className={`px-2.5 py-0.5 rounded-md font-medium transition-colors ${
               viewMode === "frp"
-                ? "bg-[#151A22] text-[#F1F5F9] border border-[#28313D] font-semibold"
-                : "text-[#A4AFBF] hover:text-[#F1F5F9]"
+                ? "bg-[#171A20] text-[#F4F5F7] border border-[#2A3039] font-semibold"
+                : "text-[#B1B7C1] hover:text-[#F4F5F7]"
             }`}
           >
             FRP (MW)
@@ -115,21 +115,21 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
       </div>
 
       {/* Numerical Comparison Metrics Bar */}
-      <div className="grid grid-cols-3 gap-2 py-2 border-b border-[#28313D] text-xs">
+      <div className="grid grid-cols-3 gap-2 py-2 border-b border-[#2A3039] text-xs">
         <div className="flex flex-col">
-          <span className="text-[#A4AFBF] text-[11px]">MODIS raw:</span>
+          <span className="text-[#B1B7C1] text-[11px]">MODIS raw:</span>
           <span className="font-mono tabular-nums font-semibold text-[#A78BFA]">
             {rawModis}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-[#A4AFBF] text-[11px]">VIIRS raw:</span>
+          <span className="text-[#B1B7C1] text-[11px]">VIIRS raw:</span>
           <span className="font-mono tabular-nums font-semibold text-[#38BDF8]">
             {rawViirs}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-[#A4AFBF] text-[11px]">Matched pairs:</span>
+          <span className="text-[#B1B7C1] text-[11px]">Candidate pairs:</span>
           <span className="font-mono tabular-nums font-semibold text-[#34D399]">
             {matchedPairs} ({matchedFraction}%)
           </span>
@@ -138,8 +138,8 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
 
       {/* Chart Section */}
       <div className="flex-1 w-full min-h-[160px] py-1.5">
-        <div className="flex items-center justify-between text-xs text-[#A4AFBF] mb-1">
-          <span className="font-medium text-[#F1F5F9]">
+        <div className="flex items-center justify-between text-xs text-[#B1B7C1] mb-1">
+          <span className="font-medium text-[#F4F5F7]">
             {viewMode === "counts" ? "Detections over time (UTC)" : "FRP quantiles by sensor (MW)"}
           </span>
           <div className="flex items-center gap-2.5 text-[11px]">
@@ -154,7 +154,7 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
             {viewMode === "counts" && (
               <span className="flex items-center gap-1 text-[#34D399]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
-                Matched
+                Candidate pairs
               </span>
             )}
           </div>
@@ -177,16 +177,16 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
                   <stop offset="95%" stopColor="#34D399" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#28313D" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="date" stroke="#A4AFBF" fontSize={11} tickLine={false} />
-              <YAxis stroke="#A4AFBF" fontSize={11} tickLine={false} />
+              <CartesianGrid stroke="#2A3039" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="date" stroke="#B1B7C1" fontSize={11} tickLine={false} />
+              <YAxis stroke="#B1B7C1" fontSize={11} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#10141B",
-                  borderColor: "#28313D",
+                  backgroundColor: "#101216",
+                  borderColor: "#2A3039",
                   borderRadius: "8px",
                   fontSize: "11px",
-                  color: "#F1F5F9",
+                  color: "#F4F5F7",
                   fontFamily: "var(--font-geist-sans), sans-serif",
                 }}
               />
@@ -198,16 +198,16 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
         ) : hasFrpData ? (
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={frpQuantilesData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid stroke="#28313D" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="metric" stroke="#A4AFBF" fontSize={11} tickLine={false} />
-              <YAxis stroke="#A4AFBF" fontSize={11} tickLine={false} unit=" MW" />
+              <CartesianGrid stroke="#2A3039" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="metric" stroke="#B1B7C1" fontSize={11} tickLine={false} />
+              <YAxis stroke="#B1B7C1" fontSize={11} tickLine={false} unit=" MW" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#10141B",
-                  borderColor: "#28313D",
+                  backgroundColor: "#101216",
+                  borderColor: "#2A3039",
                   borderRadius: "8px",
                   fontSize: "11px",
-                  color: "#F1F5F9",
+                  color: "#F4F5F7",
                   fontFamily: "var(--font-geist-sans), sans-serif",
                 }}
               />
@@ -216,23 +216,23 @@ export const SensorComparisonCard: React.FC<SensorComparisonCardProps> = ({
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-[140px] flex items-center justify-center text-xs text-[#A4AFBF]">
+          <div className="h-[140px] flex items-center justify-center text-xs text-[#858D99] bg-[#08090B] rounded-lg border border-[#2A3039]">
             No active FRP measurements in current selection
           </div>
         )}
       </div>
 
       {/* Footer link to full sensitivity deep dive */}
-      <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs">
-        <span className="text-[#A4AFBF] text-[11px]" title="Jaccard index of 1.0 km grid cell co-occurrence">
-          Tolerance: 1.0 km &bull; 60 min &bull; Jaccard: <strong className="text-[#F1F5F9] font-mono">{jaccard.toFixed(2)}</strong>
+      <div className="pt-2 border-t border-[#2A3039] flex items-center justify-between text-xs">
+        <span className="text-[#B1B7C1] text-[11px]" title="Jaccard index of 1.0 km grid cell co-occurrence">
+          Tolerance: 1.0 km &bull; 60 min &bull; Jaccard: <strong className="text-[#F4F5F7] font-mono">{jaccard.toFixed(2)}</strong>
         </span>
         {onViewDeepDive && (
           <button
             onClick={onViewDeepDive}
-            className="text-[#F59E0B] hover:text-[#fbbf24] font-medium transition-colors duration-150 flex items-center gap-1"
+            className="text-[#F5B32F] hover:text-[#F47A24] font-medium transition-colors duration-150 flex items-center gap-1"
           >
-            <span>Inspect disparity</span>
+            <span>Full comparison</span>
             <span>&rarr;</span>
           </button>
         )}

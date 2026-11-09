@@ -4,34 +4,54 @@
 
 :root {
   color-scheme: dark;
-  --background: #090B0F;
-  --surface: #10141B;
-  --surface-elevated: #151A22;
-  --surface-muted: #1E242E;
-  --border: #28313D;
-  --border-subtle: #1C232C;
-  --text-primary: #F1F5F9;
-  --text-secondary: #A4AFBF;
-  --text-muted: #6E7A8A;
-  --action: #F59E0B;
-  --primary-accent: #F59E0B;
-  --accent-amber: #F59E0B;
-  --accent-orange: #EA580C;
-  --accent-red: #DC2626;
-  --accent-cyan: #38BDF8;
-  --accent-violet: #A78BFA;
+  
+  /* Core Interface Design Tokens */
+  --fc-bg: #08090B;
+  --fc-surface: #101216;
+  --fc-surface-raised: #171A20;
+  --fc-surface-soft: #1D222A;
+  --fc-border: #2A3039;
+  --fc-border-subtle: #1C232C;
+  --fc-text: #F4F5F7;
+  --fc-text-secondary: #B1B7C1;
+  --fc-text-muted: #858D99;
+  --fc-amber: #F5B32F;
+  --fc-orange: #F47A24;
+  --fc-red: #E5484D;
+  --fc-red-deep: #8F2529;
+  --fc-yellow: #FFD166;
+  
+  /* Scientific Data Colours (strictly distinct from brand) */
   --sensor-modis: #A78BFA;
   --sensor-viirs: #38BDF8;
   --sensor-match: #34D399;
-  --sensor-modis-only: #F59E0B;
+  --sensor-modis-only: #F5B32F;
   --sensor-viirs-only: #F87171;
-  --fire-low: #FDE047;
-  --fire-mid: #F59E0B;
-  --fire-orange: #EA580C;
-  --fire-high: #DC2626;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #DC2626;
+  
+  /* FRP Sequential Thermal Ramp */
+  --fire-low: #FFD166;
+  --fire-mid: #F5B32F;
+  --fire-orange: #F47A24;
+  --fire-high: #E5484D;
+  
+  /* Mapped aliases */
+  --background: var(--fc-bg);
+  --surface: var(--fc-surface);
+  --surface-elevated: var(--fc-surface-raised);
+  --surface-muted: var(--fc-surface-soft);
+  --border: var(--fc-border);
+  --border-subtle: var(--fc-border-subtle);
+  --text-primary: var(--fc-text);
+  --text-secondary: var(--fc-text-secondary);
+  --text-muted: var(--fc-text-muted);
+  --action: var(--fc-amber);
+  --primary-accent: var(--fc-amber);
+  --accent-amber: var(--fc-amber);
+  --accent-orange: var(--fc-orange);
+  --accent-red: var(--fc-red);
+  --accent-cyan: var(--sensor-viirs);
+  --accent-violet: var(--sensor-modis);
+  
   --radius-card: 12px;
   --radius-control: 8px;
   --duration-fast: 120ms;
@@ -39,8 +59,8 @@
 }
 
 body {
-  color: var(--text-primary);
-  background: var(--background);
+  color: var(--fc-text);
+  background: var(--fc-bg);
   font-family: var(--font-geist-sans), var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   font-variant-numeric: tabular-nums;
@@ -50,8 +70,8 @@ body {
 }
 
 ::selection {
-  background: #F59E0B;
-  color: #090B0F;
+  background: #F5B32F;
+  color: #08090B;
 }
 
 /* Restrained, understated scrollbars */
@@ -60,14 +80,14 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #090B0F;
+  background: #08090B;
 }
 ::-webkit-scrollbar-thumb {
-  background: #28313D;
+  background: #2A3039;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #F59E0B;
+  background: #F5B32F;
 }
 
 /* Reduced motion preference support for accessibility */

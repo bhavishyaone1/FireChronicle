@@ -22,7 +22,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseClasses =
-      "inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100";
+      "inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5B32F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090B] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100";
 
     const sizeClasses = {
       sm: "h-7 px-2.5 text-xs gap-1.5",
@@ -32,13 +32,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantClasses = {
       primary:
-        "bg-[#F59E0B] text-black font-semibold hover:bg-[#d97706] active:bg-[#b45309] shadow-sm",
+        "bg-[#F5B32F] text-[#08090B] font-semibold hover:bg-[#F47A24] hover:text-[#08090B] active:bg-[#e06915] shadow-sm",
       secondary:
-        "bg-[#151A22] text-[#F1F5F9] border border-[#28313D] hover:bg-[#1E242E] hover:border-[#383F4A] active:bg-[#10141B]",
+        "bg-[#171A20] text-[#F4F5F7] border border-[#2A3039] hover:bg-[#1D222A] hover:border-[#3A4350] active:bg-[#101216]",
       subtle:
-        "bg-transparent text-[#A4AFBF] hover:text-[#F1F5F9] hover:bg-[#151A22] active:bg-[#10141B]",
+        "bg-transparent text-[#B1B7C1] hover:text-[#F4F5F7] hover:bg-[#171A20] active:bg-[#101216]",
       destructive:
-        "bg-red-950/80 text-red-200 border border-red-800/60 hover:bg-red-900 active:bg-red-950",
+        "bg-[#8F2529]/40 text-[#F4F5F7] border border-[#E5484D]/50 hover:bg-[#8F2529]/60 active:bg-[#8F2529]/80",
     };
 
     return (

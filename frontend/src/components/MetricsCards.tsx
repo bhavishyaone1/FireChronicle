@@ -142,27 +142,27 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       {/* 1. MODIS Detections */}
       <motion.div
         variants={cardVariants}
-        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#A78BFA]/50 hover:shadow-[0_0_15px_rgba(167,139,250,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
+        className="bg-[#101216] hover:bg-[#171A20] border border-[#2A3039] hover:border-[#A78BFA]/50 hover:shadow-[0_0_15px_rgba(167,139,250,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
       >
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5" title="Count of thermal infrared pixel anomalies detected by MODIS on Terra & Aqua satellites">
-            <span className="text-[13px] font-medium text-[#A4AFBF]">
+            <span className="text-[13px] font-medium text-[#B1B7C1]">
               MODIS detections
             </span>
-            <Info className="w-3 h-3 text-[#A4AFBF]/60 hover:text-[#A78BFA] transition-colors" />
+            <Info className="w-3 h-3 text-[#858D99] hover:text-[#A78BFA] transition-colors" />
           </div>
           <Flame className="w-4 h-4 text-[#A78BFA]" aria-hidden="true" />
         </div>
 
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
-          <span className="text-[28px] font-semibold text-[#F1F5F9] font-mono tabular-nums leading-none tracking-tight">
+          <span className="text-[28px] font-semibold text-[#F4F5F7] font-mono tabular-nums leading-none tracking-tight">
             {renderValue(rawModis)}
           </span>
           <div className="shrink-0">
             {selectedDate ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#151A22] text-[#A78BFA] font-mono border border-[#28313D]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#171A20] text-[#A78BFA] font-mono border border-[#2A3039]">
                 Single day
               </span>
             ) : (
@@ -172,7 +172,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         </div>
 
         {/* Concise Explanation Below */}
-        <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
+        <div className="pt-2 border-t border-[#2A3039] flex items-center justify-between text-xs text-[#B1B7C1]">
           <span>Terra &amp; Aqua satellites</span>
           <span className="font-mono text-[11px] text-[#A78BFA]">1.0 km nadir</span>
         </div>
@@ -181,27 +181,27 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       {/* 2. VIIRS Detections */}
       <motion.div
         variants={cardVariants}
-        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#38BDF8]/50 hover:shadow-[0_0_15px_rgba(56,189,248,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
+        className="bg-[#101216] hover:bg-[#171A20] border border-[#2A3039] hover:border-[#38BDF8]/50 hover:shadow-[0_0_15px_rgba(56,189,248,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
       >
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5" title="Count of 375 m thermal anomalies detected by VIIRS on Suomi-NPP & NOAA-20/21">
-            <span className="text-[13px] font-medium text-[#A4AFBF]">
+            <span className="text-[13px] font-medium text-[#B1B7C1]">
               VIIRS detections
             </span>
-            <Info className="w-3 h-3 text-[#A4AFBF]/60 hover:text-[#38BDF8] transition-colors" />
+            <Info className="w-3 h-3 text-[#858D99] hover:text-[#38BDF8] transition-colors" />
           </div>
           <Satellite className="w-4 h-4 text-[#38BDF8]" aria-hidden="true" />
         </div>
 
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
-          <span className="text-[28px] font-semibold text-[#F1F5F9] font-mono tabular-nums leading-none tracking-tight">
+          <span className="text-[28px] font-semibold text-[#F4F5F7] font-mono tabular-nums leading-none tracking-tight">
             {renderValue(rawViirs)}
           </span>
           <div className="shrink-0">
             {selectedDate ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#151A22] text-[#38BDF8] font-mono border border-[#28313D]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#171A20] text-[#38BDF8] font-mono border border-[#2A3039]">
                 Single day
               </span>
             ) : (
@@ -211,7 +211,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         </div>
 
         {/* Concise Explanation Below */}
-        <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
+        <div className="pt-2 border-t border-[#2A3039] flex items-center justify-between text-xs text-[#B1B7C1]">
           <span>NOAA-20/21 &amp; S-NPP</span>
           <span className="font-mono text-[11px] text-[#38BDF8]">375 m nadir</span>
         </div>
@@ -220,27 +220,27 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       {/* 3. Candidate Sensor Matches */}
       <motion.div
         variants={cardVariants}
-        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#34D399]/50 hover:shadow-[0_0_15px_rgba(52,211,153,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
+        className="bg-[#101216] hover:bg-[#171A20] border border-[#2A3039] hover:border-[#34D399]/50 hover:shadow-[0_0_15px_rgba(52,211,153,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
       >
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5" title="Collocated MODIS and VIIRS detections within 1.0 km spatial distance and ≤60 minutes delta">
-            <span className="text-[13px] font-medium text-[#A4AFBF]">
-              Candidate sensor matches
+            <span className="text-[13px] font-medium text-[#B1B7C1]">
+              Candidate correspondences
             </span>
-            <Info className="w-3 h-3 text-[#A4AFBF]/60 hover:text-[#34D399] transition-colors" />
+            <Info className="w-3 h-3 text-[#858D99] hover:text-[#34D399] transition-colors" />
           </div>
           <Link2 className="w-4 h-4 text-[#34D399]" aria-hidden="true" />
         </div>
 
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
-          <span className="text-[28px] font-semibold text-[#F1F5F9] font-mono tabular-nums leading-none tracking-tight">
+          <span className="text-[28px] font-semibold text-[#F4F5F7] font-mono tabular-nums leading-none tracking-tight">
             {renderValue(matchedPairs)}
           </span>
           <div className="shrink-0">
             {selectedDate ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#151A22] text-[#34D399] font-mono border border-[#28313D]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#171A20] text-[#34D399] font-mono border border-[#2A3039]">
                 Single day
               </span>
             ) : (
@@ -250,7 +250,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         </div>
 
         {/* Concise Explanation Below */}
-        <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
+        <div className="pt-2 border-t border-[#2A3039] flex items-center justify-between text-xs text-[#B1B7C1]">
           <span>Within 1.0 km &amp; 60 min</span>
           <span className="font-mono text-[11px] text-[#34D399]">Collocated pairs</span>
         </div>
@@ -259,39 +259,39 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       {/* 4. Unique Active Grid Cells */}
       <motion.div
         variants={cardVariants}
-        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#F59E0B]/50 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
+        className="bg-[#101216] hover:bg-[#171A20] border border-[#2A3039] hover:border-[#F5B32F]/50 hover:shadow-[0_0_15px_rgba(245,179,47,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
       >
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5" title="Distinct occupied 1.0 km equal-area cylindrical grid cells with active thermal radiation">
-            <span className="text-[13px] font-medium text-[#A4AFBF]">
+            <span className="text-[13px] font-medium text-[#B1B7C1]">
               Unique active grid cells
             </span>
-            <Info className="w-3 h-3 text-[#A4AFBF]/60 hover:text-[#F59E0B] transition-colors" />
+            <Info className="w-3 h-3 text-[#858D99] hover:text-[#F5B32F] transition-colors" />
           </div>
-          <Grid className="w-4 h-4 text-[#F59E0B]" aria-hidden="true" />
+          <Grid className="w-4 h-4 text-[#F5B32F]" aria-hidden="true" />
         </div>
 
         {/* Main Value Second */}
         <div className="my-2 flex items-baseline justify-between">
-          <span className="text-[28px] font-semibold text-[#F1F5F9] font-mono tabular-nums leading-none tracking-tight">
+          <span className="text-[28px] font-semibold text-[#F4F5F7] font-mono tabular-nums leading-none tracking-tight">
             {renderValue(uniqueCells)}
           </span>
           <div className="shrink-0">
             {selectedDate ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#151A22] text-[#F59E0B] font-mono border border-[#28313D]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#171A20] text-[#F5B32F] font-mono border border-[#2A3039]">
                 Single day
               </span>
             ) : (
-              generateSparkline(cellsSparkline, "#F59E0B")
+              generateSparkline(cellsSparkline, "#F5B32F")
             )}
           </div>
         </div>
 
         {/* Concise Explanation Below */}
-        <div className="pt-2 border-t border-[#28313D] flex items-center justify-between text-xs text-[#A4AFBF]">
+        <div className="pt-2 border-t border-[#2A3039] flex items-center justify-between text-xs text-[#B1B7C1]">
           <span>1.0 km equal-area grid</span>
-          <span className="font-mono text-[11px] text-[#F59E0B]">
+          <span className="font-mono text-[11px] text-[#F5B32F]">
             Distinct cells
           </span>
         </div>
