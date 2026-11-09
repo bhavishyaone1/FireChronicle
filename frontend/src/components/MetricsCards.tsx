@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Flame, Satellite, Link2, Grid } from "lucide-react";
+import { Flame, Satellite, Link2, Grid, Info } from "lucide-react";
 import { motion } from "motion/react";
 import { CalendarResponse, SensorComparisonResponse, GeoJSONFeatureCollection } from "@/types";
 
@@ -142,13 +142,16 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       {/* 1. MODIS Detections */}
       <motion.div
         variants={cardVariants}
-        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#A78BFA]/30 transition-colors duration-150 rounded-xl p-4 flex flex-col justify-between shadow-sm"
+        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#A78BFA]/50 hover:shadow-[0_0_15px_rgba(167,139,250,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
       >
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#A4AFBF]">
-            MODIS detections
-          </span>
+          <div className="flex items-center gap-1.5" title="Count of thermal infrared pixel anomalies detected by MODIS on Terra & Aqua satellites">
+            <span className="text-[13px] font-medium text-[#A4AFBF]">
+              MODIS detections
+            </span>
+            <Info className="w-3 h-3 text-[#A4AFBF]/60 hover:text-[#A78BFA] transition-colors" />
+          </div>
           <Flame className="w-4 h-4 text-[#A78BFA]" aria-hidden="true" />
         </div>
 
@@ -178,13 +181,16 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       {/* 2. VIIRS Detections */}
       <motion.div
         variants={cardVariants}
-        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#38BDF8]/30 transition-colors duration-150 rounded-xl p-4 flex flex-col justify-between shadow-sm"
+        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#38BDF8]/50 hover:shadow-[0_0_15px_rgba(56,189,248,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
       >
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#A4AFBF]">
-            VIIRS detections
-          </span>
+          <div className="flex items-center gap-1.5" title="Count of 375 m thermal anomalies detected by VIIRS on Suomi-NPP & NOAA-20/21">
+            <span className="text-[13px] font-medium text-[#A4AFBF]">
+              VIIRS detections
+            </span>
+            <Info className="w-3 h-3 text-[#A4AFBF]/60 hover:text-[#38BDF8] transition-colors" />
+          </div>
           <Satellite className="w-4 h-4 text-[#38BDF8]" aria-hidden="true" />
         </div>
 
@@ -214,13 +220,16 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       {/* 3. Candidate Sensor Matches */}
       <motion.div
         variants={cardVariants}
-        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#34D399]/30 transition-colors duration-150 rounded-xl p-4 flex flex-col justify-between shadow-sm"
+        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#34D399]/50 hover:shadow-[0_0_15px_rgba(52,211,153,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
       >
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#A4AFBF]">
-            Candidate sensor matches
-          </span>
+          <div className="flex items-center gap-1.5" title="Collocated MODIS and VIIRS detections within 1.0 km spatial distance and ≤60 minutes delta">
+            <span className="text-[13px] font-medium text-[#A4AFBF]">
+              Candidate sensor matches
+            </span>
+            <Info className="w-3 h-3 text-[#A4AFBF]/60 hover:text-[#34D399] transition-colors" />
+          </div>
           <Link2 className="w-4 h-4 text-[#34D399]" aria-hidden="true" />
         </div>
 
@@ -250,13 +259,16 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       {/* 4. Unique Active Grid Cells */}
       <motion.div
         variants={cardVariants}
-        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#F59E0B]/30 transition-colors duration-150 rounded-xl p-4 flex flex-col justify-between shadow-sm"
+        className="bg-[#10141B] hover:bg-[#121720] border border-[#28313D] hover:border-[#F59E0B]/50 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] transition-all duration-200 rounded-xl p-4 flex flex-col justify-between shadow-sm"
       >
         {/* Metric Name First */}
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#A4AFBF]">
-            Unique active grid cells
-          </span>
+          <div className="flex items-center gap-1.5" title="Distinct occupied 1.0 km equal-area cylindrical grid cells with active thermal radiation">
+            <span className="text-[13px] font-medium text-[#A4AFBF]">
+              Unique active grid cells
+            </span>
+            <Info className="w-3 h-3 text-[#A4AFBF]/60 hover:text-[#F59E0B] transition-colors" />
+          </div>
           <Grid className="w-4 h-4 text-[#F59E0B]" aria-hidden="true" />
         </div>
 

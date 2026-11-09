@@ -12,6 +12,8 @@ import {
   Map as MapIcon,
   Satellite as SatelliteIcon,
   Compass,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { GeoJSONFeatureCollection, GeoJSONPointFeature, PresetAoi } from "@/types";
 
@@ -72,6 +74,17 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   const [mapError, setMapError] = useState<string | null>(null);
 
   const [basemapType, setBasemapType] = useState<"satellite" | "vector">("satellite");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [cursorCoords, setCursorCoords] = useState<{
+    lat: number;
+    lng: number;
+    zoom: number;
+  } | null>(null);
+  const [hoveredFeature, setHoveredFeature] = useState<{
+    x: number;
+    y: number;
+    properties: GeoJSONPointFeature["properties"];
+  } | null>(null);
 
   const [isLayersPanelExpanded, setIsLayersPanelExpanded] = useState(true);
   const [showModis, setShowModis] = useState(true);
@@ -250,12 +263,30 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       if (instance) instance.getCanvas().style.cursor = "";
     };
 
+    const handleFeatureHover = (e: any) => {
+      if (instance) instance.getCanvas().style.cursor = "pointer";
+      if (e.features && e.features.length > 0) {
+        setHoveredFeature({
+          x: e.point.x,
+          y: e.point.y,
+          properties: e.features[0].properties,
+        });
+      }
+    };
+
+    const handleFeatureLeave = () => {
+      if (instance) instance.getCanvas().style.cursor = "";
+      setHoveredFeature(null);
+    };
+
     instance.on("mouseenter", "clusters", setPointer);
     instance.on("mouseleave", "clusters", resetPointer);
-    instance.on("mouseenter", "modis-layer", setPointer);
-    instance.on("mouseleave", "modis-layer", resetPointer);
-    instance.on("mouseenter", "viirs-layer", setPointer);
-    instance.on("mouseleave", "viirs-layer", resetPointer);
+
+    instance.on("mousemove", "modis-layer", handleFeatureHover);
+    instance.on("mouseleave", "modis-layer", handleFeatureLeave);
+
+    instance.on("mousemove", "viirs-layer", handleFeatureHover);
+    instance.on("mouseleave", "viirs-layer", handleFeatureLeave);
   }, [layerOpacity, onSelectObservation]);
 
   useEffect(() => {
@@ -282,10 +313,20 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
         setupLayers(instance);
       });
 
-      instance.on("error", (e) => {
-        if (e && e.error && e.error.message && !e.error.message.includes("tile")) {
-          setMapError("Basemap service degraded. Data layers and table remain functional.");
-        }
+      instance.on("mousemove", (e) => {
+        setCursorCoords({
+          lat: e.lngLat.lat,
+          lng: e.lngLat.lng,
+          zoom: Math.round(instance.getZoom() * 10) / 10,
+        });
+      });
+
+      instance.on("mouseout", () => {
+        setCursorCoords(null);
+      });
+
+      instance.on("webglcontextlost", () => {
+        setMapError("WebGL context lost. Please reload the page to restore the 3D map canvas.");
       });
     } catch (err) {
       setMapError("Map initialization failed. Displaying fallback view.");
@@ -298,6 +339,15 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
       }
     };
   }, [basemapType, bbox, setupLayers]);
+
+  useEffect(() => {
+    if (map.current) {
+      const timer = setTimeout(() => {
+        map.current?.resize();
+      }, 120);
+      return () => clearTimeout(timer);
+    }
+  }, [isFullscreen]);
 
   useEffect(() => {
     if (!map.current || !isMapLoaded) return;
@@ -409,7 +459,13 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
   const aoiDisplayName = currentAoi ? currentAoi.name.split("(")[0].trim() : "Regional AOI";
 
   return (
-    <div className="relative w-full h-[520px] rounded-xl overflow-hidden border border-[#28313D] bg-[#090B0F]">
+    <div
+      className={`relative w-full rounded-xl overflow-hidden border border-[#28313D] bg-[#090B0F] transition-all duration-200 ${
+        isFullscreen
+          ? "fixed inset-0 z-50 h-screen w-screen rounded-none"
+          : "h-[520px]"
+      }`}
+    >
       {/* Top Map Title Bar */}
       <div className="absolute top-3 left-3 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#10141B]/90 backdrop-blur border border-[#28313D] text-xs">
         <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
@@ -609,7 +665,19 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
           {basemapType === "satellite" ? (
             <MapIcon className="w-3.5 h-3.5 text-[#F59E0B]" />
           ) : (
-            <SatelliteIcon className="w-3.5 h-3.5 text-[#06B6D4]" />
+            <SatelliteIcon className="w-3.5 h-3.5 text-[#38BDF8]" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setIsFullscreen(!isFullscreen)}
+          className="w-8 h-8 rounded-lg bg-[#10141B]/90 backdrop-blur border border-[#28313D] flex items-center justify-center text-[#A4AFBF] hover:text-[#F1F5F9] hover:bg-[#151A22] shadow-sm transition-colors"
+          title={isFullscreen ? "Exit fullscreen" : "Expand map fullscreen"}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="w-3.5 h-3.5 text-[#F59E0B]" />
+          ) : (
+            <Maximize2 className="w-3.5 h-3.5" />
           )}
         </button>
 
@@ -643,6 +711,52 @@ export const HotspotMap: React.FC<HotspotMapProps> = ({
           <span>NASA FIRMS / ESRI</span>
         </div>
       </div>
+
+      {/* Live Cursor Coordinate & Zoom HUD Readout */}
+      {cursorCoords && (
+        <div className="absolute bottom-3 left-3 z-10 px-2.5 py-1 rounded-md bg-[#10141B]/90 backdrop-blur border border-[#28313D] text-[11px] font-mono tabular-nums text-[#A4AFBF] flex items-center gap-2 pointer-events-none shadow-sm">
+          <span className="text-[#F1F5F9]">{Math.abs(cursorCoords.lat).toFixed(4)}° {cursorCoords.lat >= 0 ? "N" : "S"}</span>
+          <span className="text-[#6E7A8A]">&bull;</span>
+          <span className="text-[#F1F5F9]">{Math.abs(cursorCoords.lng).toFixed(4)}° {cursorCoords.lng >= 0 ? "E" : "W"}</span>
+          <span className="text-[#6E7A8A]">&bull;</span>
+          <span className="text-[#F59E0B]">z{cursorCoords.zoom.toFixed(1)}</span>
+        </div>
+      )}
+
+      {/* Interactive Hotspot Feature Hover Tooltip Card */}
+      {hoveredFeature && (
+        <div
+          className="absolute z-30 pointer-events-none bg-[#10141B]/95 backdrop-blur-md border border-[#28313D] rounded-lg p-2.5 shadow-xl text-xs flex flex-col gap-1 min-w-[200px]"
+          style={{
+            left: Math.min(Math.max(hoveredFeature.x + 12, 10), (mapContainer.current?.clientWidth || 600) - 220),
+            top: Math.min(Math.max(hoveredFeature.y - 10, 10), (mapContainer.current?.clientHeight || 500) - 130),
+          }}
+        >
+          <div className="flex items-center justify-between gap-2 border-b border-[#28313D] pb-1">
+            <span
+              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                hoveredFeature.properties.sensor === "VIIRS"
+                  ? "bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40"
+                  : "bg-[#A78BFA]/20 text-[#A78BFA] border border-[#A78BFA]/40"
+              }`}
+            >
+              {hoveredFeature.properties.sensor} ({hoveredFeature.properties.platform})
+            </span>
+            <span className="font-mono text-[10px] text-[#A4AFBF] capitalize">
+              {hoveredFeature.properties.confidence_category}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-[#A4AFBF]">Fire Radiative Power:</span>
+            <span className="font-mono font-semibold text-[#F59E0B]">
+              {hoveredFeature.properties.frp_mw != null ? `${hoveredFeature.properties.frp_mw.toFixed(1)} MW` : "N/A"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-[10px] font-mono text-[#A4AFBF]">
+            <span>{hoveredFeature.properties.acq_datetime_utc ? hoveredFeature.properties.acq_datetime_utc.replace("T", " ").replace("Z", " UTC") : ""}</span>
+          </div>
+        </div>
+      )}
 
       {/* Loading Overlay */}
       {isLoading && (

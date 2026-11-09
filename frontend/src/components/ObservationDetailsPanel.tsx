@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Crosshair,
   ExternalLink,
@@ -11,6 +11,9 @@ import {
   Zap,
   ShieldCheck,
   Layers,
+  Copy,
+  Check,
+  Radio,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { GeoJSONPointFeature } from "@/types";
@@ -29,6 +32,18 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
   onFlyToObservation,
   onOpenTableView,
 }) => {
+  const [copiedType, setCopiedType] = useState<"coords" | "id" | null>(null);
+
+  const handleCopy = (text: string, type: "coords" | "id") => {
+    try {
+      navigator.clipboard.writeText(text);
+      setCopiedType(type);
+      setTimeout(() => setCopiedType(null), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
   const formatDateTime = (iso: string) => {
     try {
       const d = new Date(iso);
@@ -152,6 +167,12 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
         >
           {/* Thermal Infrared Satellite Cutout Visualizer */}
           <div className="relative h-28 w-full rounded-lg overflow-hidden bg-gradient-to-br from-[#090B0F] via-[#151A22] to-[#090B0F] border border-[#28313D] flex items-center justify-center">
+            {/* Reticle grid lines */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+              <div className="w-full h-px bg-[#A4AFBF]" />
+              <div className="h-full w-px bg-[#A4AFBF] absolute" />
+            </div>
+
             {/* Calibrated Thermal Core (refined, static, no excessive pulse) */}
             <div className="absolute w-14 h-14 rounded-full bg-[#DC2626]/25 blur-md" />
             <div className="absolute w-7 h-7 rounded-full bg-[#F59E0B]/40 blur-sm" />
@@ -187,16 +208,68 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
 
           {/* Observation Attributes Grid */}
           <div className="flex flex-col gap-1.5 text-xs">
+            {/* Record ID Row */}
+            <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
+              <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+                <Radio className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
+                Record ID
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-xs tabular-nums text-[#F1F5F9] max-w-[140px] truncate" title={obs.observation_id}>
+                  {obs.observation_id || "OBS-HARMONIZED"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(obs.observation_id || "", "id")}
+                  className="p-1 rounded hover:bg-[#151A22] text-[#A4AFBF] hover:text-[#F1F5F9] transition-colors"
+                  title="Copy record ID"
+                >
+                  {copiedType === "id" ? (
+                    <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-0.5">
+                      <Check className="w-3 h-3" />
+                      <span>Copied</span>
+                    </span>
+                  ) : (
+                    <Copy className="w-3 h-3" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Coordinates Row */}
             <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
               <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
                 Coordinates
               </span>
-              <span className="font-mono text-xs tabular-nums text-[#F1F5F9]">
-                {formatCoordinates(obs.latitude, obs.longitude)}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-xs tabular-nums text-[#F1F5F9]">
+                  {formatCoordinates(obs.latitude, obs.longitude)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleCopy(
+                      `${obs.latitude?.toFixed(4)}, ${obs.longitude?.toFixed(4)}`,
+                      "coords"
+                    )
+                  }
+                  className="p-1 rounded hover:bg-[#151A22] text-[#A4AFBF] hover:text-[#F1F5F9] transition-colors"
+                  title="Copy coordinates"
+                >
+                  {copiedType === "coords" ? (
+                    <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-0.5">
+                      <Check className="w-3 h-3" />
+                      <span>Copied</span>
+                    </span>
+                  ) : (
+                    <Copy className="w-3 h-3" />
+                  )}
+                </button>
+              </div>
             </div>
 
+            {/* Sensor & Platform Row */}
             <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
               <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
@@ -207,16 +280,30 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
               </span>
             </div>
 
-            <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
-              <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-[#F59E0B]" aria-hidden="true" />
-                Fire radiative power (FRP)
-              </span>
-              <span className="font-mono text-[13px] font-semibold text-[#F59E0B] tabular-nums">
-                {obs.frp_mw != null ? `${obs.frp_mw.toFixed(1)} MW` : "N/A"}
-              </span>
+            {/* FRP Row with Gauge */}
+            <div className="flex flex-col gap-1 py-1.5 border-b border-[#28313D]">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-[#F59E0B]" aria-hidden="true" />
+                  Fire radiative power (FRP)
+                </span>
+                <span className="font-mono text-[13px] font-semibold text-[#F59E0B] tabular-nums">
+                  {obs.frp_mw != null ? `${obs.frp_mw.toFixed(1)} MW` : "N/A"}
+                </span>
+              </div>
+              {obs.frp_mw != null && (
+                <div className="w-full bg-[#151A22] h-1.5 rounded-full overflow-hidden flex items-center mt-0.5 border border-[#28313D]">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#FDE047] via-[#F59E0B] to-[#DC2626] rounded-full transition-all duration-300"
+                    style={{
+                      width: `${Math.min(Math.max((obs.frp_mw / 60) * 100, 5), 100)}%`,
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
+            {/* Confidence Row */}
             <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
               <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
@@ -227,13 +314,37 @@ export const ObservationDetailsPanel: React.FC<ObservationDetailsPanelProps> = (
               </span>
             </div>
 
-            <div className="flex items-center justify-between py-1.5">
+            {/* Physical Spectral Bands */}
+            <div className="flex items-center justify-between py-1.5 border-b border-[#28313D]">
               <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-[#A4AFBF]" aria-hidden="true" />
-                Satellite product
+                Physical bands
               </span>
-              <span className="font-mono text-xs text-[#A4AFBF]">
-                {isViirs ? "VNP14IMGTDL (375 m)" : "MOD14 / MYD14 (1 km)"}
+              <span className="font-mono text-[11px] text-[#A4AFBF]">
+                {isViirs ? "I4 (3.74 µm) · I5 (11.45 µm)" : "B21/22 (3.96 µm) · B31 (11.0 µm)"}
+              </span>
+            </div>
+
+            {/* Harmonized Classification */}
+            <div className="flex items-center justify-between py-1.5">
+              <span className="text-[13px] font-medium text-[#A4AFBF] flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" aria-hidden="true" />
+                Harmonization status
+              </span>
+              <span
+                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium ${
+                  obs.classification === "matched"
+                    ? "bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/40"
+                    : obs.sensor === "MODIS"
+                    ? "bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/40"
+                    : "bg-[#F87171]/20 text-[#F87171] border border-[#F87171]/40"
+                }`}
+              >
+                {obs.classification === "matched"
+                  ? "Candidate Match (Collocated)"
+                  : obs.sensor === "MODIS"
+                  ? "MODIS-only Detection"
+                  : "VIIRS-only Detection"}
               </span>
             </div>
           </div>

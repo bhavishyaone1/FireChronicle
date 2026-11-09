@@ -27,11 +27,13 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
   onViewDeepDive,
 }) => {
   const [viewInterval, setViewInterval] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
 
   const days = calendarData?.days || [];
 
-  const activeDay = selectedDate
-    ? days.find((d) => d.date === selectedDate)
+  const displayDate = hoveredDate || selectedDate;
+  const activeDay = displayDate
+    ? days.find((d) => d.date === displayDate)
     : days.find((d) => d.unique_active_cells > 0) || days[0];
 
   const activeDayDateStr = activeDay?.date || (days[0]?.date ?? "2024-08-01");
@@ -166,6 +168,7 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
           <div className="grid grid-cols-7 gap-1">
             {calendarCells.map((c, idx) => {
               const isSelected = selectedDate === c.dateStr;
+              const isHovered = hoveredDate === c.dateStr;
               const heatClass = c.inCurrentMonth
                 ? getCellHeatStyle(c.dateStr)
                 : "bg-transparent text-[#28313D]";
@@ -184,13 +187,21 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
                         }`
                       : undefined
                   }
+                  onMouseEnter={() => {
+                    if (c.inCurrentMonth) setHoveredDate(c.dateStr);
+                  }}
+                  onMouseLeave={() => setHoveredDate(null)}
                   onClick={() => {
                     if (c.inCurrentMonth) {
                       onSelectDate(isSelected ? null : c.dateStr);
                     }
                   }}
-                  className={`h-7 rounded-md text-xs font-mono tabular-nums font-medium flex items-center justify-center transition-colors duration-150 motion-reduce:transition-none ${heatClass} ${
-                    isSelected ? "ring-2 ring-[#F59E0B] font-bold bg-[#28313D] z-10" : ""
+                  className={`h-7 rounded-md text-xs font-mono tabular-nums font-medium flex items-center justify-center transition-all duration-150 motion-reduce:transition-none ${heatClass} ${
+                    isSelected
+                      ? "ring-2 ring-[#F59E0B] font-bold bg-[#28313D] z-10 scale-105"
+                      : isHovered
+                      ? "ring-1 ring-[#F1F5F9]/60 z-10 scale-105"
+                      : "hover:scale-105"
                   }`}
                 >
                   {c.dayNum}
@@ -212,10 +223,22 @@ export const BurningActivityCalendar: React.FC<BurningActivityCalendarProps> = (
               className="flex flex-col gap-2"
             >
               <div className="flex items-center justify-between border-b border-[#28313D] pb-1.5">
-                <span className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-1.5 font-mono tabular-nums">
+                <div className="flex items-center gap-1.5">
                   <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
-                  {formatDateDisplay(activeDayDateStr)}
-                </span>
+                  <span className="text-xs font-semibold text-[#F1F5F9] font-mono tabular-nums">
+                    {formatDateDisplay(activeDayDateStr)}
+                  </span>
+                  {hoveredDate && hoveredDate !== selectedDate && (
+                    <span className="text-[10px] px-1 rounded bg-[#151A22] text-[#A4AFBF] border border-[#28313D] leading-none py-0.5">
+                      Preview
+                    </span>
+                  )}
+                  {selectedDate === activeDayDateStr && (
+                    <span className="text-[10px] px-1 rounded bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/40 leading-none py-0.5 font-medium">
+                      Focused
+                    </span>
+                  )}
+                </div>
                 {selectedDate && (
                   <button
                     onClick={() => onSelectDate(null)}

@@ -57,6 +57,14 @@ export const Controls: React.FC<ControlsProps> = ({
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  let activeFilterCount = 0;
+  if (startDate !== "2024-08-01" || endDate !== "2024-08-20") activeFilterCount++;
+  if (sensorFilter !== "ALL") activeFilterCount++;
+  if (classificationFilter !== "ALL") activeFilterCount++;
+  if (gridSizeKm !== 1.0) activeFilterCount++;
+  if (spatialToleranceM !== 1000) activeFilterCount++;
+  if (selectedDate) activeFilterCount++;
+
   const formatDateLabel = (isoDate: string) => {
     try {
       const parts = isoDate.split("-");
@@ -128,6 +136,21 @@ export const Controls: React.FC<ControlsProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  setStartDate("2024-08-01");
+                  setEndDate("2024-08-20");
+                  if (onClearSelectedDate) onClearSelectedDate();
+                }}
+                className={`px-1.5 py-0.5 rounded text-[10px] transition-colors font-medium border ${
+                  startDate === "2024-08-01" && endDate === "2024-08-20"
+                    ? "bg-[#151A22] border-[#F59E0B] text-[#F59E0B]"
+                    : "bg-[#090B0F] border-[#28313D] text-[#A4AFBF] hover:text-[#F1F5F9]"
+                }`}
+              >
+                01–20 Aug
+              </button>
+              <button
+                type="button"
+                onClick={() => {
                   setStartDate("2024-08-10");
                   setEndDate("2024-08-15");
                   if (onClearSelectedDate) onClearSelectedDate();
@@ -143,17 +166,17 @@ export const Controls: React.FC<ControlsProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  setStartDate("2024-08-01");
+                  setStartDate("2024-08-16");
                   setEndDate("2024-08-20");
                   if (onClearSelectedDate) onClearSelectedDate();
                 }}
                 className={`px-1.5 py-0.5 rounded text-[10px] transition-colors font-medium border ${
-                  startDate === "2024-08-01" && endDate === "2024-08-20"
+                  startDate === "2024-08-16" && endDate === "2024-08-20"
                     ? "bg-[#151A22] border-[#F59E0B] text-[#F59E0B]"
                     : "bg-[#090B0F] border-[#28313D] text-[#A4AFBF] hover:text-[#F1F5F9]"
                 }`}
               >
-                01–20 Aug
+                16–20 Aug
               </button>
             </div>
           </div>
@@ -207,9 +230,15 @@ export const Controls: React.FC<ControlsProps> = ({
             size="sm"
             onClick={handleResetFilters}
             title="Reset filters to standard defaults"
+            className="relative"
           >
             <RotateCcw className="w-3 h-3 mr-1" />
-            Reset
+            <span>Reset</span>
+            {activeFilterCount > 0 && (
+              <span className="ml-1.5 px-1.5 py-0.2 rounded-full bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/40 text-[10px] font-mono font-medium">
+                {activeFilterCount}
+              </span>
+            )}
           </Button>
 
           <Button
@@ -296,7 +325,7 @@ export const Controls: React.FC<ControlsProps> = ({
           <div className="md:col-span-4 flex flex-col gap-1">
             <div className="flex items-center justify-between text-[11px] text-[#A4AFBF]">
               <span className="font-medium text-[#F1F5F9] flex items-center gap-1">
-                <Sliders className="w-3 h-3 text-[#06B6D4]" />
+                <Sliders className="w-3 h-3 text-[#38BDF8]" />
                 Match tolerance: {spatialToleranceM}m
               </span>
               <span>&le; 60 min orbital delta</span>
@@ -308,11 +337,11 @@ export const Controls: React.FC<ControlsProps> = ({
               step="250"
               value={spatialToleranceM}
               onChange={(e) => setSpatialToleranceM(parseInt(e.target.value, 10))}
-              className="w-full accent-[#06B6D4] cursor-pointer h-1.5 bg-[#151A22] rounded-lg"
+              className="w-full accent-[#38BDF8] cursor-pointer h-1.5 bg-[#151A22] rounded-lg"
             />
             <div className="flex justify-between text-[10px] text-[#6E7A8A]">
               <span>500m (Strict)</span>
-              <span className="text-[#06B6D4]">1000m (MODIS Nadir)</span>
+              <span className="text-[#38BDF8]">1000m (MODIS Nadir)</span>
               <span>2000m (Permissive)</span>
             </div>
           </div>
