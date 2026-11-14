@@ -74,4 +74,4 @@ def test_metadata_contains_suomi_npp_lifecycle(client):
     assert resp.status_code == 200
     data = resp.json()
     assert "suomi_npp_lifecycle" in data
-    assert data["suomi_npp_lifecycle"]["cessation_date"] == "2026-11-01"
+    assert data["suomi_npp_lifecycle"]["cessation_date"] == "2026-11-02"

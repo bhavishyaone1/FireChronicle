@@ -1,0 +1,80 @@
+{
+  "fire_archive_J1V-C2_841340.dbf": {
+    "file": "fire_archive_J1V-C2_841340.dbf",
+    "total_records": 11434910,
+    "india_records": 930016,
+    "india_percentage": 8.13,
+    "date_range": "2025-11-09 to 2026-07-31",
+    "unique_dates": 265,
+    "bounds": [
+      -179.98198,
+      -86.3852,
+      179.82785,
+      73.53567
+    ],
+    "confidence_dist": {
+      "nominal": 739922,
+      "low": 165598,
+      "high": 24496
+    },
+    "satellites": {
+      "N20": 930016
+    },
+    "quality_flags": {
+      "invalid_coords": 0,
+      "invalid_time": 0,
+      "suspect_frp": 0,
+      "suspect_temp": 0
+    }
+  },
+  "fire_nrt_J1V-C2_841340.dbf": {
+    "file": "fire_nrt_J1V-C2_841340.dbf",
+    "total_records": 7197406,
+    "india_records": 65431,
+    "india_percentage": 0.91,
+    "date_range": "2026-08-01 to 2026-11-09",
+    "unique_dates": 101,
+    "bounds": [
+      -179.96582,
+      -77.52923,
+      179.95056,
+      75.0942
+    ],
+    "confidence_dist": {
+      "nominal": 58389,
+      "low": 6445,
+      "high": 597
+    },
+    "satellites": {
+      "N20": 65431
+    },
+    "quality_flags": {
+      "invalid_coords": 0,
+      "invalid_time": 0,
+      "suspect_frp": 0,
+      "suspect_temp": 0
+    }
+  },
+  "total_combined_india_records": 995447,
+  "state_breakdown": {
+    "India (National)": 144303,
+    "Madhya Pradesh": 123543,
+    "Chhattisgarh": 93628,
+    "Odisha": 59626,
+    "Telangana / Andhra Pradesh": 54649,
+    "West Bengal / Jharkhand": 51704,
+    "Uttar Pradesh": 48034,
+    "Karnataka": 37083,
+    "Punjab": 24718,
+    "Rajasthan": 21163,
+    "Jammu & Kashmir": 17205,
+    "Assam": 16202,
+    "Northeastern Region": 13999,
+    "Uttarakhand": 13607,
+    "Tamil Nadu": 13419,
+    "Haryana": 8608,
+    "Himachal Pradesh": 3969,
+    "Kerala": 892,
+    "Ladakh": 5
+  }
+}

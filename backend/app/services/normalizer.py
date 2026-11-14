@@ -2,7 +2,7 @@
 
 import hashlib
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List, Tuple, Union
 import pandas as pd
 
@@ -12,8 +12,14 @@ from backend.app.schemas.common import (
     ProcessingStatus,
     ConfidenceCategory,
     ClassificationType,
+    ContextClass,
+    ContextConfidence,
+    SourceAgency,
 )
 from backend.app.schemas.observation import NormalizedObservation
+from backend.app.services.india_boundary import attribute_india_jurisdiction
+from backend.app.services.context_engine import evaluate_observation_context
+
 
 
 def compute_observation_id(
@@ -201,7 +207,7 @@ def normalize_record(
     acq_date = row.get("acq_date", "2024-01-01")
     acq_time = row.get("acq_time", "1200")
     try:
-        _, iso_utc, padded_time = parse_utc_datetime(acq_date, acq_time)
+        dt_parsed, iso_utc, padded_time = parse_utc_datetime(acq_date, acq_time)
     except Exception:
         return None
         
@@ -241,12 +247,41 @@ def normalize_record(
             pass
             
     brightness_k = None
-    b_field = "bright_ti4" if sensor == SensorType.VIIRS else "brightness"
-    if b_field in row and pd.notna(row[b_field]):
-        try:
-            brightness_k = round(float(row[b_field]), 2)
-        except (ValueError, TypeError):
-            pass
+    b1_val = None
+    b1_name = None
+    b2_val = None
+    b2_name = None
+
+    if sensor == SensorType.VIIRS:
+        # VIIRS Band I-4 (3.74 um) and Band I-5 (11.45 um)
+        b1_name = "Band I-4 (3.74 um)"
+        b2_name = "Band I-5 (11.45 um)"
+        if "bright_ti4" in row and pd.notna(row["bright_ti4"]):
+            try:
+                b1_val = round(float(row["bright_ti4"]), 2)
+                brightness_k = b1_val
+            except (ValueError, TypeError):
+                pass
+        if "bright_ti5" in row and pd.notna(row["bright_ti5"]):
+            try:
+                b2_val = round(float(row["bright_ti5"]), 2)
+            except (ValueError, TypeError):
+                pass
+    else:
+        # MODIS Channel 21/22 (3.96 um) and Channel 31 (11.03 um)
+        b1_name = "Channel 21/22 (3.96 um)"
+        b2_name = "Channel 31 (11.03 um)"
+        if "brightness" in row and pd.notna(row["brightness"]):
+            try:
+                b1_val = round(float(row["brightness"]), 2)
+                brightness_k = b1_val
+            except (ValueError, TypeError):
+                pass
+        if "bright_t31" in row and pd.notna(row["bright_t31"]):
+            try:
+                b2_val = round(float(row["bright_t31"]), 2)
+            except (ValueError, TypeError):
+                pass
             
     anomaly_type = None
     if "type" in row and pd.notna(row["type"]):
@@ -258,11 +293,29 @@ def normalize_record(
     source_product = row.get("source_product", f"{sensor.value}_SP")
     proc_status = ProcessingStatus.NRT if "NRT" in str(source_product).upper() else ProcessingStatus.SP
     
+    # 7. IST (UTC + 05:30) Calculation
+    dt_ist = dt_parsed + timedelta(hours=5, minutes=30)
+    ist_str = dt_ist.strftime("%Y-%m-%d %H:%M:%S IST")
+
+    # 8. India Jurisdictional Attribution
+    india_state, india_district = attribute_india_jurisdiction(lat, lon)
+
+    # 9. Context Inference
+    c_class, c_evidence, c_confidence = evaluate_observation_context(
+        lat=lat,
+        lon=lon,
+        acq_date_utc=str(acq_date).strip(),
+        anomaly_type=anomaly_type,
+        india_state=india_state,
+        india_district=india_district,
+    )
+
     obs_id = compute_observation_id(source_file, row_idx, sensor.value, platform.value, lat, lon, iso_utc)
     grid_id = compute_grid_cell_id(lat, lon, grid_size_km)
     
     return NormalizedObservation(
         observation_id=obs_id,
+        source_agency=SourceAgency.NASA_FIRMS,
         source_product=str(source_product),
         source_file=source_file,
         source_row_id=row_idx,
@@ -272,6 +325,7 @@ def normalize_record(
         latitude=round(lat, 5),
         longitude=round(lon, 5),
         acq_datetime_utc=iso_utc,
+        acq_datetime_ist=ist_str,
         acq_date_utc=str(acq_date).strip(),
         acq_time_utc=padded_time,
         confidence_category=conf_cat,
@@ -282,6 +336,17 @@ def normalize_record(
         scan_km=scan_km,
         track_km=track_km,
         brightness_kelvin=brightness_k,
+        brightness_channel_1=b1_val,
+        brightness_channel_1_name=b1_name,
+        brightness_channel_1_unit="K",
+        brightness_channel_2=b2_val,
+        brightness_channel_2_name=b2_name,
+        brightness_channel_2_unit="K",
+        india_state=india_state,
+        india_district=india_district,
+        context_class=c_class,
+        context_evidence=c_evidence,
+        context_confidence=c_confidence,
         classification=ClassificationType.MODIS_ONLY if sensor == SensorType.MODIS else ClassificationType.VIIRS_ONLY,
         grid_cell_id=grid_id,
     )

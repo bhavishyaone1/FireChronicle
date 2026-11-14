@@ -10,13 +10,13 @@ from backend.app.config import settings
 from backend.app.schemas.common import SensorType
 
 
-SUOMI_NPP_CESSATION_DATE = "2026-11-01"
+SUOMI_NPP_CESSATION_DATE = "2026-11-02"
 
 
 def resolve_viirs_product(source: str, target_date: Optional[str] = None) -> Tuple[str, Optional[str]]:
     """
-    Handle NASA's announced November 1, 2026 cessation of Suomi-NPP data-product delivery.
-    If Suomi-NPP is requested on or after 2026-11-01, dynamically recommend/route to NOAA-20.
+    Handle NASA's announced November 2, 2026 cessation of Suomi-NPP data-product delivery.
+    If Suomi-NPP is requested on or after 2026-11-02, dynamically recommend/route to NOAA-20.
     """
     check_date = target_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
     if "SNPP" in source.upper() and check_date >= SUOMI_NPP_CESSATION_DATE:

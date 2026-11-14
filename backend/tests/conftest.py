@@ -8,7 +8,13 @@ from backend.app.schemas.observation import NormalizedObservation
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_sample_data():
+    from backend.app.config import settings
+    from backend.app.services.storage import storage_engine
     from backend.app.services.pipeline import pipeline
+    # Ensure tests run with clean in-memory duckdb
+    storage_engine.db_path = ":memory:"
+    storage_engine._conn = None
+    storage_engine._init_db()
     pipeline.initialize_default_sample_data()
 
 

@@ -7,13 +7,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.app.config import settings
 from backend.app.api.routes import router
 from backend.app.services.pipeline import pipeline
+from backend.app.services.storage import storage_engine
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle startup and shutdown logic."""
-    # Initialize default sample data on startup
-    pipeline.initialize_default_sample_data()
+    # Only populate fallback sample fixture if observations database has no records
+    if storage_engine.get_dataset_provenance().get("provenance_type") == "EMPTY":
+        pipeline.initialize_default_sample_data()
     yield
 
 

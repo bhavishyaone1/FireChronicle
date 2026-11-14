@@ -36,6 +36,10 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+data/extracted/
+data/interim/
+data/validation/
+data/manifests/
 *.duckdb
 *.duckdb.wal
 *.parquet
@@ -57,3 +61,7 @@ data/processed/*
 Thumbs.db
 .vscode/
 .idea/
+
+# Third-party assistant tooling and skills
+.agents/
+.agents/*

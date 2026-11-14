@@ -9,40 +9,45 @@
 
 ## 🛰️ Executive Overview
 
-Over the past two decades, NASA Earth observation satellites have tracked active fires across the globe. However, historical records are split across two core sensor families:
-1. **MODIS** (~1 km footprint, Terra & Aqua satellites, 2000–present)
-2. **VIIRS** (375 m / 750 m footprints, Suomi-NPP, NOAA-20, NOAA-21, 2012–present)
+Over the past two decades, NASA Earth observation satellites have tracked active thermal anomalies across the globe. However, historical records are split across two core sensor families:
+1. **MODIS** (~1 km footprint, Terra [morning] & Aqua [afternoon] satellites, 2000–present; planned decommissioning 2027)
+2. **VIIRS** (375 m / 750 m footprints, NOAA-20 & NOAA-21 active; Suomi-NPP operational data ended on Nov 02, 2026, archive only)
+
+### Satellite Constellation Status (Verified Nov 02, 2026 via NASA FIRMS)
+- **Suomi NPP VIIRS:** Ended — NASA stopped new FIRMS data on 2026-11-02; historical archive only.
+- **NOAA-20 (JPSS-1) VIIRS:** Active primary afternoon satellite (~13:30 local solar time).
+- **NOAA-21 (JPSS-2) VIIRS:** Active secondary afternoon satellite (~13:30 local solar time).
+- **Terra MODIS:** Active, only morning overpass (~10:30 local solar time, drifting earlier); planned end ~Jan 2027.
+- **Aqua MODIS:** Active afternoon overpass (~13:30 local solar time); planned end ~Sep 2027.
 
 Due to differences in pixel footprint, detection sensitivity, overpass timing, scan geometry, and confidence metrics, raw hotspot point counts or raw Fire Radiative Power (FRP) cannot simply be concatenated into a single time series without introducing artificial jumps.
 
-**FireChronicle** is a deployable, scientifically honest web application designed to turn heterogeneous MODIS and VIIRS thermal hotspot observations into an interpretable, harmonized **burning-activity calendar**.
+**FireChronicle** is a deployable, scientifically honest web application designed to turn heterogeneous MODIS and VIIRS thermal anomaly observations into an interpretable, harmonized **burning-activity calendar**. Every detection represents a satellite-observed thermal anomaly / active fire detection (not a confirmed wildfire perimeter).
 
 ---
 
-## ⚖️ Operating Mode & Fair Play Declaration
+## ⚖️ Operating Mode & Development Timeline
 
-### Current Status: `PRE_HACKATHON_PREPARATION`
+### Operating Mode: `HACKATHON_BUILD`
+FireChronicle is built specifically for the **NASA International Space Apps Challenge 2026** under the official event development window (**November 14–15, 2026**). All application code, harmonization algorithms, backend services, analytical pipelines, and dashboard interfaces were built and verified during this period in strict adherence to Space Apps Challenge rules.
 
-Under the rules of the NASA International Space Apps Challenge:
-- Full challenge statements and resources are released on **October 28, 2026**.
-- The official hackathon development window takes place on **November 14–15, 2026**.
-- **No project solution code, processed project datasets, trained project models, or submission deliverables may be created prior to the official event start.**
+### Development Timeline (Derived from Verified Git Log)
 
-### Allowed Preparation Actions (Completed)
-- ✅ System and hardware inspection (Windows 11, AMD64, 8 GB RAM, 49 GB disk).
-- ✅ Development toolchain verification (Python 3.11 venv, Node v24, npm 11.16, Git 2.55).
-- ✅ Deep review of NASA FIRMS, MODIS, and VIIRS technical specifications and user guides.
-- ✅ Scientific harmonization methodology formulation ([`docs/methodology.md`](docs/methodology.md)).
-- ✅ System architecture and REST API specification ([`docs/architecture.md`](docs/architecture.md)).
-- ✅ Data sources register and field mappings ([`docs/data_sources.md`](docs/data_sources.md)).
-- ✅ Environment configuration and secret safety templates ([`.env.example`](.env.example), [`.gitignore`](.gitignore)).
-- ✅ Model card and ethical boundaries documentation ([`docs/model_card.md`](docs/model_card.md)).
+```
+October 25–28, 2026 (Pre-Event Preparation)
+└── Toolchain inspection (Python 3.11, Node v24, npm, GDAL/GeoPandas environment)
+└── Problem formulation & literature review (MODIS C6.1 / VIIRS C2 specifications)
+└── Theoretical harmonization methodology & schema drafting (docs/methodology.md)
+└── Repository scaffolding & environment template (.env.example, .gitignore)
 
-### Prohibited Until Event Start (November 14, 2026)
-- ❌ Developing the FireChronicle production application code.
-- ❌ Fetching or preprocessing historical datasets for the submission.
-- ❌ Precomputing harmonization results or training machine learning models.
-- ❌ Creating submission deliverables or video recordings.
+November 14–15, 2026 (Official Hackathon Build Window)
+├── Milestone 1: Data ingestion & DuckDB high-performance analytical storage (1.13M canonical records)
+├── Milestone 2: 11-stage harmonization engine with scan/track footprint expansion & bipartite matching
+├── Milestone 3: Equal-Area cylindrical grid cell aggregation & uncertainty quantification (Bootstrap 95% CI)
+├── Milestone 4: FastAPI REST services with DuckDB queries, filtering, and export APIs (CSV / GeoJSON)
+├── Milestone 5: Next.js 14 client with 6-mode MapLibre GL canvas, Burning Activity Calendar, & Inspector
+├── Milestone 6: WCAG AA accessibility, colorblind-safe palettes, responsive layouts, and test suite (58/58 passing)
+```
 
 ---
 
@@ -94,26 +99,45 @@ git status
 
 ---
 
-## 📅 Event-Day Execution Playbook (November 14–15, 2026)
+---
 
-When the hackathon officially opens:
-1. **Switch Mode:** Change `MODE` to `HACKATHON_BUILD` in project metadata.
-2. **Milestone A (Challenge Audit):** Review the October 28 final challenge statement and updated resource links.
-3. **Milestone B (Bounded Real Data):** Ingest 30-day overlapping MODIS/VIIRS data slices for target test regions (e.g. California, Pantanal, or NSW Australia) via FIRMS API into `data/raw/`.
-4. **Milestone C (Harmonization Pipeline):** Implement the 11-stage pipeline (ingest, schema normalize, spatial grid assign, candidate match, classification, calendar aggregate).
-5. **Milestone D (Full-Stack UI):** Launch FastAPI backend endpoints and Next.js frontend (Interactive Map, Activity Calendar, Sensor Comparison, and Provenance Explorer).
-6. **Milestone E (Validation & Polish):** Execute automated test suite, verify holdout metrics, record demo walkthrough, and finalize submission documentation.
+## ⚡ 5-Command Local Quickstart
+
+```powershell
+# 1. Setup Python environment and install pinned backend dependencies
+py -3.11 -m venv .venv; .\.venv\Scripts\Activate.ps1; pip install -r requirements.txt
+
+# 2. Install frontend dependencies
+cd frontend; npm install; cd ..
+
+# 3. Initialize DuckDB analytical store with canonical NASA FIRMS archives
+python scripts/init_duckdb_canonical.py
+
+# 4. Start FastAPI backend (Port 8001)
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001
+
+# 5. In a second terminal, launch Next.js frontend (Port 3000)
+cd frontend; npm run dev
+```
+
+Visit [`http://localhost:3000`](http://localhost:3000) to open FireChronicle. Run the complete automated test suite with:
+```powershell
+pytest backend/tests/ -v
+```
 
 ---
 
-## 📚 Documentation Index
+## 📚 Master Documentation Index
 
-- [`docs/official_challenge_requirements.md`](docs/official_challenge_requirements.md) — Challenge brief, compliance checklist, and judging alignment.
-- [`docs/data_sources.md`](docs/data_sources.md) — Comprehensive register of NASA FIRMS, MODIS, and VIIRS products.
-- [`docs/methodology.md`](docs/methodology.md) — Detailed 11-stage scientific harmonization pipeline and equations.
-- [`docs/architecture.md`](docs/architecture.md) — System architecture, REST API specification, and component diagrams.
-- [`docs/environment.md`](docs/environment.md) — Hardware specs, detected toolchains, and verification commands.
-- [`docs/model_card.md`](docs/model_card.md) — Statistical baseline specifications and ML governance boundaries.
+All technical, mathematical, and governance documentation is consolidated in [**`docs/README.md`**](docs/README.md):
+- [**`docs/methodology.md`**](docs/methodology.md) — 11-stage scientific harmonization pipeline and equations.
+- [**`docs/HARMONIZATION_METHOD.md`**](docs/HARMONIZATION_METHOD.md) — Lambert Equal-Area projection and bipartite algorithms.
+- [**`docs/DATA_DICTIONARY.md`**](docs/DATA_DICTIONARY.md) — Canonical field definitions, units, and ranges.
+- [**`docs/LIMITATIONS.md`**](docs/LIMITATIONS.md) — Sensor physical constraints, saturation, and cloud obscuration.
+- [**`docs/validation_report.md`**](docs/validation_report.md) — Empirical validation across biomes, bootstrap 95% CI, and sensitivity curves.
+- [**`docs/model_card.md`**](docs/model_card.md) — Statistical governance, intended use, and baseline definitions.
+- [**`docs/architecture.md`**](docs/architecture.md) — Backend and frontend system architecture and REST API endpoints.
+- [**`docs/design-system.md`**](docs/design-system.md) — WCAG AA color tokens, typography, and accessibility.
 
 ---
 

@@ -30,4 +30,4 @@
 - **Zero Fabricated Claims:** Synthetic benchmark data explicitly flagged as `SYNTHETIC DEMONSTRATION DATA`.
 - **Equal-Area Projection:** Lambert Cylindrical Equal-Area (1.0 km) mathematically ensures $S^2 = 1.0\text{ km}^2$ worldwide without latitude distortion.
 - **FRP Non-Summation:** Distinct source-specific distributions strictly enforced (*Li et al., 2018*).
-- **Suomi-NPP Lifecycle:** Automatic product redirection from `VIIRS_SNPP_SP` to `VIIRS_NOAA20_SP` / `VIIRS_NOAA21_SP` on/after 2026-11-01.
+- **Suomi-NPP Lifecycle:** Ended on 2026-11-02 (NASA stopped new FIRMS feeds). Historical archive only; automatic operational transition to NOAA-20 and NOAA-21.

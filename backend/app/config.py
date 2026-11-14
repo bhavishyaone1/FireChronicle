@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     
     # Server host & port
     host: str = Field(default="127.0.0.1", alias="HOST")
-    port: int = Field(default=8000, alias="PORT")
+    port: int = Field(default=8001, alias="PORT")
     environment: str = Field(default="development", alias="ENVIRONMENT")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     

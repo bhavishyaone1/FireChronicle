@@ -1,0 +1,6 @@
+FIRE_ID,STATE,DISTRICT,CIRCLE,DIVISION,RANGE,SENSOR,LATITUDE,LONGITUDE,DATE,TIME
+FSI_UT_2024_01,Uttarakhand,Chamoli,Garhwal,Badrinath,Joshimath,VIIRS,30.4155,79.3235,2024-08-11,0830
+FSI_UT_2024_02,Uttarakhand,Chamoli,Garhwal,Badrinath,Joshimath,VIIRS,30.4140,79.3250,2024-08-11,0830
+FSI_UT_2024_03,Uttarakhand,Chamoli,Garhwal,Badrinath,Joshimath,VIIRS,30.4168,79.3220,2024-08-11,0830
+FSI_MP_2024_01,Madhya Pradesh,Balaghat,Balaghat,South Balaghat,Lamta,VIIRS,21.8130,80.1848,2024-08-12,0835
+FSI_CG_2024_01,Chhattisgarh,Bastar,Jagdalpur,Bastar,Bastanar,VIIRS,19.0748,82.0228,2024-08-13,0840

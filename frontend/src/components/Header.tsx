@@ -7,7 +7,11 @@ import {
   Database,
   Upload,
   User,
+  AlertTriangle,
+  Radio,
+  Info,
 } from "lucide-react";
+import { DatasetProvenance } from "@/types";
 
 interface HeaderProps {
   activeMode: string;
@@ -15,18 +19,23 @@ interface HeaderProps {
   isFirmsConfigured: boolean;
   startDate: string;
   endDate: string;
+  provenance?: DatasetProvenance | null;
   onOpenDateSelector?: () => void;
   onOpenProvenance?: () => void;
   onOpenUploadModal?: () => void;
+  onOpenDataExplainer?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  isBackendConnected,
   isFirmsConfigured,
   startDate,
   endDate,
+  provenance,
   onOpenDateSelector,
   onOpenProvenance,
   onOpenUploadModal,
+  onOpenDataExplainer,
 }) => {
   const [showDataSourceDropdown, setShowDataSourceDropdown] = useState(false);
 
@@ -44,7 +53,51 @@ export const Header: React.FC<HeaderProps> = ({
     return iso;
   };
 
-  const formattedRange = `${formatDate(startDate)} – ${formatDate(endDate)}, ${startDate.split("-")[0] || "2024"}`;
+  const formattedRange = `${formatDate(startDate)} – ${formatDate(endDate)}, ${startDate.split("-")[0] || "2026"}`;
+
+  // Provenance Badge Styling
+  const getProvenanceBadge = () => {
+    if (!isBackendConnected) {
+      return {
+        pillClass: "bg-[#2A0F12]/90 hover:bg-[#3D1418] border-[#991B1B]/60 text-[#FCA5A5] shadow-[0_0_12px_rgba(239,68,68,0.2)]",
+        dotClass: "bg-[#EF4444] shadow-[0_0_6px_#EF4444]",
+        label: "API Unreachable",
+        chipText: "Bundled Sample / Offline",
+      };
+    }
+    if (provenance?.provenance_type === "LIVE_NASA_FIRMS") {
+      return {
+        pillClass: "bg-[#091F14]/90 hover:bg-[#0E2F1E] border-[#166534]/50 text-[#4ADE80] shadow-[0_0_12px_rgba(34,197,94,0.15)]",
+        dotClass: "bg-[#22C55E] shadow-[0_0_6px_#22C55E] animate-pulse",
+        label: "Live NASA FIRMS Data",
+        chipText: "Live API Connected",
+      };
+    }
+    if (provenance?.provenance_type === "UPLOADED_NASA_FIRMS_CSV") {
+      return {
+        pillClass: "bg-[#08222E]/90 hover:bg-[#0D2F3E] border-[#0E7490]/60 text-[#38BDF8] shadow-[0_0_12px_rgba(56,189,248,0.2)]",
+        dotClass: "bg-[#38BDF8] shadow-[0_0_6px_#38BDF8]",
+        label: "User Uploaded CSV",
+        chipText: "Custom FIRMS CSV",
+      };
+    }
+    if (provenance?.provenance_type === "SYNTHETIC_DEMO") {
+      return {
+        pillClass: "bg-[#251508]/90 hover:bg-[#341F0E] border-[#C2410C]/60 text-[#FB923C] shadow-[0_0_12px_rgba(249,115,22,0.2)]",
+        dotClass: "bg-[#F97316] shadow-[0_0_6px_#F97316]",
+        label: "Bundled Sample Data",
+        chipText: "Synthetic Demo Fixture",
+      };
+    }
+    return {
+      pillClass: "bg-[#1E1906]/90 hover:bg-[#2D250A] border-[#A16207]/60 text-[#FBBF24] shadow-[0_0_12px_rgba(245,158,11,0.2)]",
+      dotClass: "bg-[#EAB308] shadow-[0_0_6px_#EAB308]",
+      label: "NASA FIRMS Archive (1.13M Records)",
+      chipText: "Verified NASA Archive",
+    };
+  };
+
+  const badge = getProvenanceBadge();
 
   return (
     <header className="h-12 px-5 bg-transparent flex items-center justify-between shrink-0 z-20">
@@ -53,16 +106,17 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Left area allows the page hero background to breathe */}
       </div>
 
-      {/* Right Controls: Live Status Pill, Date Range Pill, User Avatar */}
+      {/* Right Controls: Dynamic Provenance Pill, Date Range Pill, User Avatar */}
       <div className="flex items-center gap-3">
-        {/* Live NASA FIRMS Data Pill */}
+        {/* Data Provenance Pill */}
         <div className="relative">
           <button
             onClick={() => setShowDataSourceDropdown(!showDataSourceDropdown)}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#091F14]/90 hover:bg-[#0E2F1E] border border-[#166534]/50 text-[#4ADE80] text-xs font-medium transition-all shadow-[0_0_12px_rgba(34,197,94,0.15)]"
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-medium transition-all ${badge.pillClass}`}
+            title="Click to inspect data source provenance and telemetry integrity"
           >
-            <span className="w-2 h-2 rounded-full bg-[#22C55E] shadow-[0_0_6px_#22C55E] animate-pulse" />
-            <span>Live NASA FIRMS Data</span>
+            <span className={`w-2 h-2 rounded-full ${badge.dotClass}`} />
+            <span>{badge.label}</span>
           </button>
 
           {showDataSourceDropdown && (
@@ -70,16 +124,18 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center justify-between border-b border-[#232938] pb-2">
                 <span className="text-xs font-semibold text-white flex items-center gap-1.5">
                   <Database className="w-3.5 h-3.5 text-[#F59E0B]" />
-                  NASA FIRMS Feed
+                  Data Provenance
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#171E2D] border border-[#263147] text-[#93C5FD] font-mono">
-                  {isFirmsConfigured ? "Live API Connected" : "Verified 2024 Sample"}
+                  {badge.chipText}
                 </span>
               </div>
               <p className="text-xs text-[#9AA3B4] leading-relaxed">
-                {isFirmsConfigured
-                  ? "Connected directly to NASA FIRMS API. Ingesting near-real-time thermal infrared observations."
-                  : "Running verified benchmark dataset with full spatial cross-matching algorithms."}
+                {provenance?.description || (
+                  isBackendConnected
+                    ? "Verified NASA FIRMS Collection 6.1 (MODIS) and Collection 2 (VIIRS) canonical archive for India."
+                    : "Backend server is currently offline or unreachable. Displaying local bundled demonstration data."
+                )}
               </p>
               {onOpenUploadModal && (
                 <button
@@ -117,6 +173,18 @@ export const Header: React.FC<HeaderProps> = ({
           <span>{formattedRange}</span>
           <ChevronDown className="w-3 h-3 text-[#7B8596]" />
         </button>
+
+        {/* How Data Works Button */}
+        {onOpenDataExplainer && (
+          <button
+            onClick={onOpenDataExplainer}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121520]/90 hover:bg-[#181D2C] border border-[#232938] text-xs text-[#E2E8F0] hover:text-[#F5B32F] font-medium transition-colors shadow-sm"
+            title="How the Data Works: Ingestion, matching, and harmonization"
+          >
+            <Info className="w-3.5 h-3.5 text-[#F59E0B]" />
+            <span className="hidden sm:inline">How Data Works</span>
+          </button>
+        )}
 
         {/* User Profile Avatar */}
         <button

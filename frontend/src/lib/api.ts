@@ -5,11 +5,19 @@ import {
   CalendarResponse,
   SensorComparisonResponse,
   AnomalyResponse,
+  CandidateEventsResponse,
+  IndianStateInfo,
+  SourcesAvailabilityResponse,
+  SatelliteConfigPayload,
+  FireTypeBreakdownResponse,
 } from "@/types";
 
 const API_BASE = typeof window !== "undefined"
   ? "/api"
-  : (process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api");
+  : (process.env.NEXT_PUBLIC_API_BASE_URL ||
+     (process.env.NODE_ENV === "production"
+       ? "https://firechronicle.onrender.com/api"
+       : "http://127.0.0.1:8002/api"));
 
 export async function fetchHealth(): Promise<HealthResponse> {
   const res = await fetch(`${API_BASE}/health`, { cache: "no-store" });
@@ -23,12 +31,73 @@ export async function fetchMetadata(): Promise<MetadataResponse> {
   return res.json();
 }
 
+export async function fetchIndianStates(): Promise<{ states: IndianStateInfo[] }> {
+  const res = await fetch(`${API_BASE}/states`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch Indian states");
+  return res.json();
+}
+
+export async function fetchStatesGeoJson(): Promise<any> {
+  const res = await fetch(`${API_BASE}/states/geojson`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch states GeoJSON");
+  return res.json();
+}
+
+
+export async function fetchSourcesAvailability(): Promise<SourcesAvailabilityResponse> {
+  const res = await fetch(`${API_BASE}/sources/availability`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch sources availability");
+  return res.json();
+}
+
+export async function fetchCandidateEvents(params: {
+  bbox?: [number, number, number, number];
+  startDate?: string;
+  endDate?: string;
+  state?: string;
+}): Promise<CandidateEventsResponse> {
+  const query = new URLSearchParams();
+  if (params.bbox) query.set("bbox", params.bbox.join(","));
+  if (params.startDate) query.set("start_date", params.startDate);
+  if (params.endDate) query.set("end_date", params.endDate);
+  if (params.state && params.state !== "ALL") query.set("state", params.state);
+
+  const url = `${API_BASE}/events?${query.toString()}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch candidate events");
+  return res.json();
+}
+
+export async function fetchSatellites(): Promise<SatelliteConfigPayload> {
+  const res = await fetch(`${API_BASE}/satellites`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch satellite status");
+  return res.json();
+}
+
+export async function fetchFireTypesBreakdown(params?: {
+  bbox?: [number, number, number, number];
+  startDate?: string;
+  endDate?: string;
+}): Promise<FireTypeBreakdownResponse> {
+  const query = new URLSearchParams();
+  if (params?.bbox) query.set("bbox", params.bbox.join(","));
+  if (params?.startDate) query.set("start_date", params.startDate);
+  if (params?.endDate) query.set("end_date", params.endDate);
+
+  const res = await fetch(`${API_BASE}/types/breakdown?${query.toString()}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch fire types breakdown");
+  return res.json();
+}
+
 export async function fetchObservations(params: {
   bbox?: [number, number, number, number];
   startDate?: string;
   endDate?: string;
   sensor?: string;
   classification?: string;
+  state?: string;
+  contextClass?: string;
+  fireType?: string;
   limit?: number;
 }): Promise<GeoJSONFeatureCollection> {
   const query = new URLSearchParams();
@@ -37,6 +106,9 @@ export async function fetchObservations(params: {
   if (params.endDate) query.set("end_date", params.endDate);
   if (params.sensor && params.sensor !== "ALL") query.set("sensor", params.sensor);
   if (params.classification && params.classification !== "ALL") query.set("classification", params.classification);
+  if (params.state && params.state !== "ALL") query.set("state", params.state);
+  if (params.contextClass && params.contextClass !== "ALL") query.set("context_class", params.contextClass);
+  if (params.fireType && params.fireType !== "ALL") query.set("fire_type", params.fireType);
   if (params.limit) query.set("limit", params.limit.toString());
 
   const url = `${API_BASE}/observations?${query.toString()}`;

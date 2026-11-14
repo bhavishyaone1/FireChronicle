@@ -45,11 +45,13 @@ class HarmonizationPipeline:
     @classmethod
     def initialize_default_sample_data(cls) -> Dict[str, Any]:
         """
-        Load sample fixtures from data/sample/ to ensure immediate system functionality.
+        Load sample fixtures from data/sample/ to ensure test or demo functionality.
         Runs normalization, spatial-temporal matching, and DuckDB storage.
         """
         modis_sample = settings.sample_data_dir / "sample_modis.csv"
         viirs_sample = settings.sample_data_dir / "sample_viirs.csv"
+        india_modis = settings.sample_data_dir / "sample_india_modis.csv"
+        india_viirs = settings.sample_data_dir / "sample_india_viirs.csv"
 
         all_obs: List[NormalizedObservation] = []
 
@@ -60,6 +62,14 @@ class HarmonizationPipeline:
         if viirs_sample.exists():
             viirs_obs = cls.load_and_process_csv(viirs_sample, "VIIRS_SNPP_SP", SensorType.VIIRS)
             all_obs.extend(viirs_obs)
+
+        if india_modis.exists():
+            ind_modis_obs = cls.load_and_process_csv(india_modis, "MODIS_INDIA_NRT", SensorType.MODIS)
+            all_obs.extend(ind_modis_obs)
+
+        if india_viirs.exists():
+            ind_viirs_obs = cls.load_and_process_csv(india_viirs, "VIIRS_NOAA20_INDIA_NRT", SensorType.VIIRS)
+            all_obs.extend(ind_viirs_obs)
 
         # Match observations across sensors
         matched_obs, match_stats = match_observations(

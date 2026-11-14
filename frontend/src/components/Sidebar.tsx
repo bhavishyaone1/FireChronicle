@@ -9,6 +9,7 @@ import {
   TrendingUp,
   BookOpen,
   ArrowRight,
+  Flame,
 } from "lucide-react";
 import { FireChronicleLogo } from "./FireChronicleLogo";
 
@@ -21,6 +22,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onOpenMethodology }) => {
   const navItems = [
     { id: "overview", label: "Overview", icon: Home },
+    { id: "events", label: "Candidate Events", icon: Flame },
     { id: "calendar", label: "Activity Calendar", icon: Calendar },
     { id: "compare", label: "Sensor Comparison", icon: SlidersHorizontal },
     { id: "audit", label: "Harmonization Audit", icon: FileSpreadsheet },
@@ -96,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onOpe
               Tracking a safer, greener planet
             </h4>
             <p className="text-[10px] text-[#8E96A5] leading-relaxed">
-              Harmonizing MODIS &amp; VIIRS for a clearer view of wildfire activity.
+              Harmonizing MODIS &amp; VIIRS for a clearer view of active burning activity.
             </p>
             <button
               onClick={() => onOpenMethodology ? onOpenMethodology() : setActiveTab("methodology")}

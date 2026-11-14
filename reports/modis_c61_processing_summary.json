@@ -1,0 +1,88 @@
+{
+  "standard_archive": {
+    "file": "fire_archive_M-C61_841318.dbf",
+    "total_records": 2649343,
+    "india_records": 126813,
+    "india_percentage": 4.79,
+    "date_range": "2025-11-10 to 2026-08-31",
+    "unique_dates": 295,
+    "bounds": [
+      -178.1997,
+      -76.158,
+      179.6065,
+      81.4857
+    ],
+    "confidence_dist": {
+      "low": 5155,
+      "nominal": 102033,
+      "high": 19625
+    },
+    "satellites": {
+      "Terra": 39321,
+      "Aqua": 87492
+    },
+    "quality_flags": {
+      "invalid_coords": 0,
+      "invalid_time": 0,
+      "suspect_frp": 0,
+      "suspect_temp": 0
+    },
+    "type_dist": {
+      "0": 120101,
+      "2": 6451,
+      "1": 10,
+      "3": 251
+    }
+  },
+  "nrt_archive": {
+    "file": "fire_nrt_M-C61_841318.dbf",
+    "total_records": 747712,
+    "india_records": 11381,
+    "india_percentage": 1.52,
+    "date_range": "2026-09-01 to 2026-11-09",
+    "unique_dates": 70,
+    "bounds": [
+      -179.31766,
+      -51.3375,
+      179.64786,
+      85.95154
+    ],
+    "confidence_dist": {
+      "low": 539,
+      "nominal": 9565,
+      "high": 1277
+    },
+    "satellites": {
+      "Terra": 2522,
+      "Aqua": 8859
+    },
+    "quality_flags": {
+      "invalid_coords": 0,
+      "invalid_time": 0,
+      "suspect_frp": 0,
+      "suspect_temp": 0
+    }
+  },
+  "total_combined_india_records": 138194,
+  "state_breakdown": {
+    "India (National)": 22277,
+    "Madhya Pradesh": 18044,
+    "Chhattisgarh": 9023,
+    "Punjab": 6705,
+    "Uttar Pradesh": 6689,
+    "Telangana / Andhra Pradesh": 5811,
+    "Odisha": 5646,
+    "Karnataka": 5448,
+    "West Bengal / Jharkhand": 3798,
+    "Assam": 2963,
+    "Rajasthan": 2731,
+    "Northeastern Region": 2727,
+    "Tamil Nadu": 2056,
+    "Jammu & Kashmir": 1711,
+    "Uttarakhand": 1604,
+    "Haryana": 1031,
+    "Himachal Pradesh": 429,
+    "Kerala": 132,
+    "Ladakh": 3
+  }
+}

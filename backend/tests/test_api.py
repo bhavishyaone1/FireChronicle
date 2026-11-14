@@ -54,6 +54,12 @@ def test_comparison_endpoint():
     assert "matched_pairs_count" in data
     assert "spatial_agreement_jaccard" in data
     assert len(data["sensitivity_curve"]) == 4
+    assert "uncertainty" in data
+    assert "discontinuity" in data
+    assert "temporal_sensitivity_curve" in data
+    if data["uncertainty"]:
+        assert "modis_matched_fraction_ci" in data["uncertainty"]
+        assert "sample_size_n" in data["uncertainty"]["modis_matched_fraction_ci"]
 
 
 def test_anomalies_endpoint():
@@ -66,6 +72,24 @@ def test_anomalies_endpoint():
     for m in data["months"]:
         if m["observed_active_cells"] is not None and m["observed_active_cells"] <= m["p75_active_cells"]:
             assert not m["is_anomaly"], f"False anomaly detected for {m['month_name']} where observed <= p75"
+
+
+def test_states_and_states_geojson_endpoints():
+    resp_states = client.get("/api/states")
+    assert resp_states.status_code == 200
+    states_data = resp_states.json()
+    assert "states" in states_data
+    assert len(states_data["states"]) >= 10
+
+    resp_geojson = client.get("/api/states/geojson")
+    assert resp_geojson.status_code == 200
+    geojson_data = resp_geojson.json()
+    assert geojson_data["type"] == "FeatureCollection"
+    assert len(geojson_data["features"]) >= 10
+    feature = geojson_data["features"][0]
+    assert feature["geometry"]["type"] == "Polygon"
+    assert "name" in feature["properties"]
+
 
 
 def test_import_rejects_non_csv():

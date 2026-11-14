@@ -35,6 +35,35 @@ class ClassificationType(str, Enum):
     VIIRS_ONLY = "VIIRS_only"
 
 
+class ContextClass(str, Enum):
+    """India-focused cautious context classification."""
+    FSI_SUPPORTED_FOREST_ALERT = "FSI_SUPPORTED_FOREST_ALERT"
+    LIKELY_FOREST_CONTEXT = "LIKELY_FOREST_CONTEXT"
+    BHUVAN_AGRICULTURAL_FIRE_RECORD = "BHUVAN_AGRICULTURAL_FIRE_RECORD"
+    LIKELY_AGRICULTURAL_CONTEXT = "LIKELY_AGRICULTURAL_CONTEXT"
+    OTHER_STATIC_THERMAL_SOURCE = "OTHER_STATIC_THERMAL_SOURCE"
+    OFFSHORE = "OFFSHORE"
+    VOLCANIC = "VOLCANIC"
+    UNCLASSIFIED = "UNCLASSIFIED"
+
+
+class ContextConfidence(str, Enum):
+    """Confidence level of context inference."""
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+    INSUFFICIENT = "INSUFFICIENT"
+
+
+class SourceAgency(str, Enum):
+    NASA_FIRMS = "NASA_FIRMS"
+    FSI = "FSI"
+    BHUVAN = "BHUVAN"
+    IMD = "IMD"
+    GFWED = "GFWED"
+
+
+
 class CoverageStatus(str, Enum):
     FULL = "full"
     PARTIAL = "partial"

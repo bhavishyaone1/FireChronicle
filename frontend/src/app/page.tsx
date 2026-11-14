@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
+import { AlertTriangle } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { HeroBanner } from "@/components/HeroBanner";
@@ -17,7 +18,11 @@ import { SensorDiscontinuityInspector } from "@/components/SensorDiscontinuityIn
 import { HistoricalAnomalies } from "@/components/HistoricalAnomalies";
 import { MethodologyProvenance } from "@/components/MethodologyProvenance";
 import { HarmonizationAuditView } from "@/components/HarmonizationAuditView";
+import { CandidateEventsView } from "@/components/CandidateEventsView";
 import { CsvImportModal } from "@/components/CsvImportModal";
+import { SatelliteStatusPanel } from "@/components/SatelliteStatusPanel";
+import { FireTypeBreakdownCard } from "@/components/FireTypeBreakdownCard";
+import { DataFlowExplainerModal } from "@/components/DataFlowExplainerModal";
 import {
   fetchHealth,
   fetchMetadata,
@@ -35,6 +40,7 @@ import {
   AnomalyResponse,
   DatasetProvenance,
 } from "@/types";
+import { MapViewMode } from "@/components/HotspotMap";
 
 // Dynamic import for MapLibre GL to ensure client-only execution
 const HotspotMap = dynamic(
@@ -43,9 +49,9 @@ const HotspotMap = dynamic(
 );
 
 const DEFAULT_AOI: PresetAoi = {
-  id: "global",
-  name: "Global",
-  bbox: [-118.6, 34.1, -117.8, 34.5],
+  id: "india_all",
+  name: "Republic of India (National)",
+  bbox: [68.1, 6.5, 97.4, 37.1],
 };
 
 export default function Home() {
@@ -55,7 +61,7 @@ export default function Home() {
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace("#", "");
-      if (["overview", "calendar", "compare", "audit", "anomalies", "methodology"].includes(hash)) {
+      if (["overview", "events", "calendar", "compare", "audit", "anomalies", "methodology"].includes(hash)) {
         setActiveTab(hash);
       }
     };
@@ -75,35 +81,26 @@ export default function Home() {
   const [activeMode, setActiveMode] = useState("HACKATHON_BUILD");
   const [presetAois, setPresetAois] = useState<PresetAoi[]>([DEFAULT_AOI]);
   const [selectedAoi, setSelectedAoi] = useState<PresetAoi>(DEFAULT_AOI);
+  const [selectedState, setSelectedState] = useState<string>("ALL");
+  const [useIST, setUseIST] = useState<boolean>(true);
 
-  // Filter parameters: Default to Aug 01 - Aug 20, 2024 (as in reference visual)
-  const [startDate, setStartDate] = useState("2024-08-01");
-  const [endDate, setEndDate] = useState("2024-08-20");
+  // Filter parameters: Default to March 01 - March 07, 2026 (Real NASA FIRMS Canonical Archive)
+  const [startDate, setStartDate] = useState("2026-03-01");
+  const [endDate, setEndDate] = useState("2026-03-07");
   const [gridSizeKm, setGridSizeKm] = useState(1.0);
   const [spatialToleranceM, setSpatialToleranceM] = useState(1000);
   const [sensorFilter, setSensorFilter] = useState("ALL");
   const [classificationFilter, setClassificationFilter] = useState("ALL");
+  const [fireTypeFilter, setFireTypeFilter] = useState("ALL");
+  const [isDataExplainerOpen, setIsDataExplainerOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [matchingMethod, setMatchingMethod] = useState("greedy");
+  const [mapActiveViewMode, setMapActiveViewMode] = useState<MapViewMode>("points");
 
   // Selected Observation for inspection panel
   const [selectedObservation, setSelectedObservation] = useState<
     GeoJSONPointFeature["properties"] | null
-  >({
-    observation_id: "MODIS_20240818_1432_3405_11824",
-    sensor: "MODIS",
-    platform: "Aqua",
-    acq_datetime_utc: "2024-08-18T14:32:00Z",
-    latitude: 34.2512,
-    longitude: -118.1523,
-    frp_mw: 24.1,
-    confidence_category: "high",
-    raw_confidence: 85,
-    classification: "matched",
-    matched_pair_id: "PAIR_20240818_001",
-    grid_cell_id: "CEA_1KM_3405_11824",
-    daynight: "D",
-  });
+  >(null);
   const selectedObservationRef = useRef(selectedObservation);
   useEffect(() => {
     selectedObservationRef.current = selectedObservation;
@@ -119,6 +116,7 @@ export default function Home() {
   const [comparisonData, setComparisonData] = useState<SensorComparisonResponse | null>(null);
   const [anomalyData, setAnomalyData] = useState<AnomalyResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   // Health and metadata initial load
   const loadMeta = useCallback(async () => {
@@ -137,7 +135,11 @@ export default function Home() {
     try {
       const meta = await fetchMetadata();
       if (meta.preset_aois && meta.preset_aois.length > 0) {
-        setPresetAois([DEFAULT_AOI, ...meta.preset_aois.filter((a) => a.id !== DEFAULT_AOI.id)]);
+        setPresetAois(meta.preset_aois);
+        const indiaDefault = meta.preset_aois.find((a) => a.id === "india_all") || meta.preset_aois[0];
+        if (indiaDefault) {
+          setSelectedAoi(indiaDefault);
+        }
       }
       if (meta.provenance) {
         setProvenance(meta.provenance);
@@ -166,6 +168,8 @@ export default function Home() {
           endDate: targetEndDate,
           sensor: sensorFilter,
           classification: classificationFilter,
+          state: selectedState !== "ALL" ? selectedState : undefined,
+          fireType: fireTypeFilter !== "ALL" ? fireTypeFilter : undefined,
         }).catch((err) => {
           console.error("fetchObservations error:", err);
           return null;
@@ -191,7 +195,7 @@ export default function Home() {
         }),
         fetchAnomalies({
           bbox,
-          targetYear: 2024,
+          targetYear: 2026,
         }).catch((err) => {
           console.error("fetchAnomalies error:", err);
           return null;
@@ -206,17 +210,28 @@ export default function Home() {
         setProvenance(obs.metadata.provenance);
       }
 
+      if (!obs && !cal) {
+        setApiError("Backend telemetry request failed. Verify FastAPI server on port 8001.");
+      } else {
+        setApiError(null);
+      }
+
       // Keep selected observation synchronized with filtered results
       if (obs && obs.features && obs.features.length > 0) {
         const curId = selectedObservationRef.current?.observation_id;
-        const isCurrentStillPresent = curId === "MODIS_20240818_1432_3405_11824" || (curId &&
-          obs.features.some((f) => f.properties.observation_id === curId));
-        if (!isCurrentStillPresent) {
-          const first = obs.features[0];
-          const props = { ...first.properties };
-          if (first.geometry && first.geometry.coordinates) {
-            props.longitude = first.geometry.coordinates[0];
-            props.latitude = first.geometry.coordinates[1];
+        const currentMatch = curId
+          ? obs.features.find((f) => f.properties.observation_id === curId)
+          : null;
+        if (!currentMatch) {
+          // Select highest FRP genuine observation from loaded features
+          const sorted = [...obs.features].sort(
+            (a, b) => (b.properties.frp_mw || 0) - (a.properties.frp_mw || 0)
+          );
+          const top = sorted[0];
+          const props = { ...top.properties };
+          if (top.geometry && top.geometry.coordinates) {
+            props.longitude = top.geometry.coordinates[0];
+            props.latitude = top.geometry.coordinates[1];
           }
           setSelectedObservation(props);
         }
@@ -237,7 +252,9 @@ export default function Home() {
     spatialToleranceM,
     sensorFilter,
     classificationFilter,
+    fireTypeFilter,
     matchingMethod,
+    selectedState,
   ]);
 
   // Derive true latest record date from active dataset
@@ -250,6 +267,19 @@ export default function Home() {
       .filter(Boolean)
       .sort();
     return dates[dates.length - 1] || null;
+  }, [geoJsonData]);
+
+  // Aggregate detection counts per Indian state for intuitive dropdown feedback
+  const stateCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    if (!geoJsonData || !geoJsonData.features) return counts;
+    for (const f of geoJsonData.features) {
+      const st = f.properties?.india_state;
+      if (st) {
+        counts[st] = (counts[st] || 0) + 1;
+      }
+    }
+    return counts;
   }, [geoJsonData]);
 
   useEffect(() => {
@@ -265,11 +295,13 @@ export default function Home() {
       <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden relative bg-[#07080B]">
         {/* Top Panoramic Atmospheric Wildfire Background across Header & Hero */}
         <div
-          className="absolute top-0 right-0 w-full md:w-[72%] h-[240px] bg-no-repeat bg-right-top bg-cover pointer-events-none opacity-70 z-0"
+          className="absolute top-0 right-0 w-full md:w-[78%] h-[275px] bg-no-repeat bg-right-top bg-cover pointer-events-none opacity-85 z-0"
           style={{
             backgroundImage: `url('/wildfire_header_bg.jpg')`,
-            WebkitMaskImage: "radial-gradient(ellipse at 88% 18%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 80%)",
-            maskImage: "radial-gradient(ellipse at 88% 18%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 80%)",
+            WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0) 100%), linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.9) 70%, rgba(0,0,0,0) 100%)",
+            maskImage: "linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0) 100%), linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.9) 70%, rgba(0,0,0,0) 100%)",
+            WebkitMaskComposite: "source-in",
+            maskComposite: "intersect",
           }}
         />
 
@@ -280,18 +312,37 @@ export default function Home() {
           isFirmsConfigured={isFirmsConfigured}
           startDate={startDate}
           endDate={endDate}
+          provenance={provenance}
           onOpenDateSelector={() => {
-            // Quick toggle for dates
-            if (startDate === "2024-08-10") {
-              setStartDate("2024-08-01");
-              setEndDate("2024-08-20");
+            // Cycle through high-yield canonical date presets
+            if (startDate === "2026-03-01" && endDate === "2026-03-07") {
+              setStartDate("2026-04-11");
+              setEndDate("2026-04-17");
+            } else if (startDate === "2026-04-11" && endDate === "2026-04-17") {
+              setStartDate("2026-03-26");
+              setEndDate("2026-04-24");
+            } else if (startDate === "2026-03-26" && endDate === "2026-04-24") {
+              setStartDate("2026-03-01");
+              setEndDate("2026-04-30");
+            } else if (startDate === "2026-03-01" && endDate === "2026-04-30") {
+              setStartDate("2025-11-09");
+              setEndDate("2026-11-09");
             } else {
-              setStartDate("2024-08-10");
-              setEndDate("2024-08-15");
+              setStartDate("2026-03-01");
+              setEndDate("2026-03-07");
             }
+            setSelectedDate(null);
           }}
           onOpenProvenance={() => handleTabChange("methodology")}
           onOpenUploadModal={() => setIsCsvModalOpen(true)}
+          onOpenDataExplainer={() => setIsDataExplainerOpen(true)}
+        />
+
+        <DataFlowExplainerModal
+          isOpen={isDataExplainerOpen}
+          onClose={() => setIsDataExplainerOpen(false)}
+          observationsData={geoJsonData}
+          comparisonData={comparisonData}
         />
 
         <CsvImportModal
@@ -310,6 +361,7 @@ export default function Home() {
         >
           {[
             { id: "overview", label: "Overview" },
+            { id: "events", label: "Events" },
             { id: "calendar", label: "Calendar" },
             { id: "compare", label: "Comparison" },
             { id: "audit", label: "Audit" },
@@ -331,7 +383,24 @@ export default function Home() {
         </nav>
 
         {/* Dashboard Content Container */}
-        <main className="flex-1 p-3.5 space-y-2.5 max-w-[1720px] w-full mx-auto relative z-10">
+        <main className="flex-1 p-2.5 sm:p-3 space-y-2 max-w-[1720px] w-full mx-auto relative z-10">
+          {(!isBackendConnected || apiError) && (
+            <div className="rounded-xl border border-amber-500/50 bg-amber-950/40 p-3 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-200 shadow-lg">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+                <span>
+                  <strong className="text-white">Notice:</strong> Showing bundled sample data — API unreachable ({apiError || "Backend server offline"}).
+                </span>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-900/60 border border-amber-600/50 font-mono text-[10px] text-amber-300">
+                Bundled Sample Mode
+              </span>
+            </div>
+          )}
+
+          {/* Satellite Constellation Operational Status Banner (Collapsible) */}
+          <SatelliteStatusPanel defaultExpanded={false} />
+
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -339,16 +408,18 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="space-y-2.5"
+              className="space-y-2"
             >
               {/* OVERVIEW TAB (Primary Visual Target) */}
               {activeTab === "overview" && (
             <>
-              {/* Welcome / Hero Banner */}
+              {/* Welcome / Hero Banner - Problem Statement & Core USP Showcase */}
               <HeroBanner
                 isFirmsConfigured={isFirmsConfigured}
                 provenance={provenance}
                 latestRecordDate={latestRecordDate}
+                onOpenDataExplainer={() => setIsDataExplainerOpen(true)}
+                onSelectTab={handleTabChange}
               />
 
               {/* Observation Filters & Harmonization Controls */}
@@ -371,18 +442,48 @@ export default function Home() {
                 setSensorFilter={setSensorFilter}
                 classificationFilter={classificationFilter}
                 setClassificationFilter={setClassificationFilter}
+                selectedState={selectedState}
+                setSelectedState={setSelectedState}
+                stateCounts={stateCounts}
+                totalCount={geoJsonData?.total_count || geoJsonData?.features?.length || 0}
+                useIST={useIST}
+                setUseIST={setUseIST}
                 selectedDate={selectedDate}
                 onClearSelectedDate={() => setSelectedDate(null)}
+                fireTypeFilter={fireTypeFilter}
+                setFireTypeFilter={setFireTypeFilter}
                 onApplyFilters={() => loadData()}
               />
 
-              {/* 4 KPI Summary Cards */}
+              {/* 4 Interactive KPI Summary Cards */}
               <MetricsCards
                 calendarData={calendarData}
                 comparisonData={comparisonData}
                 geoJsonData={geoJsonData}
                 selectedDate={selectedDate}
                 isLoading={isLoading}
+                sensorFilter={sensorFilter}
+                onSelectSensor={(sensor) => {
+                  setSensorFilter((prev) => (prev === sensor ? "ALL" : sensor));
+                }}
+                classificationFilter={classificationFilter}
+                onSelectClassification={(cls) => {
+                  setClassificationFilter((prev) => (prev === cls ? "ALL" : cls));
+                }}
+                onSelectGridMode={() => {
+                  setMapActiveViewMode("grid");
+                }}
+                isGridModeActive={mapActiveViewMode === "grid"}
+                provenance={provenance}
+              />
+
+              {/* Thermal Anomaly Type Breakdown & Honest Attribution Card */}
+              <FireTypeBreakdownCard
+                bbox={selectedAoi.bbox}
+                startDate={startDate}
+                endDate={endDate}
+                activeTypeFilter={fireTypeFilter}
+                onSelectTypeFilter={(t) => setFireTypeFilter(t)}
               />
 
               {/* Main Center Workspace: Map (70%) + Selected Observation (30%) */}
@@ -404,12 +505,21 @@ export default function Home() {
                     centerTarget={mapCenterTarget}
                     selectedObservationId={selectedObservation?.observation_id}
                     selectedObservation={selectedObservation}
+                    selectedState={selectedState}
+                    activeViewMode={mapActiveViewMode}
+                    onViewModeChange={(m) => setMapActiveViewMode(m)}
                   />
                 </div>
 
                 <div className="lg:col-span-4 h-full">
                   <ObservationDetailsPanel
                     selectedObservation={selectedObservation}
+                    onSelectObservation={(props) => {
+                      setSelectedObservation(props);
+                      if (props?.longitude != null && props?.latitude != null) {
+                        setMapCenterTarget([props.longitude, props.latitude]);
+                      }
+                    }}
                     onDeselectObservation={() => setSelectedObservation(null)}
                     onFlyToObservation={() => {
                       if (selectedObservation?.longitude != null && selectedObservation?.latitude != null) {
@@ -419,6 +529,8 @@ export default function Home() {
                     onOpenTableView={() => {
                       handleTabChange("audit");
                     }}
+                    useIST={useIST}
+                    allObservations={geoJsonData?.features || []}
                   />
                 </div>
               </div>
@@ -428,6 +540,8 @@ export default function Home() {
                 <FireActivityTrendCard
                   calendarData={calendarData}
                   isLoading={isLoading}
+                  onSelectDate={(d) => setSelectedDate(d)}
+                  selectedDate={selectedDate}
                 />
 
                 <BurningActivityCalendar
@@ -446,6 +560,20 @@ export default function Home() {
           )}
 
           {/* DEDICATED DEEP DIVE TABS */}
+          {activeTab === "events" && (
+            <CandidateEventsView
+              bbox={selectedAoi.bbox}
+              startDate={startDate}
+              endDate={endDate}
+              selectedState={selectedState !== "ALL" ? selectedState : undefined}
+              useIST={useIST}
+              onFlyToCentroid={(coords) => {
+                setMapCenterTarget(coords);
+                handleTabChange("overview");
+              }}
+            />
+          )}
+
           {activeTab === "calendar" && (
             <div className="space-y-5">
               <BurningActivityCalendar
