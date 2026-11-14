@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { HeroBanner } from "@/components/HeroBanner";
@@ -77,6 +77,8 @@ export default function Home() {
     }
   };
   const [isBackendConnected, setIsBackendConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "warming_up" | "offline">("connecting");
+  const [retryAttempt, setRetryAttempt] = useState(0);
   const [isFirmsConfigured, setIsFirmsConfigured] = useState(false);
   const [activeMode, setActiveMode] = useState("HACKATHON_BUILD");
   const [presetAois, setPresetAois] = useState<PresetAoi[]>([DEFAULT_AOI]);
@@ -123,13 +125,18 @@ export default function Home() {
     try {
       const health = await fetchHealth();
       setIsBackendConnected(true);
+      setConnectionStatus("connected");
       setIsFirmsConfigured(health.firms_configured);
       setActiveMode(health.active_mode);
       if (health.provenance) {
         setProvenance(health.provenance);
       }
-    } catch {
+      setApiError(null);
+    } catch (err: unknown) {
       setIsBackendConnected(false);
+      const msg = err instanceof Error ? err.message : String(err);
+      const isWarming = msg.toLowerCase().includes("warming up") || msg.toLowerCase().includes("standby");
+      setConnectionStatus(isWarming ? "warming_up" : "offline");
     }
 
     try {
@@ -152,6 +159,17 @@ export default function Home() {
   useEffect(() => {
     loadMeta();
   }, [loadMeta]);
+
+  // Automated reconnect loop for cloud cold-start resilience
+  useEffect(() => {
+    if (!isBackendConnected && retryAttempt < 4) {
+      const timer = setTimeout(() => {
+        setRetryAttempt((prev) => prev + 1);
+        loadMeta();
+      }, 3500 * (retryAttempt + 1));
+      return () => clearTimeout(timer);
+    }
+  }, [isBackendConnected, retryAttempt, loadMeta]);
 
   // Main synchronized data fetch
   const loadData = useCallback(async () => {
@@ -211,9 +229,11 @@ export default function Home() {
       }
 
       if (!obs && !cal) {
-        setApiError("Backend telemetry request failed. Verify FastAPI server on port 8001.");
+        setApiError("Cloud backend is initializing or reconnecting.");
       } else {
         setApiError(null);
+        setIsBackendConnected(true);
+        setConnectionStatus("connected");
       }
 
       // Keep selected observation synchronized with filtered results
@@ -309,6 +329,7 @@ export default function Home() {
         <Header
           activeMode={activeMode}
           isBackendConnected={isBackendConnected}
+          connectionStatus={connectionStatus}
           isFirmsConfigured={isFirmsConfigured}
           startDate={startDate}
           endDate={endDate}
@@ -384,17 +405,50 @@ export default function Home() {
 
         {/* Dashboard Content Container */}
         <main className="flex-1 p-2.5 sm:p-3 space-y-2 max-w-[1720px] w-full mx-auto relative z-10">
-          {(!isBackendConnected || apiError) && (
-            <div className="rounded-xl border border-amber-500/50 bg-amber-950/40 p-3 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-200 shadow-lg">
+          {connectionStatus !== "connected" && (
+            <div
+              className={`rounded-xl border p-2.5 flex flex-wrap items-center justify-between gap-2 text-xs shadow-sm transition-all ${
+                connectionStatus === "warming_up" || connectionStatus === "connecting"
+                  ? "border-amber-500/30 bg-amber-950/20 text-amber-200"
+                  : "border-amber-500/50 bg-amber-950/40 text-amber-200"
+              }`}
+            >
               <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+                {connectionStatus === "warming_up" || connectionStatus === "connecting" ? (
+                  <Loader2 className="w-4 h-4 text-amber-400 animate-spin shrink-0" />
+                ) : (
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                )}
                 <span>
-                  <strong className="text-white">Notice:</strong> Showing bundled sample data — API unreachable ({apiError || "Backend server offline"}).
+                  {connectionStatus === "warming_up" || connectionStatus === "connecting" ? (
+                    <>
+                      <strong className="text-amber-100">Synchronizing Telemetry Engine:</strong> Cloud backend is initializing (free-tier spin-up takes ~20–30s on first load). Retrying automatically...
+                    </>
+                  ) : (
+                    <>
+                      <strong className="text-white">Notice:</strong> Displaying bundled canonical sample data — {apiError || "Backend standby"}.
+                    </>
+                  )}
                 </span>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-900/60 border border-amber-600/50 font-mono text-[10px] text-amber-300">
-                Bundled Sample Mode
-              </span>
+              <div className="flex items-center gap-2">
+                {connectionStatus === "offline" && (
+                  <button
+                    onClick={() => {
+                      setRetryAttempt(0);
+                      setConnectionStatus("connecting");
+                      loadMeta();
+                      loadData();
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-200 font-medium text-[11px] transition-colors"
+                  >
+                    Retry Connection
+                  </button>
+                )}
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-900/40 border border-amber-500/40 font-mono text-[10px] text-amber-300">
+                  {connectionStatus === "offline" ? "Bundled Sample Mode" : "Auto-connecting..."}
+                </span>
+              </div>
             </div>
           )}
 

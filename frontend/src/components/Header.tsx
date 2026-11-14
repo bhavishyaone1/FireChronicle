@@ -16,6 +16,7 @@ import { DatasetProvenance } from "@/types";
 interface HeaderProps {
   activeMode: string;
   isBackendConnected: boolean;
+  connectionStatus?: "connecting" | "connected" | "warming_up" | "offline";
   isFirmsConfigured: boolean;
   startDate: string;
   endDate: string;
@@ -28,6 +29,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   isBackendConnected,
+  connectionStatus = "connected",
   isFirmsConfigured,
   startDate,
   endDate,
@@ -57,12 +59,20 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Provenance Badge Styling
   const getProvenanceBadge = () => {
+    if (connectionStatus === "connecting" || connectionStatus === "warming_up") {
+      return {
+        pillClass: "bg-[#251A08]/90 hover:bg-[#34240B] border-[#D97706]/60 text-[#FCD34D] shadow-[0_0_12px_rgba(245,158,11,0.2)]",
+        dotClass: "bg-[#F59E0B] shadow-[0_0_6px_#F59E0B] animate-pulse",
+        label: connectionStatus === "warming_up" ? "Connecting to Engine..." : "Initializing Telemetry...",
+        chipText: "Cloud Engine Synchronizing",
+      };
+    }
     if (!isBackendConnected) {
       return {
         pillClass: "bg-[#2A0F12]/90 hover:bg-[#3D1418] border-[#991B1B]/60 text-[#FCA5A5] shadow-[0_0_12px_rgba(239,68,68,0.2)]",
         dotClass: "bg-[#EF4444] shadow-[0_0_6px_#EF4444]",
-        label: "API Unreachable",
-        chipText: "Bundled Sample / Offline",
+        label: "Offline / Standby",
+        chipText: "Bundled Sample Data",
       };
     }
     if (provenance?.provenance_type === "LIVE_NASA_FIRMS") {

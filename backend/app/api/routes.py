@@ -828,6 +828,7 @@ def export_dataset(
     sensor: Optional[str] = Query("ALL", description="MODIS, VIIRS, or ALL"),
     classification: Optional[str] = Query("ALL", description="matched, MODIS_only, VIIRS_only, or ALL"),
     fire_type: Optional[str] = Query(None, description="VEGETATION, STATIC, OFFSHORE, VOLCANO, UNCLASSIFIED, or ALL"),
+    format: Optional[str] = Query(None, description="geojson or csv format alias"),
     export_format: str = Query("geojson", pattern="^(geojson|csv)$"),
     limit: int = Query(5000, ge=1, le=50000, description="Max observations to export"),
     offset: int = Query(0, ge=0),
@@ -836,12 +837,14 @@ def export_dataset(
     Export filtered observations in GeoJSON or CSV format.
     Includes full provenance, audit identifiers, and scientific metadata.
     """
-    # Auto-detect format from route alias
+    # Auto-detect format from route alias or query parameter
     path = request.url.path
     if path.endswith("/export/csv") or path.endswith("/exports/observations.csv"):
         export_format = "csv"
     elif path.endswith("/export/geojson"):
         export_format = "geojson"
+    elif format and format.lower() in ("csv", "geojson"):
+        export_format = format.lower()
     bbox_list = parse_bbox_param(bbox)
 
     records, total_count = storage_engine.query_observations(
